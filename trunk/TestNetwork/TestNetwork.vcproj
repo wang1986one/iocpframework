@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="TestNetwork"
+	Name="Network1"
 	ProjectGUID="{12D1D0D6-25EC-4549-92CF-408C1B894944}"
 	RootNamespace="TestNetwork"
 	Keyword="Win32Proj"
@@ -227,62 +227,94 @@
 			Name="include"
 			>
 			<File
-				RelativePath=".\include\Basic.hpp"
+				RelativePath="..\include\Basic.hpp"
 				>
 			</File>
 			<Filter
-				Name="IOCP"
+				Name="FileSystem"
 				>
 				<File
-					RelativePath=".\include\IOCP\Buffer.hpp"
+					RelativePath="..\include\FileSystem\File.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\IOCP\Dispatcher.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\Dispatcher.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\IOCP.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\MemoryMgr.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\Object.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\Object.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\Pointer.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\WinException.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\IOCP\WinException.hpp"
+					RelativePath="..\include\FileSystem\File.hpp"
 					>
 				</File>
 			</Filter>
 			<Filter
-				Name="File"
+				Name="IOCP"
 				>
 				<File
-					RelativePath=".\include\FileSystem\File.cpp"
+					RelativePath="..\include\IOCP\Buffer.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\FileSystem\File.hpp"
+					RelativePath="..\include\IOCP\Dispatcher.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\Dispatcher.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\IOCP.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\MemoryMgr.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\Object.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\Object.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\Pointer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\WinException.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\WinException.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Memory"
+				>
+				<File
+					RelativePath="..\include\Memory\FixedMemoryPool.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Memory\MemAllocator.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Memory\SGIMallocPool.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Memory\SGIMemoryPool.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="MultiThread"
+				>
+				<File
+					RelativePath="..\include\MultiThread\Lock.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MultiThread\Thread.hpp"
 					>
 				</File>
 			</Filter>
@@ -290,39 +322,35 @@
 				Name="Network"
 				>
 				<File
-					RelativePath=".\include\Network\IPAddress.cpp"
+					RelativePath="..\include\Network\IPAddress.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\Network\IPAddress.hpp"
+					RelativePath="..\include\Network\IPAddress.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\Network\Socket.cpp"
+					RelativePath="..\include\Network\Socket.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\Network\Socket.hpp"
+					RelativePath="..\include\Network\Socket.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\Network\SocketProvider.cpp"
+					RelativePath="..\include\Network\SocketProvider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\Network\SocketProvider.hpp"
+					RelativePath="..\include\Network\SocketProvider.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\Network\SockInit.hpp"
+					RelativePath="..\include\Network\SockInit.hpp"
 					>
 				</File>
 			</Filter>
 		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
