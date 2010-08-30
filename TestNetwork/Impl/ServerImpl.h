@@ -8,7 +8,6 @@
 
 using namespace async::network;
 
-
 class Session
 	: public std::tr1::enable_shared_from_this<Session>
 {

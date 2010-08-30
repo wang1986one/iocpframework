@@ -58,6 +58,7 @@ namespace async
 		{
 			static void *Allocate(size_t size)
 			{
+				// 将指定的内存页面始终保存在物理内存上，不许它交换到磁盘页文件中
 				void *p = ::VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT | MEM_TOP_DOWN, PAGE_EXECUTE_READWRITE);
 				::VirtualLock(p, size);
 
