@@ -42,32 +42,28 @@ namespace async
 		public:
 			explicit MemAllocator(AllocT &alloc)
 				: m_alloc(&alloc)
-			{
-			}
+			{}
 			MemAllocator(const MemAllocator &rhs)
 				: m_alloc(rhs.m_alloc)
-			{
-			}
+			{}
 			template<typename U>
 			MemAllocator(const MemAllocator<U, AllocT>& rhs)
 				: m_alloc(rhs.m_alloc)
-			{
-			}
+			{}
 			~MemAllocator()
-			{
-			}
+			{}
 
 		public:
-			pointer Address(reference value) const 
+			pointer address(reference value) const 
 			{
 				return &value;
 			}
-			const_pointer Address(const_reference value) const 
+			const_pointer address(const_reference value) const 
 			{
 				return &value;
 			}
 
-			size_type MaxSize() const
+			size_type max_size() const
 			{
 				size_type count = static_cast<size_type>(-1) / sizeof(value_type);
 
@@ -97,30 +93,9 @@ namespace async
 			{
 				return m_alloc->Deallocate(p, num * sizeof(value_type));
 			}
-
-			void Construct(pointer p)
-			{
-				//__Construct(p);
-			}
-
-			template<typename Arg>
-			void Construct(pointer p, const Arg& value)
-			{
-				//__Construct(p, value);
-			}
-
-			void Destroy(pointer p) 
-			{
-				//__Destroy(p);
-			}
 		};
-
-
 	}
-
 }
-
-
 
 
 #endif
