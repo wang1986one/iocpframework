@@ -18,7 +18,7 @@ namespace async
 			SYSTEM_INFO systemInfo = {0};
 			::GetSystemInfo(&systemInfo);
 
-			return perCPU * systemInfo.dwNumberOfProcessors;
+			return perCPU * systemInfo.dwNumberOfProcessors + 2;
 		}
 
 

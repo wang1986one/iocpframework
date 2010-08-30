@@ -37,7 +37,7 @@ namespace async
 			if( socket_ != INVALID_SOCKET )
 				return;
 
-			socket_ = ::WSASocket(AF_INET, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED); //::socket(AF_INET, nType, nProtocol);
+			socket_ = ::WSASocket(AF_INET, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED);
 			if( socket_ == INVALID_SOCKET )
 				throw Win32Exception("WSASocket");
 
@@ -211,7 +211,8 @@ namespace async
 			wsabuf.len = nSize;
 
 			DWORD dwFlag = 0;
-			if(  0 != ::WSARecv(socket_, &wsabuf, 1, NULL, &dwFlag, asynResult.Get(), NULL)
+			DWORD dwSize = 0;
+			if(  0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, asynResult.Get(), NULL)
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
 			{
 				asynResult->Release();
@@ -238,7 +239,8 @@ namespace async
 			wsabuf.len = nSize;
 
 			DWORD dwFlag = 0;
-			if(  0 != ::WSASend(socket_, &wsabuf, 1, NULL, dwFlag, asynResult.Get(), NULL)
+			DWORD dwSize = 0;
+			if(  0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, asynResult.Get(), NULL)
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
 			{
 				asynResult->Release();
