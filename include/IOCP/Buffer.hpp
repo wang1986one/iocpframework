@@ -70,16 +70,14 @@ namespace async
 				, buffer_(pStr)
 				, internal_(false)
 			{
-				assert(nSize > 4);
 			}
-			BufferT(pointer beg, pointer end)
+			BufferT(pointer beg, const_pointer end)
 				: alloc_(BufferPool)
 				, allocSize_(std::distance(beg, end))
 				, bufferSize_(allocSize_)
 				, buffer_(beg)
 				, internal_(false)
 			{
-				assert(allocSize_ > 4);
 			}
 
 
@@ -120,6 +118,9 @@ namespace async
 
 			void resize(size_t nNewSize)
 			{
+				if( !internal_ )
+					return;
+
 				if( nNewSize <= allocSize_ )
 					bufferSize_ = nNewSize;
 				else
