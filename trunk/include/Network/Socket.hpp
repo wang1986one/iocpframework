@@ -79,13 +79,22 @@ namespace async
 			// 不需设置回调接口
 		public:
 			void IOControl(DWORD dwIOControl, const SocketBufferPtr &inBuf, const SocketBufferPtr &outBuf);
+			
+			template<typename SocketOptionT>
+			bool SetOption(const SocketOptionT &option);
+
+			template<typename SocketOptionT>
+			bool GetOption(SocketOptionT &option) const;
 
 			void Create(int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
 			void Close();
 
+			bool IsOpen();
+
 			void Bind(u_short uPort = 0, const IPAddress &addr = INADDR_ANY);
 			void Listen(int nMax = SOMAXCONN);
 
+			
 			SocketPtr Accept();
 			void Connect(const IPAddress &addr, u_short uPort);
 			void DisConnect(bool bReuseSocket = false);
@@ -113,6 +122,47 @@ namespace async
 		private:
 			size_t _EndAsyncOperation(const AsyncResultPtr &asyncResult);
 		};
+
+
+		// ---------------------------
+
+		inline bool Socket::IsOpen()
+		{
+			return socket_ != INVALID_SOCKET;
+		}
+
+		template<typename SocketOptionT>
+		bool Socket::SetOption(const SocketOptionT &option)
+		{
+			if( !IsOpen() )
+				return false;
+
+			/*if( option.level() == SOL_SOCKET && option.name() == SO_LINGER )
+			{
+				const ::linger *lingerData = reinterpret_cast<const ::linger *>(option.data());
+				if( lingerData->l_onoff != 0 && lingerData->l_linger != 0 )
+
+			}*/
+
+			return SOCKET_ERROR != ::setsockopt(socket_, option.level(), option.name(), option.data(), option.size());
+		}
+
+		template<typename SocketOptionT>
+		bool Socket::GetOption(SocketOptionT &option) const
+		{
+			if( !IsOpen() )
+				return false;
+
+			size_t sz = option.size();
+			if( SOCKET_ERROR != ::getsockopt(socket_, option.level(), option.name(), option.data(), sz) )
+			{
+				option.resize(sz);
+				return true;
+			}
+			else
+				return false;
+		}
+
 	}
 
 
