@@ -28,6 +28,18 @@ namespace async
 			: public OVERLAPPED
 			, public Object
 		{
+			// 发送者
+			ObjectPtr	m_sender;
+			// 缓冲区
+			ObjectPtr	m_buffer;
+			// 异步状态
+			ObjectPtr	m_asynState;
+			// 内部状态
+			ObjectPtr	m_internalState;
+			// 回调函数
+			AsyncCallbackFunc m_callback;
+
+
 			AsyncResult::AsyncResult(const ObjectPtr &sender, const ObjectPtr &buffer,
 				const ObjectPtr &asyncState, const ObjectPtr &internalState, const AsyncCallbackFunc &callback)
 				: m_sender(sender), m_buffer(buffer), m_asynState(asyncState), m_internalState(internalState), m_callback(callback)
@@ -35,11 +47,15 @@ namespace async
 				RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
 			}
 
-			ObjectPtr	m_sender;
-			ObjectPtr	m_buffer;
-			ObjectPtr	m_asynState;
-			ObjectPtr	m_internalState;
-			AsyncCallbackFunc m_callback;
+			void reset(const ObjectPtr &sender, const ObjectPtr &buffer,
+				const ObjectPtr &asyncState, const ObjectPtr &internalState, const AsyncCallbackFunc &callback)
+			{
+				m_sender		= sender;
+				m_buffer		= buffer;
+				m_asynState		= asyncState;
+				m_internalState = internalState;
+				m_callback		= callback;
+			}
 
 		private:
 			AsyncResult();

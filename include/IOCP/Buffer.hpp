@@ -80,8 +80,7 @@ namespace async
 			{
 			}
 
-
-			virtual ~BufferT()
+			~BufferT()
 			{
 				// 如果为内部分配缓冲区，则需要自动释放
 				if( internal_ )

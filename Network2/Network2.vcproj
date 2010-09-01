@@ -282,6 +282,10 @@
 				Name="Network"
 				>
 				<File
+					RelativePath="..\include\Network\BufferHelper.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\IPAddress.cpp"
 					>
 				</File>
@@ -295,6 +299,10 @@
 				</File>
 				<File
 					RelativePath="..\include\Network\Socket.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\SocketOption.hpp"
 					>
 				</File>
 				<File

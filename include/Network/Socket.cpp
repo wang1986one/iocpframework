@@ -40,9 +40,6 @@ namespace async
 			socket_ = ::WSASocket(AF_INET, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED);
 			if( socket_ == INVALID_SOCKET )
 				throw Win32Exception("WSASocket");
-
-			// 绑定到IOCP
-			//io_.Bind(reinterpret_cast<HANDLE>(socket_));
 		}
 
 		void Socket::Close()
@@ -55,16 +52,6 @@ namespace async
 			socket_ = INVALID_SOCKET;
 		}
 
-		void Socket::IOControl(DWORD dwIOControl, const SocketBufferPtr &inBuf, const SocketBufferPtr &outBuf)
-		{
-			DWORD dwRet = 0;
-
-			if( 0 != ::WSAIoctl(socket_, dwIOControl, inBuf->data(), inBuf->allocSize(), 
-				outBuf->data(), outBuf->allocSize(), &dwRet, 0, 0) )
-				throw Win32Exception("WSAIoCtl");
-
-			outBuf->resize(dwRet);
-		}
 
 		void Socket::Bind(u_short uPort /* = 0 */, const IPAddress &addr /* = INADDR_ANY */)
 		{
@@ -93,7 +80,7 @@ namespace async
 			EndConnect(BeginConnect(addr, uPort));
 		}
 
-		void Socket::DisConnect(bool bReuseSocket /* = false */)
+		void Socket::DisConnect(bool bReuseSocket /* = true */)
 		{
 			EndDisconnect(BeginDisconnect(bReuseSocket));
 		}
@@ -120,16 +107,18 @@ namespace async
 			return size;
 		}
 
-		AsyncResultPtr Socket::BeginAccept(AsyncCallbackFunc callback /* = 0 */, const ObjectPtr &asyncState/* = nothing*/)
+		AsyncResultPtr Socket::BeginAccept(size_t szOutSide/* = 0*/, AsyncCallbackFunc callback /* = 0 */, const ObjectPtr &asyncState/* = nothing*/)
 		{
-			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2));
+			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSide));
 			SocketPtr acceptSocket(new Socket(io_));
 			AsyncResultPtr asyncResult(new AsyncResult(this, acceptBuffer, asyncState, acceptSocket, callback));
 			asyncResult->AddRef();
 
-			// 不需要接收远程客户机第一块数据，故设置为0
-			if( !SocketProvider::GetSingleton(io_).AcceptEx(socket_, acceptSocket->socket_, acceptBuffer->data(), 0,
-				sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, 0, asyncResult.Get()) 
+			// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
+			// 如果为0，则立即返回。若大于0，则接受数据后再返回
+			DWORD dwRecvBytes = 0;
+			if( !SocketProvider::GetSingleton(io_).AcceptEx(socket_, acceptSocket->socket_, acceptBuffer->data(), szOutSide,
+				sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &dwRecvBytes, asyncResult.Get()) 
 				&& ::WSAGetLastError() != ERROR_IO_PENDING )
 			{
 				asyncResult->Release();
@@ -153,22 +142,16 @@ namespace async
 			AsyncResultPtr asynResult(new AsyncResult(this, nothing, asyncState, nothing, callback));
 			asynResult->AddRef();
 
-			sockaddr_in remoteAddr = {0};
-			remoteAddr.sin_family		= AF_INET;
-			remoteAddr.sin_port			= ::htons(uPort);
-			remoteAddr.sin_addr.s_addr	= addr.Address();
-
-			// 很变态，需要先bind
-			::bind(socket_, reinterpret_cast<const sockaddr *>(&remoteAddr), sizeof(sockaddr_in));
-
-			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, asynResult.Get()) 
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				asynResult->Release();
-				throw Win32Exception("ConnectionEx");
-			}
+			_BeginConnectImpl(asynResult, addr, uPort);
 
 			return asynResult;
+		}
+		const AsyncResultPtr &Socket::BeginConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
+		{
+			result->AddRef();
+
+			_BeginConnectImpl(result, addr, uPort);
+			return result;
 		}
 
 		void Socket::EndConnect(const AsyncResultPtr &asyncResult)
@@ -182,16 +165,17 @@ namespace async
 			AsyncResultPtr asynResult(new AsyncResult(this, nothing, asyncState, nothing, callback));
 			asynResult->AddRef();
 
-			DWORD dwFlags = bReuseSocket ? TF_REUSE_SOCKET : 0;
-
-			if( !SocketProvider::GetSingleton(io_).DisconnectEx(socket_, asynResult.Get(), dwFlags, 0) 
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				asynResult->Release();
-				throw Win32Exception("DisConnectionEx");
-			}
+			_BeginDisconnectImpl(asynResult, bReuseSocket);
 
 			return asynResult;
+		}
+		const AsyncResultPtr &Socket::BeginDisconnect(const AsyncResultPtr &result, bool bReuseSocket /* = true */)
+		{
+			result->AddRef();
+
+			_BeginDisconnectImpl(result, bReuseSocket);
+
+			return result;
 		}
 
 		void Socket::EndDisconnect(const AsyncResultPtr &asyncResult)
@@ -205,21 +189,18 @@ namespace async
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
 
-
-			WSABUF wsabuf = {0};
-			wsabuf.buf = reinterpret_cast<char *>(buf->data(nOffset));
-			wsabuf.len = nSize;
-
-			DWORD dwFlag = 0;
-			DWORD dwSize = 0;
-			if(  0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, asynResult.Get(), NULL)
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				asynResult->Release();
-				throw Win32Exception("WSARecv");
-			}
+			_BeginRecvImpl(asynResult, nOffset, nSize);
 
 			return asynResult;
+		}
+
+		const AsyncResultPtr &Socket::BeginRecv(const AsyncResultPtr &result, size_t offset, size_t size)
+		{
+			result->AddRef();
+
+			_BeginRecvImpl(result, offset, size);
+
+			return result;
 		}
 
 		size_t Socket::EndRecv(const AsyncResultPtr &asyncResult)
@@ -232,28 +213,94 @@ namespace async
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
-
-
-			WSABUF wsabuf = {0};
-			wsabuf.buf = reinterpret_cast<char *>(buf->data(nOffset));
-			wsabuf.len = nSize;
-
-			DWORD dwFlag = 0;
-			DWORD dwSize = 0;
-			if(  0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, asynResult.Get(), NULL)
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				asynResult->Release();
-				throw Win32Exception("WSASend");
-			}
+			
+			_BeginSendImpl(asynResult, nOffset, nSize);
 
 			return asynResult;
+		}
+
+		const AsyncResultPtr &Socket::BeginSend(const AsyncResultPtr &result, size_t offset, size_t size)
+		{
+			result->AddRef();
+
+			_BeginSendImpl(result, offset, size);
+
+			return result;
 		}
 
 		size_t Socket::EndSend(const AsyncResultPtr &asyncResult)
 		{
 			return _EndAsyncOperation(asyncResult);
 		}
+
+
+		// --------------------------------
+
+		void Socket::_BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
+		{
+			sockaddr_in remoteAddr = {0};
+			remoteAddr.sin_family		= AF_INET;
+			remoteAddr.sin_port			= ::htons(uPort);
+			remoteAddr.sin_addr.s_addr	= addr.Address();
+
+			// 很变态，需要先bind
+			::bind(socket_, reinterpret_cast<const sockaddr *>(&remoteAddr), sizeof(sockaddr_in));
+
+			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, result.Get()) 
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			{
+				result->Release();
+				throw Win32Exception("ConnectionEx");
+			}
+		}
+
+		void Socket::_BeginDisconnectImpl(const AsyncResultPtr &result, bool bReuseSocket)
+		{
+			DWORD dwFlags = bReuseSocket ? TF_REUSE_SOCKET : 0;
+
+			if( !SocketProvider::GetSingleton(io_).DisconnectEx(socket_, result.Get(), dwFlags, 0) 
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			{
+				result->Release();
+				throw Win32Exception("DisConnectionEx");
+			}
+		}
+
+		void Socket::_BeginRecvImpl(const AsyncResultPtr &result, size_t offset, size_t size)
+		{
+			const SocketBufferPtr buffer = result->m_buffer;
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = reinterpret_cast<char *>(buffer->data(offset));
+			wsabuf.len = size;
+
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+			if(  0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, result.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			{
+				result->Release();
+				throw Win32Exception("WSARecv");
+			}
+		}
+
+		void Socket::_BeginSendImpl(const AsyncResultPtr &result, size_t offset, size_t size)
+		{
+			const SocketBufferPtr buffer = result->m_buffer;
+			WSABUF wsabuf = {0};
+			wsabuf.buf = reinterpret_cast<char *>(buffer->data(offset));
+			wsabuf.len = size;
+
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+			if(  0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, result.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			{
+				result->Release();
+				throw Win32Exception("WSASend");
+			}
+		}
+
 	}
 
 }

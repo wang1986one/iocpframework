@@ -28,7 +28,6 @@ namespace async
 
 		// class SocketBuffer
 		typedef BufferT<char, MemoryMgr::DEFAULT_SOCKET_SIZE, async::memory::MemAllocator<char, MemoryMgr::SocketMemoryPool> > SocketBuffer;
-		//typedef BufferT<char, MemoryMgr::DEFAULT_SOCKET_SIZE, std::allocator<char>> SocketBuffer;
 		typedef pointer<SocketBuffer> SocketBufferPtr;
 
 
@@ -39,6 +38,7 @@ namespace async
 			: public Object
 		{
 		private:
+			// socket handle
 			SOCKET socket_;
 
 			// IO服务
@@ -46,93 +46,110 @@ namespace async
 
 		public:
 			explicit Socket(IODispatcher &, int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
-			virtual ~Socket();
+			~Socket();
 
 			// non-copyable
 		private:
 			Socket(const Socket &);
 			Socket &operator=(const Socket &);
 
-			
 		public:
 			// explicit转换
-			operator SOCKET() 
-			{
-				return socket_;
-			}
-			operator SOCKET() const
-			{
-				return socket_;
-			}
+			operator SOCKET()				{ return socket_; }
+			operator SOCKET() const			{ return socket_; }
 
 			// 显示获取
-			SOCKET GetHandle() 
-			{
-				return socket_;
-			}
-			const SOCKET GetHandle() const
-			{
-				return socket_;
-			}
+			SOCKET GetHandle()				{ return socket_; }
+			const SOCKET GetHandle() const	{ return socket_; }
 
-
-			// 不需设置回调接口
 		public:
-			void IOControl(DWORD dwIOControl, const SocketBufferPtr &inBuf, const SocketBufferPtr &outBuf);
+			// WSAIoctl
+			template<typename InT, typename OutT>
+			DWORD IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize);
 			
+			// setsocketopt
 			template<typename SocketOptionT>
 			bool SetOption(const SocketOptionT &option);
 
+			// getsockopt
 			template<typename SocketOptionT>
 			bool GetOption(SocketOptionT &option) const;
 
+			// WSASocket
 			void Create(int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
+			// closesocket
 			void Close();
+		
+			bool IsOpen() const;
 
-			bool IsOpen();
-
+			// bind
 			void Bind(u_short uPort = 0, const IPAddress &addr = INADDR_ANY);
+			// listen
 			void Listen(int nMax = SOMAXCONN);
 
 			
+			// 不需设置回调接口
+		public:
 			SocketPtr Accept();
 			void Connect(const IPAddress &addr, u_short uPort);
-			void DisConnect(bool bReuseSocket = false);
+			void DisConnect(bool bReuseSocket = true);
 
 			size_t Recv(const SocketBufferPtr &buf);
 			size_t Send(const SocketBufferPtr &buf);
 
 			// 异步调用接口
 		public:
-			AsyncResultPtr BeginAccept(AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
+			// szOutSize指定额外的缓冲区大小，以用来Accept远程连接后且收到第一块数据包才返回
+			AsyncResultPtr BeginAccept(size_t szOutSize = 0, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
 			SocketPtr EndAccept(const AsyncResultPtr &asynResult);
 
 			AsyncResultPtr BeginConnect(const IPAddress &addr, u_short uPort, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
+			const AsyncResultPtr &BeginConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void EndConnect(const AsyncResultPtr &asyncResult);
 
 			AsyncResultPtr BeginDisconnect(bool bReuseSocket = true, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
+			const AsyncResultPtr &BeginDisconnect(const AsyncResultPtr &result, bool bReuseSocket = true);
 			void EndDisconnect(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr BeginRecv(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+			AsyncResultPtr BeginRecv(const SocketBufferPtr &buf, size_t offset, size_t size, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+			const AsyncResultPtr &BeginRecv(const AsyncResultPtr &result, size_t offset, size_t size);
 			size_t EndRecv(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr BeginSend(const SocketBufferPtr &buf,size_t nOffset, size_t nSize, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+			AsyncResultPtr BeginSend(const SocketBufferPtr &buf,size_t offset, size_t size, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+			const AsyncResultPtr &BeginSend(const AsyncResultPtr &result, size_t offset, size_t size);
 			size_t EndSend(const AsyncResultPtr &asyncResult);
 
+			
 		private:
+			void _BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
+			void _BeginDisconnectImpl(const AsyncResultPtr &result, bool bReuseSocket);
+			void _BeginRecvImpl(const AsyncResultPtr &result, size_t offset, size_t size);
+			void _BeginSendImpl(const AsyncResultPtr &result, size_t offset, size_t size);
+			
 			size_t _EndAsyncOperation(const AsyncResultPtr &asyncResult);
 		};
 
 
 		// ---------------------------
 
-		inline bool Socket::IsOpen()
+		inline bool Socket::IsOpen() const
 		{
 			return socket_ != INVALID_SOCKET;
 		}
 
+		template<typename InT, typename OutT>
+		inline DWORD Socket::IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize)
+		{
+			DWORD dwRet = 0;
+
+			if( 0 != ::WSAIoctl(socket_, dwIOControl, inData, inSize, outData, outSize, &dwRet, 0, 0) )
+				throw Win32Exception("WSAIoCtl");
+
+			return dwRet;
+		}
+
 		template<typename SocketOptionT>
-		bool Socket::SetOption(const SocketOptionT &option)
+		inline bool Socket::SetOption(const SocketOptionT &option)
 		{
 			if( !IsOpen() )
 				return false;
@@ -148,7 +165,7 @@ namespace async
 		}
 
 		template<typename SocketOptionT>
-		bool Socket::GetOption(SocketOptionT &option) const
+		inline bool Socket::GetOption(SocketOptionT &option) const
 		{
 			if( !IsOpen() )
 				return false;
