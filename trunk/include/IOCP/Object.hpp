@@ -57,7 +57,7 @@ namespace async
 			Object()
 				: m_nRefCount(0)
 			{}
-			virtual ~Object(){}
+			~Object(){}
 
 		public:
 			void Object::AddRef()
@@ -78,7 +78,6 @@ namespace async
 			{
 				Callback::Alloc(size);
 
-				//return MemoryMgr::GetMemory().Allocate(size);
 				return MemoryMgr::GetMemory().allocate(size);
 			}
 			static void operator delete(void *ptr, size_t size)
@@ -88,7 +87,7 @@ namespace async
 				if( ptr == NULL )
 					return;
 
-				return  MemoryMgr::GetMemory().deallocate((char *)ptr, size);//MemoryMgr::GetMemory().Deallocate((char *)ptr, size);
+				return  MemoryMgr::GetMemory().deallocate((char *)ptr, size);
 			}
 		};
 

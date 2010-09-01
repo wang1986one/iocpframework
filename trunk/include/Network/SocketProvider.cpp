@@ -13,9 +13,6 @@
 
 namespace async
 {
-
-
-
 	namespace network
 	{
 
@@ -46,13 +43,7 @@ namespace async
 
 		void SocketProvider::GetExtensionFuncPtr(const SocketPtr &sock, GUID *guid, LPVOID pFunc)
 		{
-			SocketBufferPtr inBuf(new SocketBuffer(sizeof(GUID)));
-			SocketBufferPtr outBuf(new SocketBuffer(sizeof(void *)));
-
-			RtlMoveMemory(inBuf->data(), guid, sizeof(GUID));
-
-			sock->IOControl(SIO_GET_EXTENSION_FUNCTION_POINTER, inBuf, outBuf);
-			RtlMoveMemory(pFunc, outBuf->data(), sizeof(void *));
+			sock->IOControl(SIO_GET_EXTENSION_FUNCTION_POINTER, guid, sizeof(GUID), pFunc, sizeof(LPVOID));
 		}
 	}
 

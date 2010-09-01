@@ -42,7 +42,7 @@ namespace async
 
 		public:
 			File(IODispatcher &, LPCTSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE hTemplate = NULL);
-			virtual ~File();
+			~File();
 
 			// non-copyable
 		private:
