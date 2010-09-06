@@ -19,7 +19,6 @@ namespace async
 		using namespace IOCP;
 
 		// forward declare
-		class SocketProvider;
 
 		class Socket;
 		typedef pointer<Socket> SocketPtr;
@@ -100,22 +99,22 @@ namespace async
 			// 异步调用接口
 		public:
 			// szOutSize指定额外的缓冲区大小，以用来Accept远程连接后且收到第一块数据包才返回
-			AsyncResultPtr BeginAccept(size_t szOutSize = 0, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
+			AsyncResultPtr BeginAccept(size_t szOutSize = 0, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing);
 			SocketPtr EndAccept(const AsyncResultPtr &asynResult);
 
-			AsyncResultPtr BeginConnect(const IPAddress &addr, u_short uPort, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
+			AsyncResultPtr BeginConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing);
 			const AsyncResultPtr &BeginConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void EndConnect(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr BeginDisconnect(bool bReuseSocket = true, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing);
+			AsyncResultPtr BeginDisconnect(bool bReuseSocket = true, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing);
 			const AsyncResultPtr &BeginDisconnect(const AsyncResultPtr &result, bool bReuseSocket = true);
 			void EndDisconnect(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr BeginRecv(const SocketBufferPtr &buf, size_t offset, size_t size, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+			AsyncResultPtr BeginRecv(const SocketBufferPtr &buf, size_t offset, size_t size, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
 			const AsyncResultPtr &BeginRecv(const AsyncResultPtr &result, size_t offset, size_t size);
 			size_t EndRecv(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr BeginSend(const SocketBufferPtr &buf,size_t offset, size_t size, AsyncCallbackFunc callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+			AsyncResultPtr BeginSend(const SocketBufferPtr &buf,size_t offset, size_t size, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
 			const AsyncResultPtr &BeginSend(const AsyncResultPtr &result, size_t offset, size_t size);
 			size_t EndSend(const AsyncResultPtr &asyncResult);
 
