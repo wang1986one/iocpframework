@@ -67,11 +67,11 @@ void NetworkImpl::OnAccept(const AsyncResultPtr &asyncResult)
 	try 
 	{
 		// 获取远程连接
-		SocketPtr listenSocket = asyncResult->m_asynState;
-		SocketPtr acceptSocket = listenSocket->EndAccept(asyncResult);
+		const SocketPtr &listenSocket = asyncResult->m_asynState;
+		const SocketPtr &acceptSocket = listenSocket->EndAccept(asyncResult);
 		
 		// 获取提供的Buffer
-		SocketBufferPtr addrBuffer = asyncResult->m_buffer;
+		const SocketBufferPtr &addrBuffer = asyncResult->m_buffer;
 
 		// 设置超时
 		struct TCPKeepAlive
@@ -105,8 +105,10 @@ void NetworkImpl::OnAccept(const AsyncResultPtr &asyncResult)
 
 		// 投递新的接受请求
 		SocketBufferPtr buffer(new SocketBuffer);
-		acceptSocket->BeginRecv(buffer, 0, buffer->allocSize(),
-			std::tr1::bind(&NetworkImpl::OnRecv, this, std::tr1::placeholders::_1), acceptSocket);
+		static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::OnRecv, this, std::tr1::placeholders::_1);
+		asyncResult->reset(acceptSocket, buffer, acceptSocket, nothing, callback);
+
+		acceptSocket->BeginRecv(asyncResult, 0, buffer->allocSize());
 	} 
 	catch(const std::exception &e) 
 	{
@@ -118,12 +120,12 @@ void NetworkImpl::OnAccept(const AsyncResultPtr &asyncResult)
 
 void NetworkImpl::OnRecv(const AsyncResultPtr &asyncResult)
 {
-	SocketPtr sock = asyncResult->m_asynState;
+	const SocketPtr &sock = asyncResult->m_asynState;
 
 	try 
 	{
 		size_t size = sock->EndRecv(asyncResult);
-		SocketBufferPtr buffer = asyncResult->m_buffer;
+		const SocketBufferPtr &buffer = asyncResult->m_buffer;
 
 		buffer->resize(size);
 
@@ -134,7 +136,9 @@ void NetworkImpl::OnRecv(const AsyncResultPtr &asyncResult)
 		}
 
 		// 返回已接收的数据
-		sock->BeginSend(buffer, 0, size, std::tr1::bind(&NetworkImpl::OnSend, this, std::tr1::placeholders::_1), sock);
+		static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::OnSend, this, std::tr1::placeholders::_1);
+		asyncResult->m_callback = callback;
+		sock->BeginSend(asyncResult, 0, size);
 
 	}
 	catch(const std::exception &e) 
@@ -146,16 +150,17 @@ void NetworkImpl::OnRecv(const AsyncResultPtr &asyncResult)
 
 void NetworkImpl::OnSend(const AsyncResultPtr &asyncResult)
 {
-	SocketPtr socket = asyncResult->m_asynState;
+	const SocketPtr &socket = asyncResult->m_asynState;
 
 	try 
 	{
-		SocketBufferPtr buffer = asyncResult->m_buffer;
+		const SocketBufferPtr &buffer = asyncResult->m_buffer;
 		size_t size = socket->EndSend(asyncResult);
 		if( size != 0 )
 		{
-			socket->BeginRecv(buffer, 0, buffer->allocSize(),
-				std::tr1::bind(&NetworkImpl::OnRecv, this, std::tr1::placeholders::_1), socket);
+			static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::OnRecv, this, std::tr1::placeholders::_1);
+			asyncResult->m_callback = callback;
+			socket->BeginRecv(asyncResult, 0, buffer->allocSize());
 		}
 		else 
 		{
@@ -237,7 +242,7 @@ DWORD NetworkImpl::_ThreadAccept()
 			// 投递接收连接
 			for(int i = 0; i != MAX_ACCEPT; ++i)
 			{
-				acceptor_->BeginAccept(std::tr1::bind(&NetworkImpl::OnAccept, this, std::tr1::placeholders::_1), acceptor_);
+				acceptor_->BeginAccept(0, std::tr1::bind(&NetworkImpl::OnAccept, this, std::tr1::placeholders::_1), acceptor_);
 			}
 		}
 	}

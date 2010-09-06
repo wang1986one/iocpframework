@@ -107,7 +107,7 @@ namespace async
 			return size;
 		}
 
-		AsyncResultPtr Socket::BeginAccept(size_t szOutSide/* = 0*/, AsyncCallbackFunc callback /* = 0 */, const ObjectPtr &asyncState/* = nothing*/)
+		AsyncResultPtr Socket::BeginAccept(size_t szOutSide/* = 0*/, const AsyncCallbackFunc &callback /* = 0 */, const ObjectPtr &asyncState/* = nothing*/)
 		{
 			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSide));
 			SocketPtr acceptSocket(new Socket(io_));
@@ -137,7 +137,7 @@ namespace async
 
 
 		// Òì²½µ÷ÓÃ
-		AsyncResultPtr Socket::BeginConnect(const IPAddress &addr, u_short uPort, AsyncCallbackFunc callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */)
+		AsyncResultPtr Socket::BeginConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, nothing, asyncState, nothing, callback));
 			asynResult->AddRef();
@@ -160,7 +160,7 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::BeginDisconnect(bool bReuseSocket /* = true */, AsyncCallbackFunc callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */)
+		AsyncResultPtr Socket::BeginDisconnect(bool bReuseSocket /* = true */, const AsyncCallbackFunc &callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, nothing, asyncState, nothing, callback));
 			asynResult->AddRef();
@@ -184,7 +184,7 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::BeginRecv(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, AsyncCallbackFunc callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */, const ObjectPtr &internalState /*= nothing*/)
+		AsyncResultPtr Socket::BeginRecv(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */, const ObjectPtr &internalState /*= nothing*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
@@ -209,7 +209,7 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::BeginSend(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, AsyncCallbackFunc callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */, const ObjectPtr &internalState /*= nothing*/)
+		AsyncResultPtr Socket::BeginSend(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback /* = NULL */, const ObjectPtr &asyncState /* = nothing */, const ObjectPtr &internalState /*= nothing*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
