@@ -112,7 +112,6 @@ namespace async
 						// 如果有变化，则重置
 						if( ::InterlockedCompareExchange(&change_, 0, 1) == 1 )
 						{
-							handles.resize(timerArray_.size());
 							_Copy(handles, timerArray_);
 						}
 						
@@ -133,7 +132,17 @@ namespace async
 						const TimerPointer &timer = timerArray_[WAIT_OBJECT_0 + res];
 						TimerMapsIter iter = timerMaps_.find(timer);
 						if( iter != timerMaps_.end() )
-							io_.Post(iter->second);
+						{
+							try
+							{
+								io_.Post(iter->second);
+							}
+							catch(std::exception &e)
+							{
+								std::cerr << e.what() << std::endl;
+							}
+						}
+							
 					}
 
 					::OutputDebugString(_T("Exit Timer Thread\n"));
@@ -143,6 +152,8 @@ namespace async
 				void _Copy(std::vector<HANDLE> &handles, TimersArray &timers)
 				{
 					const size_t count = timers.size();
+					handles.resize(count);
+
 					for(size_t i = 0; i != count; ++i)
 						handles[i] = *(timers[i]);
 				}

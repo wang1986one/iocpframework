@@ -73,7 +73,6 @@ namespace async
 			bool PostStatus(ULONG_PTR ulCompKey, DWORD dwNumBytes = 0, OVERLAPPED *pOver = NULL)
 			{
 				BOOL bOk = ::PostQueuedCompletionStatus(m_hIOCP, dwNumBytes, ulCompKey, pOver);
-				assert(bOk);
 
 				return bOk == TRUE;
 			}
