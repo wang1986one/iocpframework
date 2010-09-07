@@ -12,7 +12,7 @@
 namespace async
 {
 
-	namespace IOCP 
+	namespace iocp 
 	{
 		struct AsyncResult;
 		typedef pointer<AsyncResult> AsyncResultPtr;
@@ -80,13 +80,13 @@ namespace async
 			typedef Threads::iterator		ThreadsIter;
 
 		private:
-			// IOCP Handle
+			// iocp Handle
 			CIOCP m_hIOCP;
 			// Ïß³ÌÈÝÆ÷
 			std::vector<HANDLE>	m_threads;
 
 		public:
-			IODispatcher(size_t numThreads = 0);
+			IODispatcher(size_t numThreads = GetFitThreadNum());
 			~IODispatcher();
 
 		public:

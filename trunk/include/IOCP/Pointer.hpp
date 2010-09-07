@@ -6,7 +6,7 @@ namespace async
 {
 
 
-	namespace IOCP
+	namespace iocp
 	{
 
 		//-----------------------------------------------------

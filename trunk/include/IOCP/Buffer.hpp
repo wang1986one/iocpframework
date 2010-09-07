@@ -12,7 +12,7 @@ namespace async
 {
 
 
-	namespace IOCP
+	namespace iocp
 	{
 
 		//-------------------------------------------------------------------
@@ -140,12 +140,16 @@ namespace async
 
 			pointer data(size_t offset = 0)
 			{
-				assert(offset < allocSize_);
+				if( offset >= allocSize_ )
+					throw std::out_of_range("buffer offset >= allocSize_");
+
 				return buffer_ + offset;
 			}
 			const_pointer data(size_t offset = 0) const
 			{
-				assert(offset < allocSize_);
+				if( offset >= allocSize_ )
+					throw std::out_of_range("buffer offset >= allocSize_");
+
 				return buffer_ + offset;
 			}
 
@@ -172,7 +176,7 @@ namespace async
 		typename BufferT<T, __DefaultSize, AllocT>::alloc_type BufferT<T, __DefaultSize, AllocT>::BufferPool;
 
 
-	} // end of IOCP
+	} // end of iocp
 
 
 } // end of async

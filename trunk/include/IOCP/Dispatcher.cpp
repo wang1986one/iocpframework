@@ -10,7 +10,7 @@
 namespace async
 {
 	
-	namespace IOCP
+	namespace iocp
 	{
 		// 获取适合系统的线程数
 		size_t GetFitThreadNum(size_t perCPU/* = 2*/)

@@ -9,7 +9,7 @@
 namespace async
 {
 
-	namespace IOCP
+	namespace iocp
 	{
 		//--------------------------------------------------------------
 		// class CIOCP

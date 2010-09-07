@@ -118,7 +118,7 @@ private:
 	{		
 		try
 		{
-			acceptor_->BeginAccept(std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1));
+			acceptor_->BeginAccept(0, std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1));
 		} 
 		catch(const std::exception &e)
 		{

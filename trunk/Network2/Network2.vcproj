@@ -242,6 +242,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\IOCP\Callback.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\IOCP\Dispatcher.cpp"
 					>
 				</File>
@@ -342,6 +346,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\Memory\MemoryLeak.h"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Memory\SGIMallocPool.hpp"
 					>
 				</File>
@@ -357,6 +365,26 @@
 					RelativePath="..\include\MultiThread\Lock.hpp"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="Timer"
+				>
+				<File
+					RelativePath="..\include\Timer\Timer.hpp"
+					>
+				</File>
+				<Filter
+					Name="impl"
+					>
+					<File
+						RelativePath="..\include\Timer\impl\BasicTimer.hpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\Timer\impl\TimerImpl.hpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<File
