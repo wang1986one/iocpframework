@@ -92,7 +92,7 @@ namespace async
 				{
 					assert(timer_ != NULL);
 
-					SetTimer(period_);
+					SetTimer(period_, 0);
 				}
 			};
 
