@@ -54,7 +54,7 @@ namespace async
 				// delay 延迟时间
 				void SetTimer(long period, long delay = 0)
 				{
-					timer_->SetTimer(period);
+					timer_->SetTimer(period, delay);
 				}
 
 				// 取消Timer
