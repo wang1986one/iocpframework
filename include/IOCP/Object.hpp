@@ -12,7 +12,7 @@ namespace async
 
 
 
-	namespace IOCP
+	namespace iocp
 	{
 		class NullCallback
 		{

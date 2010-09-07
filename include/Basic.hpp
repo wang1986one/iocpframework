@@ -21,5 +21,6 @@
 #include <functional>
 #include <algorithm>
 
+#include <cassert>
 
 #endif

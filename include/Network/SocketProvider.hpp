@@ -15,7 +15,7 @@ namespace async
 
 	namespace network
 	{
-		using namespace IOCP;
+		using namespace iocp;
 
 		class Socket;
 		typedef pointer<Socket> SocketPtr;

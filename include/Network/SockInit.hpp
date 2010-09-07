@@ -63,7 +63,7 @@ namespace async
 				{
 					if( this != &instance_ && ref_->Result() != 0 )
 					{
-						throw async::IOCP::Win32Exception("WSAStartup");
+						throw async::iocp::Win32Exception("WSAStartup");
 					}
 				}
 

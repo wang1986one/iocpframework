@@ -16,7 +16,7 @@ namespace async
 
 	namespace network
 	{
-		using namespace IOCP;
+		using namespace iocp;
 
 		// forward declare
 

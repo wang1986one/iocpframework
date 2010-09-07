@@ -16,7 +16,7 @@ namespace async
 	namespace filesystem
 	{
 
-		using namespace async::IOCP;
+		using namespace async::iocp;
 
 		// forward declare
 		class File;

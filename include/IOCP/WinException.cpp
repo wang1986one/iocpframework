@@ -8,7 +8,7 @@ namespace async
 {
 
 
-	namespace IOCP
+	namespace iocp
 	{
 
 		Win32Exception::Win32Exception(const std::string &apiName, unsigned long dwErrCode)
