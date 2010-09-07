@@ -59,10 +59,10 @@ void AsyncWait4(const async::iocp::AsyncResultPtr &result)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	async::iocp::IODispatcher io;
+
 	try
 	{
-		async::iocp::IODispatcher io;
-
 		async::timer::Timer timer(io, 2000);
 		timer.BeginWait(std::tr1::bind(&AsyncWait, std::tr1::placeholders::_1, std::tr1::ref(timer)));
 
@@ -74,9 +74,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		timer3->Wait();
 		timer3->BeginWait(std::tr1::bind(&AsyncWait3, std::tr1::placeholders::_1, std::tr1::ref(timer3)));
 
-		std::cin.get();
+
 		async::timer::Timer timer4(io, 500);
 		timer4.BeginWait(std::tr1::bind(&AsyncWait4, std::tr1::placeholders::_1));
+
 	}
 	catch(std::exception &e)
 	{
