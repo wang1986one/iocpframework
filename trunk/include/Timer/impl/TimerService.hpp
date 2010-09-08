@@ -34,19 +34,16 @@ namespace async
 				typedef std::tr1::shared_ptr<TimerType>	TimerPointer;
 
 			private:
-				typedef std::tr1::unordered_map<TimerPointer, async::iocp::AsyncResultPtr>	TimerMaps;
-				typedef typename TimerMaps::iterator	TimerMapsIter;
-
-				typedef std::vector<TimerPointer>		TimersArray;
+				typedef std::vector<std::pair<TimerPointer, async::iocp::AsyncResultPtr>>		TimersArray;
+				typedef typename TimersArray::iterator			TimerArrayIter;
 
 			private:
-				TimerMaps timerMaps_;			// Hash Table of Timer 
-				TimersArray timerArray_;		// Array of Timer
+				TimersArray timerArray_;				// Array of Timer
 
 				async::thread::ThreadImplEx thread_;	// WaitForMutipleObjectEx
 
-				volatile long change_;			// Timer change
-				async::iocp::IODispatcher &io_;	// IO service
+				volatile long change_;					// Timer change
+				async::iocp::IODispatcher &io_;			// IO service
 
 			private:
 				TimerService(async::iocp::IODispatcher &io)
@@ -85,8 +82,8 @@ namespace async
 					TimerPointer timer(new TimerType(period));
 					AsyncResultPtr result(new AsyncResult(nothing, nothing, nothing, nothing, handler));
 			
-					timerMaps_.insert(TimerMaps::value_type(timer, result));
-					timerArray_.push_back(timer);
+					//timerMaps_.insert(TimerMaps::value_type(timer, result));
+					timerArray_.push_back(std::make_pair(timer, result));
 
 					::InterlockedExchange(&change_, 1);
 					return timer;
@@ -95,8 +92,26 @@ namespace async
 				// ÉèÖÃTimer»Øµ÷
 				void ChangeCallback(const TimerPointer &timer, const async::iocp::AsyncCallbackFunc &handler)
 				{
-					TimerMaps::iterator iter = timerMaps_.find(timer);
-					if( iter != timerMaps_.end() )
+					struct TimerFind
+					{
+						const TimerPointer &timer_;
+
+						TimerFind(const TimerPointer &timer)
+							: timer_(timer)
+						{}
+
+						bool operator()(const TimersArray::value_type &val) const
+						{
+							if( timer_ == val.first )
+								return true;
+
+							return false;
+						}
+					};
+			
+					TimerArrayIter iter = std::find_if(timerArray_.begin(), timerArray_.end(), TimerFind(timer));
+
+					if( iter != timerArray_.end() )
 						iter->second->m_callback = handler;
 					else
 						throw std::logic_error("has no timer");
@@ -129,20 +144,8 @@ namespace async
 						else if( res == WAIT_IO_COMPLETION )
 							break;
 
-						const TimerPointer &timer = timerArray_[WAIT_OBJECT_0 + res];
-						TimerMapsIter iter = timerMaps_.find(timer);
-						if( iter != timerMaps_.end() )
-						{
-							try
-							{
-								io_.Post(iter->second);
-							}
-							catch(std::exception &e)
-							{
-								std::cerr << e.what() << std::endl;
-							}
-						}
-							
+						const TimersArray::value_type &val = timerArray_[WAIT_OBJECT_0 + res];
+						io_.Post(val.second);
 					}
 
 					::OutputDebugString(_T("Exit Timer Thread\n"));
@@ -155,7 +158,7 @@ namespace async
 					handles.resize(count);
 
 					for(size_t i = 0; i != count; ++i)
-						handles[i] = *(timers[i]);
+						handles[i] = *(timers[i].first);
 				}
 			};
 

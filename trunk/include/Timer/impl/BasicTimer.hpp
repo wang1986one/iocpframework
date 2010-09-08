@@ -26,7 +26,7 @@ namespace async
 			private:
 				// Timer指针
 				TimerPointer timer_;
-				async::iocp::IODispatcher &io_;
+				async::iocp::IODispatcher &io_;			// IO service
 
 			public:
 				// 不接受回调函数，且注册一个Timer
@@ -85,13 +85,6 @@ namespace async
 				void ExpireseAt()
 				{
 					
-				}
-
-			private:
-				// 投递给IOCP进行分派
-				void _Callback(const async::iocp::AsyncResultPtr &result)
-				{
-					io_.Post(result);
 				}
 			};
 		}
