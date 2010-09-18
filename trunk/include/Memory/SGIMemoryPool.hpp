@@ -9,7 +9,6 @@
 
 
 
-
 /*
 	实现分析:
 	该内存池采用HASH-LIST数据结构管理数据,分配一块内存时,如果所要求的内存超过了某个数量就直接调用malloc分配内存, 
@@ -238,11 +237,15 @@ namespace async
 				ObjPtrType *pFreeListTemp = m_pFreeLists + FREELISTINDEX(n);
 
 				{
-					AutoLock lock(m_lock);
+					//AutoLock lock(m_lock);
 
 					// 调整对应的free - list,回收。改变Next指针，将返回的节点放在List开头
-					pTemp->pFreeListLink = *pFreeListTemp;
-					*pFreeListTemp = pTemp;
+					InterlockedExchangePointer(&pTemp->pFreeListLink, pFreeListTemp);
+					InterlockedExchangePointer(pFreeListTemp, &pTemp);
+					
+					
+					//pTemp->pFreeListLink = *pFreeListTemp;
+					//*pFreeListTemp = pTemp;
 				}
 
 			}

@@ -102,6 +102,7 @@ namespace async
 			AsyncResultPtr BeginAccept(size_t szOutSize = 0, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing);
 			SocketPtr EndAccept(const AsyncResultPtr &asynResult);
 
+			// 异步连接需要先绑定端口
 			AsyncResultPtr BeginConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing);
 			const AsyncResultPtr &BeginConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void EndConnect(const AsyncResultPtr &asyncResult);

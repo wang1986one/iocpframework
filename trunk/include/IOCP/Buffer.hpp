@@ -125,16 +125,17 @@ namespace async
 				else
 				{
 					// 申请新缓冲区
-					allocSize_ = nNewSize;
-					pointer pNewBuf = _Allocate(allocSize_);
+					pointer pNewBuf = _Allocate(nNewSize);
 
 					// 复制缓冲区
-					std::copy(buffer_, buffer_ + bufferSize_, pNewBuf);
+					std::copy(buffer_, buffer_ + allocSize_, pNewBuf);
 
 					// 释放旧缓冲区
 					alloc_.deallocate(buffer_, allocSize_);
 
-					buffer_ = pNewBuf;
+					allocSize_	= nNewSize;
+					bufferSize_ = nNewSize;
+					buffer_		= pNewBuf;
 				}
 			}
 

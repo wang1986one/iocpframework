@@ -71,12 +71,12 @@ namespace async
 
 		public:
 			// Read
-			AsyncResultPtr BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, PLARGE_INTEGER fileOffset
+			AsyncResultPtr BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *fileOffset
 				, AsyncCallbackFunc callback = 0, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
 			size_t EndRead(const AsyncResultPtr &asynResult);
 
 			// Write
-			AsyncResultPtr BeginWrite(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, PLARGE_INTEGER fileOffset
+			AsyncResultPtr BeginWrite(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *fileOffset
 				, AsyncCallbackFunc callback = 0, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
 			size_t EndWrite(const AsyncResultPtr &asynResult);
 
