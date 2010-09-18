@@ -41,8 +41,6 @@ void NetworkImpl::Start(u_short uPort)
 		// 创建Accept 线程
 		acceptThread_.RegisterFunc(std::tr1::bind(&NetworkImpl::_ThreadAccept, this));
 		acceptThread_.Start();
-
-		//acceptor_->BeginAccept(std::tr1::bind(&NetworkImpl::OnAccept, this, std::tr1::placeholders::_1), acceptor_);
 	} 
 	catch(const std::exception &e)
 	{
@@ -62,7 +60,7 @@ void NetworkImpl::Stop()
 
 
 
-void NetworkImpl::OnAccept(const AsyncResultPtr &asyncResult)
+void NetworkImpl::_OnAccept(const AsyncResultPtr &asyncResult)
 {
 	try 
 	{
@@ -100,12 +98,10 @@ void NetworkImpl::OnAccept(const AsyncResultPtr &asyncResult)
 		SocketProvider::GetSingleton(io_).GetAcceptExSockaddrs(addrBuffer->data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, 
 			reinterpret_cast<SOCKADDR **>(&pLocalAddr), &szLocalLen, reinterpret_cast<SOCKADDR **>(&pRemoteAddr), &szRemoteLen);
 
-		// 管理
-		_AddRemote(acceptSocket, *pLocalAddr);
 
 		// 投递新的接受请求
 		SocketBufferPtr buffer(new SocketBuffer);
-		static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::OnRecv, this, std::tr1::placeholders::_1);
+		static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnRecv, this, std::tr1::placeholders::_1);
 		asyncResult->reset(acceptSocket, buffer, acceptSocket, nothing, callback);
 
 		acceptSocket->BeginRecv(asyncResult, 0, buffer->allocSize());
@@ -118,7 +114,7 @@ void NetworkImpl::OnAccept(const AsyncResultPtr &asyncResult)
 }
 
 
-void NetworkImpl::OnRecv(const AsyncResultPtr &asyncResult)
+void NetworkImpl::_OnRecv(const AsyncResultPtr &asyncResult)
 {
 	const SocketPtr &sock = asyncResult->m_asynState;
 
@@ -131,24 +127,24 @@ void NetworkImpl::OnRecv(const AsyncResultPtr &asyncResult)
 
 		if( size == 0 )
 		{
-			_RemoveRemote(sock);
 			return ;
 		}
 
+		sock->BeginRecv(asyncResult, 0, buffer->allocSize());
+
 		// 返回已接收的数据
-		static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::OnSend, this, std::tr1::placeholders::_1);
-		asyncResult->m_callback = callback;
-		sock->BeginSend(asyncResult, 0, size);
+		//static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnSend, this, std::tr1::placeholders::_1);
+		//asyncResult->m_callback = callback;
+		//sock->BeginSend(asyncResult, 0, size);
 
 	}
 	catch(const std::exception &e) 
 	{
 		std::cerr << e.what() << std::endl;
-		_RemoveRemote(sock);
 	}
 }
 
-void NetworkImpl::OnSend(const AsyncResultPtr &asyncResult)
+void NetworkImpl::_OnSend(const AsyncResultPtr &asyncResult)
 {
 	const SocketPtr &socket = asyncResult->m_asynState;
 
@@ -158,72 +154,20 @@ void NetworkImpl::OnSend(const AsyncResultPtr &asyncResult)
 		size_t size = socket->EndSend(asyncResult);
 		if( size != 0 )
 		{
-			static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::OnRecv, this, std::tr1::placeholders::_1);
-			asyncResult->m_callback = callback;
-			socket->BeginRecv(asyncResult, 0, buffer->allocSize());
+			static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnRecv, this, std::tr1::placeholders::_1);
+			//asyncResult->m_callback = callback;
+			//socket->BeginRecv(asyncResult, 0, buffer->allocSize());
 		}
 		else 
 		{
-			_RemoveRemote(socket);
 			return;
 		}
 	}
 	catch(const std::exception &e) 
 	{
 		std::cerr << e.what() << std::endl;
-		_RemoveRemote(socket);
 	}
 }
-
-
-size_t NetworkImpl::GetClientSize() const
-{
-	LockType lock(mutex_);
-
-	return remotes_.size();
-}
-
-
-
-void NetworkImpl::_AddRemote(const SocketPtr &remoteSock, const SOCKADDR_IN &remoteAddr)
-{
-	{
-		LockType lock(mutex_);
-		remotes_.insert(std::make_pair(remoteSock->GetHandle(), remoteAddr));
-	}
-}
-
-void NetworkImpl::_RemoveRemote(const SocketPtr &remoteSock)
-{
-	try
-	{	
-		remoteSock->BeginDisconnect();
-	}
-	catch(std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-
-	{
-		LockType lock(mutex_);
-		remotes_.erase(*remoteSock);
-	}
-}
-
-//
-//size_t NetworkImpl::_ParseProtocol(const SocketBufferPtr &buffer)
-//{
-//	if( buffer->size() >= sizeof(PackageHeader) )
-//	{
-//		CPackageHelper package(reinterpret_cast<char *>(buffer->data()), buffer->size());
-//		if( package.GetHeader()->StartFlag != START_FLAG )
-//			return 0;
-//		else
-//			return package.GetHeader()->Length;
-//	}
-//
-//	return 0;
-//}
 
 
 DWORD NetworkImpl::_ThreadAccept()
@@ -242,8 +186,13 @@ DWORD NetworkImpl::_ThreadAccept()
 			// 投递接收连接
 			for(int i = 0; i != MAX_ACCEPT; ++i)
 			{
-				acceptor_->BeginAccept(0, std::tr1::bind(&NetworkImpl::OnAccept, this, std::tr1::placeholders::_1), acceptor_);
+				acceptor_->BeginAccept(0, std::tr1::bind(&NetworkImpl::_OnAccept, this, std::tr1::placeholders::_1), acceptor_);
 			}
+
+			static u_long connect = 0;
+
+			connect += MAX_ACCEPT;
+			std::cout << connect << std::endl;
 		}
 	}
 
