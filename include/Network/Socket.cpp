@@ -276,8 +276,16 @@ namespace async
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
-			if(  0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, result.Get(), NULL)
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			
+			int ret = ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, result.Get(), NULL);
+			DWORD dwError = ::WSAGetLastError();
+
+			// 立即完成，由IOCP转发
+			if( ret != 0 && dwError != WSA_IO_PENDING )
+			{
+				io_.Post(result);
+			}
+			else if( SOCKET_ERROR == ret && dwError != WSA_IO_PENDING )
 			{
 				result->Release();
 				throw Win32Exception("WSARecv");
@@ -293,8 +301,16 @@ namespace async
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
-			if(  0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, result.Get(), NULL)
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			
+			int ret = ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, result.Get(), NULL);
+			DWORD error = ::WSAGetLastError();
+
+			// 立即完成，由IOCP转发
+			if( ret != 0 && error != WSA_IO_PENDING )
+			{
+				io_.Post(result);
+			}
+			else if( SOCKET_ERROR == ret && error != WSA_IO_PENDING )
 			{
 				result->Release();
 				throw Win32Exception("WSASend");

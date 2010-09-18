@@ -1,8 +1,6 @@
 #include "stdafx.h"
 
 #include "File.hpp"
-
-#include "../IOCP/Dispatcher.hpp"
 #include "../IOCP/WinException.hpp"
 
 
@@ -37,21 +35,29 @@ namespace  async
 
 
 		// Read
-		AsyncResultPtr File::BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, PLARGE_INTEGER offset
+		AsyncResultPtr File::BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *index
 			, AsyncCallbackFunc callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/ , const ObjectPtr &internalState/* = nothing*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
 
 			// 设置偏移
-			if( offset != NULL )
+			if( index != NULL )
 			{
-				(static_cast<OVERLAPPED *>(asynResult.Get()))->Offset		= offset->LowPart;
-				(static_cast<OVERLAPPED *>(asynResult.Get()))->OffsetHigh	= offset->HighPart;
+				(static_cast<OVERLAPPED *>(asynResult.Get()))->Offset		= index->LowPart;
+				(static_cast<OVERLAPPED *>(asynResult.Get()))->OffsetHigh	= index->HighPart;
 			}	
 
-			if( !::ReadFile(file_, buf->data(nOffset), nBufSize, NULL, asynResult.Get()) &&
-				::GetLastError() != ERROR_IO_PENDING )
+			DWORD bytesRead = 0;
+			BOOL bSuc = ::ReadFile(file_, buf->data(nOffset), nBufSize, &bytesRead, asynResult.Get());
+			DWORD dwError = ::WSAGetLastError();
+
+			// 立即完成，由IOCP转发
+			if( bSuc && bytesRead != 0 )
+			{
+				io_.Post(asynResult);
+			}
+			else if( !bSuc && dwError != WSA_IO_PENDING )
 			{
 				asynResult->Release();
 				throw Win32Exception("ReadFile");
@@ -67,22 +73,29 @@ namespace  async
 
 
 		// Write
-		AsyncResultPtr File::BeginWrite(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, PLARGE_INTEGER offset
+		AsyncResultPtr File::BeginWrite(const FileBufferPtr &buf, size_t bufOffset, size_t bufSize, const LARGE_INTEGER *index
 			, AsyncCallbackFunc callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/, const ObjectPtr &internalState/* = nothing*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
 
 			// 设置偏移
-			if( offset != NULL )
+			if( index != NULL )
 			{
-				(static_cast<OVERLAPPED *>(asynResult.Get()))->Offset = offset->LowPart;
-				(static_cast<OVERLAPPED *>(asynResult.Get()))->OffsetHigh = offset->HighPart;
+				(static_cast<OVERLAPPED *>(asynResult.Get()))->Offset = index->LowPart;
+				(static_cast<OVERLAPPED *>(asynResult.Get()))->OffsetHigh = index->HighPart;
 			}		
 
+			DWORD bytesWrite = 0;
+			BOOL bSuc = ::WriteFile(file_, buf->data(bufOffset), bufSize, &bytesWrite, asynResult.Get()); 
+			DWORD dwError = ::WSAGetLastError();
 
-			if( !::WriteFile(file_, buf->data(nOffset), nBufSize, NULL, asynResult.Get()) &&
-				::GetLastError() != ERROR_IO_PENDING )
+			// 立即完成，由IOCP转发
+			if( bSuc && bytesWrite != 0 )
+			{
+				io_.Post(asynResult);
+			}
+			else if( !bSuc && dwError != WSA_IO_PENDING )
 			{
 				asynResult->Release();
 				throw Win32Exception("WriteFile");
