@@ -398,7 +398,7 @@ namespace async
 			}
 
 			// Register Thread work function
-			void RegisterFunc(ThreadFunc func)
+			void RegisterFunc(const ThreadFunc &func)
 			{
 				m_fThread = func;
 			}

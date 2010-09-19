@@ -57,7 +57,7 @@ namespace async
 			Object()
 				: m_nRefCount(0)
 			{}
-			~Object(){}
+			virtual ~Object(){}
 
 		public:
 			void Object::AddRef()

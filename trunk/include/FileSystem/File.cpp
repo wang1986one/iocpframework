@@ -36,7 +36,7 @@ namespace  async
 
 		// Read
 		AsyncResultPtr File::BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *index
-			, AsyncCallbackFunc callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/ , const ObjectPtr &internalState/* = nothing*/)
+			, const AsyncCallbackFunc &callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/ , const ObjectPtr &internalState/* = nothing*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
@@ -74,7 +74,7 @@ namespace  async
 
 		// Write
 		AsyncResultPtr File::BeginWrite(const FileBufferPtr &buf, size_t bufOffset, size_t bufSize, const LARGE_INTEGER *index
-			, AsyncCallbackFunc callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/, const ObjectPtr &internalState/* = nothing*/)
+			, const AsyncCallbackFunc &callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/, const ObjectPtr &internalState/* = nothing*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
 			asynResult->AddRef();
