@@ -78,6 +78,9 @@ namespace async
 
 		void IODispatcher::Stop()
 		{
+			// 取消所有线程上的待决的IO操作
+			std::for_each(m_threads.begin(), m_threads.end(), std::ptr_fun(::CancelIo));
+
 			// 先停止所有的线程
 			for(ThreadsIter iter = m_threads.begin();
 				iter != m_threads.end();

@@ -9,11 +9,11 @@ namespace async
 	namespace iocp
 	{
 
-		Callback::AllocCallback Callback::m_allocCallback;
-		Callback::DeallocCallback Callback::m_deallocCallback;
+		DebugCallback::AllocCallback DebugCallback::allocCallback_;
+		DebugCallback::DeallocCallback DebugCallback::deallocCallback_;
 
 
-		void Callback::Alloc(size_t size)
+		void DebugCallback::Alloc(u_long size)
 		{
 			static volatile LONG uAllocCount = 0;
 			static volatile LONG uAllocSize = 0;
@@ -26,11 +26,11 @@ namespace async
 			::InterlockedExchangeAdd(&uAllocCount, 1);
 			::InterlockedExchangeAdd(&uAllocSize, size);
 
-			if( m_allocCallback != NULL )
-				m_allocCallback(uAllocCount, uAllocSize);
+			if( allocCallback_ != NULL )
+				allocCallback_(uAllocCount, uAllocSize);
 		}
 
-		void Callback::Dealloc(size_t size)
+		void DebugCallback::Dealloc(u_long size)
 		{
 			static volatile LONG uDeallocCount = 0;
 			static volatile LONG uDeallocSize = 0;
@@ -43,15 +43,15 @@ namespace async
 			::InterlockedExchangeAdd(&uDeallocCount, 1);
 			::InterlockedExchangeAdd(&uDeallocSize, size);
 
-			if( m_deallocCallback != NULL )
-				m_deallocCallback(uDeallocCount, uDeallocSize);
+			if( deallocCallback_ != NULL )
+				deallocCallback_(uDeallocCount, uDeallocSize);
 		}
 
 
-		void Callback::RegisterCallback(AllocCallback allocCallback, DeallocCallback deallocCallback)
+		void DebugCallback::RegisterCallback(const AllocCallback &allocCallback, const DeallocCallback &deallocCallback)
 		{
-			m_allocCallback = allocCallback;
-			m_deallocCallback = deallocCallback;
+			allocCallback_ = allocCallback;
+			deallocCallback_ = deallocCallback;
 		}
 	}
 

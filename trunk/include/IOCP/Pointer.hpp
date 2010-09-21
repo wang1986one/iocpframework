@@ -20,13 +20,18 @@ namespace async
 			T *m_pObject;
 
 		public:
+			pointer()
+				: m_pObject(NULL)
+			{}
 			pointer(T *t)
 			{
+				assert(t);
 				_Bind(t);
 			}
 			template<typename U>
 			pointer(U *p)
 			{
+				assert(p);
 				_Bind(p);
 			}
 
@@ -48,6 +53,8 @@ namespace async
 
 			pointer<T> &operator=(T *t)
 			{
+				assert(t);
+
 				_Unbind();
 				_Bind(t);
 
@@ -56,6 +63,8 @@ namespace async
 			template<typename U>
 			pointer<T> &operator=(U *p)
 			{
+				assert(p);
+
 				_Unbind();
 				_Bind(p);
 
@@ -148,7 +157,8 @@ namespace async
 
 			void _Unbind()
 			{		
-				m_pObject->Release();
+				if( m_pObject != NULL )
+					m_pObject->Release();
 			}
 
 		};
