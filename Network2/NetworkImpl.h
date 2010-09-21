@@ -8,42 +8,67 @@
 
 
 using namespace async;
-using namespace async::network;
+	using namespace async::network;
 
 
+	// ------------------------------------------------
+	// class NetworkImpl
 
-class NetworkImpl
-{
-public:
-	// 一次投递Accept个数
-	enum { MAX_ACCEPT = 10 };
+	class NetworkImpl
+	{
+		// 回调接口
+		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, const SOCKADDR_IN &)>	AcceptCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &)>						RecvCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, size_t)>				SendCallback;
+		typedef std::tr1::function<void(const SocketPtr &)>													DisconnectCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const std::exception &)>							ErrorCallback;
 
-private:
-	IODispatcher &io_;
-	SocketPtr acceptor_;
+	public:
+		// 一次投递Accept个数
+		enum { MAX_ACCEPT = 1 };
 
-	// 投递Accept线程
-	async::thread::ThreadImplEx acceptThread_;
+	private:
+		IODispatcher &io_;
+		SocketPtr acceptor_;
 
-public:
-	explicit NetworkImpl(IODispatcher &io);
-	~NetworkImpl();
+		// 投递Accept线程
+		async::thread::ThreadImplEx acceptThread_;
+
+		// 回调接口
+		AcceptCallback acceptCallback_;
+		RecvCallback recvCallback_;
+		SendCallback sendCallback_;
+		DisconnectCallback disconnectCallback_;
+		ErrorCallback errorCallback_;
+
+	public:
+		explicit NetworkImpl(IODispatcher &io);
+		~NetworkImpl();
 
 
-public:
-	void Start(u_short);
-	void Stop();
+	public:
+		// 注册回调
+		void Register(const AcceptCallback &acceptCallback = NULL, const RecvCallback &RecvCallback = NULL
+			, const SendCallback &sendCallback = NULL, const DisconnectCallback &disconnectCallback = NULL
+			, const ErrorCallback &errorCallback = NULL);
+		// 启动
+		void Start(u_short);
+		// 停止
+		void Stop();
 
-	void Send(const SocketBufferPtr &);
+		// 发送数据
+		void Send(const SocketPtr &socket, const SocketBufferPtr &buffer);
 
-private:
-	void _OnAccept(const AsyncResultPtr &);
-	void _OnRecv(const AsyncResultPtr &);
-	void _OnSend(const AsyncResultPtr &);
 
-private:
-	DWORD _ThreadAccept();
-};
+		// IOCP回调处理
+	private:
+		void _OnAccept(const AsyncResultPtr &);
+		void _OnRecv(const AsyncResultPtr &);
+		void _OnSend(const AsyncResultPtr &);
+
+	private:
+		DWORD _ThreadAccept();
+	};
 
 
 #endif

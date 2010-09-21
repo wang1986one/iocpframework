@@ -53,11 +53,17 @@ namespace  async
 			DWORD dwError = ::WSAGetLastError();
 
 			// 立即完成，由IOCP转发
-			if( bSuc && bytesRead != 0 )
+			/*if( bSuc && bytesRead != 0 )
 			{
 				io_.Post(asynResult);
 			}
 			else if( !bSuc && dwError != WSA_IO_PENDING )
+			{
+				asynResult->Release();
+				throw Win32Exception("ReadFile");
+			}*/
+
+			if( !bSuc && dwError != ERROR_IO_PENDING)
 			{
 				asynResult->Release();
 				throw Win32Exception("ReadFile");
@@ -91,11 +97,16 @@ namespace  async
 			DWORD dwError = ::WSAGetLastError();
 
 			// 立即完成，由IOCP转发
-			if( bSuc && bytesWrite != 0 )
+			/*if( bSuc && bytesWrite != 0 )
 			{
 				io_.Post(asynResult);
 			}
 			else if( !bSuc && dwError != WSA_IO_PENDING )
+			{
+				asynResult->Release();
+				throw Win32Exception("WriteFile");
+			}*/
+			if( !bSuc && dwError != ERROR_IO_PENDING )
 			{
 				asynResult->Release();
 				throw Win32Exception("WriteFile");

@@ -82,7 +82,6 @@ namespace async
 					TimerPointer timer(new TimerType(period));
 					AsyncResultPtr result(new AsyncResult(nothing, nothing, nothing, nothing, handler));
 			
-					//timerMaps_.insert(TimerMaps::value_type(timer, result));
 					timerArray_.push_back(std::make_pair(timer, result));
 
 					::InterlockedExchange(&change_, 1);

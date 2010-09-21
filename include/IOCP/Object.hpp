@@ -16,9 +16,14 @@ namespace async
 	{
 		class NullCallback
 		{
+			typedef std::tr1::function<void(u_long, u_long)> AllocCallback;
+			typedef std::tr1::function<void(u_long, u_long)> DeallocCallback;
+
 		public:
-			static void Alloc(size_t){}
-			static void Dealloc(size_t){}
+			static void Alloc(u_long){}
+			static void Dealloc(u_long){}
+
+			static void RegisterCallback(const AllocCallback &, const DeallocCallback &){}
 		};
 
 
@@ -26,22 +31,27 @@ namespace async
 		// class Callback
 		// ≤‚ ‘ π”√
 
-		class Callback
+		class DebugCallback
 		{
-			typedef std::tr1::function<void(LONG, size_t)> AllocCallback;
-			typedef std::tr1::function<void(LONG, size_t)> DeallocCallback;
+			typedef std::tr1::function<void(u_long, u_long)> AllocCallback;
+			typedef std::tr1::function<void(u_long, u_long)> DeallocCallback;
 
 		private:
-			static AllocCallback m_allocCallback;
-			static DeallocCallback m_deallocCallback;
+			static AllocCallback allocCallback_;
+			static DeallocCallback deallocCallback_;
 
 		public:
-			static void Alloc(size_t size);
-			static void Dealloc(size_t size);
+			static void Alloc(u_long size);
+			static void Dealloc(u_long size);
 
-			static void RegisterCallback(AllocCallback allocCallback, DeallocCallback deallocCallback);
+			static void RegisterCallback(const AllocCallback &, const DeallocCallback &);
 		};
 
+		#ifndef _DEBUG
+			typedef NullCallback DefaultDebug;
+		#else
+			typedef DebugCallback DefaultDebug; 
+		#endif 
 
 
 		//-------------------------------------------------------------------
@@ -76,13 +86,13 @@ namespace async
 		public:
 			static void *operator new(size_t size)
 			{
-				Callback::Alloc(size);
+				DefaultDebug::Alloc(size);
 
 				return MemoryMgr::GetMemory().allocate(size);
 			}
 			static void operator delete(void *ptr, size_t size)
 			{
-				Callback::Dealloc(size);
+				DefaultDebug::Dealloc(size);
 
 				if( ptr == NULL )
 					return;
