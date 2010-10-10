@@ -35,7 +35,7 @@ namespace async
 
 			private:
 				typedef std::vector<std::pair<TimerPointer, async::iocp::AsyncResultPtr>>		TimersArray;
-				typedef typename TimersArray::iterator			TimerArrayIter;
+				typedef typename TimersArray::iterator	TimerArrayIter;
 
 			private:
 				TimersArray timerArray_;				// Array of Timer
