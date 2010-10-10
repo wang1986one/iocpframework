@@ -19,12 +19,14 @@ namespace async
 			{
 			private:
 				HANDLE timer_;
-				long period_;
+				long period_;		// 间隔时间
+				long due_;			// 第一次后延长时间
 				
 			public:
-				WaitableTimer(long period, bool manualReset = false, const wchar_t *timerName = NULL)
+				WaitableTimer(long period, long due, bool manualReset = false, const wchar_t *timerName = NULL)
 					: timer_(NULL)
 					, period_(period)
+					, due_(due)
 				{
 					timer_ = ::CreateWaitableTimerW(NULL, manualReset ? TRUE : FALSE, timerName);
 
@@ -92,7 +94,7 @@ namespace async
 				{
 					assert(timer_ != NULL);
 
-					SetTimer(period_, 0);
+					SetTimer(period_, due_);
 				}
 			};
 

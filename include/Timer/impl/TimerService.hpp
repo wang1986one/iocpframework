@@ -76,10 +76,10 @@ namespace async
 
 			public:
 				// 增加一个Timer
-				TimerPointer AddTimer(long period, const async::iocp::AsyncCallbackFunc &handler)
+				TimerPointer AddTimer(long period, long due, const async::iocp::AsyncCallbackFunc &handler)
 				{
 					using namespace async::iocp;
-					TimerPointer timer(new TimerType(period));
+					TimerPointer timer(new TimerType(period, due));
 					AsyncResultPtr result(new AsyncResult(nothing, nothing, nothing, nothing, handler));
 			
 					timerArray_.push_back(std::make_pair(timer, result));
