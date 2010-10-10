@@ -31,15 +31,15 @@ namespace async
 			public:
 				// 不接受回调函数，且注册一个Timer
 				// period为时间间隔
-				BasicTimer(async::iocp::IODispatcher &io, long period)
+				BasicTimer(async::iocp::IODispatcher &io, long period, long due)
 					: io_(io)
-					, timer_(TimerServiceType::GetInstance(io).AddTimer(period, NULL))
+					, timer_(TimerServiceType::GetInstance(io).AddTimer(period, due, NULL))
 				{}
 				// 接受回调函数，且注册一个Timer
 				template<typename HandlerT>
-				BasicTimer(async::iocp::IODispatcher &io, long period, const HandlerT &handler)
+				BasicTimer(async::iocp::IODispatcher &io, long period, long due, const HandlerT &handler)
 					: io_(io)
-					, timer_(TimerServiceType::GetInstance(io).AddTimer(period, handler))
+					, timer_(TimerServiceType::GetInstance(io).AddTimer(period, due, handler))
 				{}
 				~BasicTimer()
 				{}
@@ -64,10 +64,10 @@ namespace async
 				}
 
 				// 同步等待
-				void Wait()
+				/*void Wait()
 				{
 					timer_->SyncWait();
-				}
+				}*/
 
 				// 异步等待
 				void BeginWait()

@@ -86,14 +86,16 @@ namespace async
 			std::vector<HANDLE>	m_threads;
 
 		public:
-			IODispatcher(size_t numThreads = GetFitThreadNum());
+			explicit IODispatcher(size_t numThreads = GetFitThreadNum());
 			~IODispatcher();
 
 		public:
 			// 绑定设备到完成端口
 			void Bind(HANDLE hObject);
 			// 向完成端口投递请求
-			void Post(const AsyncResultPtr &ar);
+			void Post(const AsyncResultPtr &);
+			// 当仅不在线程池中时才向调度器中分派
+			void Dispatch(const AsyncResultPtr &);
 
 			// 停止服务
 			void Stop();

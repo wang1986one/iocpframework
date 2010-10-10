@@ -4,11 +4,19 @@
 
 #include "Dispatcher.hpp"
 #include "WinException.hpp"
-
+#include "../MultiThread/Tls.hpp"
 
 
 namespace async
 {
+	namespace HandlerInvoke
+	{
+		inline void Invoke(const iocp::AsyncResultPtr &result)
+		{
+			result->m_callback(std::tr1::cref(result));
+		}
+	}
+
 	
 	namespace iocp
 	{
@@ -68,12 +76,22 @@ namespace async
 				throw Win32Exception("m_hIOCP.AssociateDevice");
 		}
 
-		void IODispatcher::Post(const AsyncResultPtr &async)
+		void IODispatcher::Post(const AsyncResultPtr &result)
 		{
-			async->AddRef();
+			result->AddRef();
 
-			if( 0 == m_hIOCP.PostStatus(0, 0, &*async) )
+			if( 0 == m_hIOCP.PostStatus(0, 0, &*result) )
 				throw Win32Exception("m_hIOCP.PostStatus");
+		}
+
+		void IODispatcher::Dispatch(const AsyncResultPtr &result)
+		{	
+			result->AddRef();
+
+			if( thread::CallStack<IODispatcher>::Contains(this) )
+				HandlerInvoke::Invoke(result);
+			else
+				Post(result);
 		}
 
 		void IODispatcher::Stop()
@@ -101,6 +119,8 @@ namespace async
 
 		void IODispatcher::_ThreadIO()
 		{
+			thread::CallStack<IODispatcher>::Context ctx(this);
+
 			DWORD dwSize = 0;
 			ULONG_PTR uKey = 0;
 			OVERLAPPED *pOverlapped = NULL;
@@ -121,11 +141,11 @@ namespace async
 				AsyncResultPtr asynResult = static_cast<AsyncResult *>(pOverlapped);
 				asynResult->Release();
 
-				if( asynResult->m_callback != NULL )
+				if( !asynResult->m_callback )
 				{
 					try
 					{
-						asynResult->m_callback(std::tr1::cref(asynResult));
+						HandlerInvoke::Invoke(asynResult);
 					}
 					catch(const std::exception &e)
 					{
@@ -149,7 +169,7 @@ namespace async
 
 			pThis->_ThreadIO();
 
-			::OutputDebugStringW(L"Exit\n");
+			::OutputDebugStringW(L"IO Thread Exit\n");
 			return 0;
 		}
 
