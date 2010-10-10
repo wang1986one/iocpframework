@@ -141,24 +141,22 @@ namespace async
 				AsyncResultPtr asynResult = static_cast<AsyncResult *>(pOverlapped);
 				asynResult->Release();
 
-				if( !asynResult->m_callback )
+				try
 				{
-					try
-					{
-						HandlerInvoke::Invoke(asynResult);
-					}
-					catch(const std::exception &e)
-					{
-						std::cerr << e.what() << std::endl;
-						assert(0);
-						// Opps!!
-					}
-					catch(...)
-					{
-						assert(0);
-						// Opps!!
-					}
+					HandlerInvoke::Invoke(asynResult);
 				}
+				catch(const std::exception &e)
+				{
+					std::cerr << e.what() << std::endl;
+					assert(0);
+					// Opps!!
+				}
+				catch(...)
+				{
+					assert(0);
+					// Opps!!
+				}
+				
 			}
 		}
 
