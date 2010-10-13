@@ -75,18 +75,33 @@
 	}
 
 
-	void NetworkImpl::Send(const SocketPtr &socket, const SocketBufferPtr &buffer)
+	void NetworkImpl::Send(const SocketPtr &socket, const SocketBufferPtr &buffer, const ObjectPtr &obj)
 	{
 		try 
 		{
-			socket->BeginSend(buffer, 0, buffer->size(), std::tr1::bind(&NetworkImpl::_OnSend, this,
-				std::tr1::placeholders::_1), socket);
+			static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnSend, this, std::tr1::placeholders::_1);
+			socket->BeginSend(buffer, 0, buffer->size(), callback, socket, obj);
 		}
 		catch(const std::exception &e)
 		{
 			if( errorCallback_ != NULL )
 				errorCallback_(std::tr1::ref(socket), std::tr1::ref(e));
 		}
+	}
+	AsyncResultPtr NetworkImpl::Send(const SocketPtr &socket, const AsyncResultPtr &asyncResult, size_t bufLen)
+	{
+		try 
+		{
+			static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnSend, this, std::tr1::placeholders::_1);
+			socket->BeginSend(asyncResult, 0, bufLen);
+		}
+		catch(const std::exception &e)
+		{
+			if( errorCallback_ != NULL )
+				errorCallback_(std::tr1::ref(socket), std::tr1::ref(e));
+		}
+
+		return asyncResult;
 	}
 
 
@@ -131,16 +146,15 @@
 			SocketProvider::GetSingleton(io_).GetAcceptExSockaddrs(addrBuffer->data(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, 
 				reinterpret_cast<SOCKADDR **>(&pLocalAddr), &szLocalLen, reinterpret_cast<SOCKADDR **>(&pRemoteAddr), &szRemoteLen);
 
-			// 回调
-			if( acceptCallback_ != NULL )
-				acceptCallback_(acceptSocket, addrBuffer, *pRemoteAddr);
-
-
 			// 投递新的接受请求
 			SocketBufferPtr buffer(new SocketBuffer);
 
 			static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnRecv, this, std::tr1::placeholders::_1);
 			asyncResult->reset(acceptSocket, buffer, acceptSocket, nothing, callback);
+
+			// 回调
+			if( acceptCallback_ != NULL )
+				acceptCallback_(std::tr1::cref(acceptSocket), std::tr1::cref(addrBuffer), std::tr1::ref(asyncResult->m_internalState), std::tr1::cref(*pRemoteAddr));
 
 			acceptSocket->BeginRecv(asyncResult, 0, buffer->allocSize());
 		} 
@@ -168,7 +182,7 @@
 				
 				// 回调
 				if( recvCallback_ != NULL )
-					recvCallback_(std::tr1::cref(socket), std::tr1::cref(buffer));
+					recvCallback_(std::tr1::cref(socket), std::tr1::cref(buffer), std::tr1::cref(asyncResult->m_internalState));
 
 				static AsyncCallbackFunc callback = std::tr1::bind(&NetworkImpl::_OnRecv, this, std::tr1::placeholders::_1);
 				asyncResult->m_callback = callback;
@@ -202,7 +216,7 @@
 			{
 				// 回调
 				if( sendCallback_ != NULL )
-					sendCallback_(std::tr1::cref(socket), std::tr1::cref(buffer), size);
+					sendCallback_(std::tr1::cref(socket), std::tr1::cref(buffer), size, std::tr1::cref(asyncResult->m_internalState));
 			}
 			else 
 			{
