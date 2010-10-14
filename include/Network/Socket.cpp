@@ -13,17 +13,20 @@ namespace async
 	namespace network
 	{
 
-		Socket::Socket(OverlappedDispatcher &io, int nType /* = SOCK_STREAM */, int nProtocol /* = IPPROTO_TCP */)
+		Socket::Socket(OverlappedDispatcher &io)
+			: socket_(INVALID_SOCKET)
+			, io_(io)
+		{
+			SocketProvider &provider = SocketProvider::GetSingleton(io_);
+		}
+
+		Socket::Socket(AsyncIODispatcherType &io, int nType, int nProtocol)
 			: socket_(INVALID_SOCKET)
 			, io_(io)
 		{
 			SocketProvider &provider = SocketProvider::GetSingleton(io_);
 
-			// 创建
 			Open(nType, nProtocol);
-
-			// 绑定到IOCP
-			io_.Bind(reinterpret_cast<HANDLE>(socket_));
 		}
 
 		Socket::~Socket()
@@ -40,47 +43,41 @@ namespace async
 			socket_ = ::WSASocket(AF_INET, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED);
 			if( socket_ == INVALID_SOCKET )
 				throw Win32Exception("WSASocket");
-		}
 
+			// 绑定到IOCP
+			io_.Bind(reinterpret_cast<HANDLE>(socket_));
+		}
+		
+		void Socket::Shutdown(int shut)
+		{
+			if( !IsOpen() )
+				return;
+
+			::shutdown(socket_, shut);
+		}
 		void Socket::Close()
 		{
 			if( !IsOpen() )
 				return;
 
-			::shutdown(socket_, SD_BOTH);
 			::closesocket(socket_);
 			socket_ = INVALID_SOCKET;
 		}
 		
-		bool Socket::Cancel()
+		void Socket::Cancel()
 		{
 			if( !IsOpen() )
-				return false;
-
-			else if( FARPROC cancelFuncPtr = ::GetProcAddress(::GetModuleHandleA("KERNEL32"), "CancelIoEx") )
-			{
-				// 仅在Vista以后支持，可以从不同的线程来取消IO操作
-				typedef BOOL (__stdcall *CancelIOExPtr)(HANDLE, LPOVERLAPPED);
-				CancelIOExPtr cancelIOEx = reinterpret_cast<CancelIOExPtr>(cancelFuncPtr);
-
-				if( !cancelIOEx(reinterpret_cast<HANDLE>(socket_), 0) )
-					return false;
-			}
+				throw std::logic_error("Socket not Open");
 			else
 			{
-				// 此处忽略了在同一线程的检查
-				// CancelIO只能在同一个线程中取消IO操作
-				if( !::CancelIo(reinterpret_cast<HANDLE>(socket_)) )
-					return false;
+				SocketProvider::CancelIO(socket_);
 			}
-
-			return true;
 		}
 
-		void Socket::Bind(u_short family/* = AF_INET*/, u_short uPort /* = 0 */, const IPAddress &addr /* = INADDR_ANY */)
+		void Socket::Bind(u_short family/* AF_INET*/, u_short uPort /* 0 */, const IPAddress &addr /* INADDR_ANY */)
 		{
 			if( !IsOpen() )
-				throw std::logic_error("socket not open");
+				throw std::logic_error("Socket not open");
 
 			sockaddr_in addrIn = {0};
 			addrIn.sin_family		= family;
@@ -113,20 +110,46 @@ namespace async
 		}
 
 
-		size_t Socket::Recv(const SocketBufferPtr &buf)
+		size_t Socket::Recv(const SocketBufferPtr &buffer, DWORD flag)
 		{
-			return EndRecv(BeginRecv(buf, 0, buf->allocSize()));
+			WSABUF wsabuf = {0};
+			wsabuf.buf = reinterpret_cast<char *>(buffer->data());
+			wsabuf.len = buffer->allocSize();
+
+			if( wsabuf.len == 0 )
+				throw std::logic_error("Buffer allocate size is zero");
+
+			DWORD dwSize = 0;
+
+			if( 0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &flag, 0, 0) )
+				throw Win32Exception("WSARecv");
+
+			return dwSize;
 		}
 
-		size_t Socket::Send(const SocketBufferPtr &buf)
+		size_t Socket::Send(const SocketBufferPtr &buffer, DWORD flag)
 		{
-			return EndSend(BeginSend(buf, 0, buf->size()));
+			WSABUF wsabuf = {0};
+			wsabuf.buf = reinterpret_cast<char *>(buffer->data());
+			wsabuf.len = buffer->size();
+
+			if( wsabuf.len == 0 )
+				throw std::logic_error("Buffer size is zero");
+
+			DWORD dwSize = 0;
+
+			if( 0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, flag, 0, 0) )
+				throw Win32Exception("WSASend");
+
+			return dwSize;
 		}
 
 		AsyncResultPtr Socket::BeginAccept(size_t szOutSide/* = 0*/, const AsyncCallbackFunc &callback /* = 0 */, const ObjectPtr &asyncState/* = nothing*/)
 		{
 			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSide));
 			SocketPtr acceptSocket(new Socket(io_));
+			acceptSocket->Open(SOCK_STREAM, IPPROTO_TCP);
+
 			AsyncResultPtr asyncResult(new AsyncResult(this, acceptBuffer, asyncState, acceptSocket, callback));
 			asyncResult->AddRef();
 
@@ -284,7 +307,7 @@ namespace async
 
 		void Socket::_BeginRecvImpl(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
-			const SocketBufferPtr buffer = result->m_buffer;
+			const SocketBufferPtr &buffer = result->m_buffer;
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = reinterpret_cast<char *>(buffer->data(offset));
@@ -303,7 +326,7 @@ namespace async
 
 		void Socket::_BeginSendImpl(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
-			const SocketBufferPtr buffer = result->m_buffer;
+			const SocketBufferPtr &buffer = result->m_buffer;
 			WSABUF wsabuf = {0};
 			wsabuf.buf = reinterpret_cast<char *>(buffer->data(offset));
 			wsabuf.len = size;

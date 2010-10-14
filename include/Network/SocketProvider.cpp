@@ -26,7 +26,7 @@ namespace async
 			static GUID guidDisconnectEx		= WSAID_DISCONNECTEX;
 			static GUID guidWSARecvMsg			= WSAID_WSARECVMSG;
 
-			SocketPtr socket(new Socket(io));
+			SocketPtr socket(new Socket(io, SOCK_STREAM, IPPROTO_TCP));
 			GetExtensionFuncPtr(socket, &guidTransmitFile,			&TransmitFile);
 			GetExtensionFuncPtr(socket, &guidAcceptEx,				&AcceptEx);
 			GetExtensionFuncPtr(socket, &guidGetAcceptExSockaddrs,	&GetAcceptExSockaddrs);
@@ -44,6 +44,26 @@ namespace async
 		void SocketProvider::GetExtensionFuncPtr(const SocketPtr &sock, GUID *guid, LPVOID pFunc)
 		{
 			sock->IOControl(SIO_GET_EXTENSION_FUNCTION_POINTER, guid, sizeof(GUID), pFunc, sizeof(LPVOID));
+		}
+
+		void SocketProvider::CancelIO(SOCKET socket)
+		{
+			if( FARPROC cancelFuncPtr = ::GetProcAddress(::GetModuleHandleA("KERNEL32"), "CancelIoEx") )
+			{
+				// 仅在Vista以后支持，可以从不同的线程来取消IO操作
+				typedef BOOL (__stdcall *CancelIOExPtr)(HANDLE, LPOVERLAPPED);
+				CancelIOExPtr cancelIOEx = reinterpret_cast<CancelIOExPtr>(cancelFuncPtr);
+
+				if( !cancelIOEx(reinterpret_cast<HANDLE>(socket), 0) )
+					throw Win32Exception("CancelIOEx");
+			}
+			else
+			{
+				// 此处忽略了在同一线程的检查
+				// CancelIO只能在同一个线程中取消IO操作
+				if( !::CancelIo(reinterpret_cast<HANDLE>(socket)) )
+					throw Win32Exception("CancelIo");
+			}
 		}
 	}
 

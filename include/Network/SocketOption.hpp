@@ -69,11 +69,11 @@ namespace async
 			// 获取Socket值
 			char *data()
 			{
-				return &value_;
+				return reinterpret_cast<char *>(&value_);
 			}
 			const char *data() const
 			{
-				return &value_;
+				return reinterpret_cast<const char *>(&value_);
 			}
 
 			// 获取值大小
@@ -358,24 +358,24 @@ namespace async
 				tcp::socket sock(io);
 				SocketBase::Broadcast opt(true);
 				socket.SetOption(opt);
-			*/
+		*/
 
-			typedef Boolean<SOL_SOCKET, SO_BROADCAST>	Broadcast;
-			typedef Boolean<SOL_SOCKET, SO_DEBUG>		Debug;
-			typedef Boolean<SOL_SOCKET, SO_DONTROUTE>	DontRoute;
-			typedef Boolean<SOL_SOCKET, SO_KEEPALIVE>	KeepAlive;
-			typedef Boolean<SOL_SOCKET, SO_REUSEADDR>	ReuseAddr;
+		typedef Boolean<SOL_SOCKET, SO_BROADCAST>	Broadcast;
+		typedef Boolean<SOL_SOCKET, SO_DEBUG>		Debug;
+		typedef Boolean<SOL_SOCKET, SO_DONTROUTE>	DontRoute;
+		typedef Boolean<SOL_SOCKET, SO_KEEPALIVE>	KeepAlive;
+		typedef Boolean<SOL_SOCKET, SO_REUSEADDR>	ReuseAddr;
 
-			typedef Integer<SOL_SOCKET, SO_SNDBUF>		SendBufSize;
-			typedef Integer<SOL_SOCKET, SO_SNDLOWAT>	SendLowWaterMark;
-			typedef Integer<SOL_SOCKET, SO_RCVBUF>		RecvBufSize;
-			typedef Integer<SOL_SOCKET, SO_RCVLOWAT>	RecvLowWwaterMark;
-			//typedef Integer<SOL_SOCKET, SO_LINGER>		Linger;
-			typedef Integer<SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT> UpdateAcceptContext;
+		typedef Integer<SOL_SOCKET, SO_SNDBUF>		SendBufSize;
+		typedef Integer<SOL_SOCKET, SO_SNDLOWAT>	SendLowWaterMark;
+		typedef Integer<SOL_SOCKET, SO_RCVBUF>		RecvBufSize;
+		typedef Integer<SOL_SOCKET, SO_RCVLOWAT>	RecvLowWwaterMark;
+		//typedef Integer<SOL_SOCKET, SO_LINGER>		Linger;
+		typedef Integer<SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT> UpdateAcceptContext;
 
 
-			typedef NonBlockingIO						NonBlockingIO;
-			typedef BytesReadable						BytesReadable;
+		typedef NonBlockingIO						NonBlockingIO;
+		typedef BytesReadable						BytesReadable;
 	}
 }
 

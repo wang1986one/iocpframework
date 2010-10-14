@@ -2,6 +2,7 @@
 #define __NETWORK_TCP_HPP
 
 
+#include "SocketOption.hpp"
 #include "BasicAcceptor.hpp"
 #include "BasicStreamSocket.hpp"
 
@@ -19,7 +20,7 @@ namespace async
 		{
 		public:
 			typedef BasicAcceptor<Tcp>			Accpetor;
-			//typedef BasicStreamSocket<Tcp>		Socket;
+			typedef BasicStreamSocket<Tcp>		StreamSocket;
 			
 
 
