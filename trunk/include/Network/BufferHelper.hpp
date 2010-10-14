@@ -15,7 +15,7 @@ namespace async
 		
 		// ------------------------
 
-		inline SocketBufferPtr Buffer(char *buf, size_t sz)
+		inline SocketBufferPtr MakeBuffer(char *buf, size_t sz)
 		{
 			return SocketBufferPtr(new SocketBuffer(buf, sz));
 		}
@@ -24,7 +24,7 @@ namespace async
 		// --------------------------
 
 		template<size_t _N>
-		inline SocketBufferPtr Buffer(char (&arr)[_N])
+		inline SocketBufferPtr MakeBuffer(char (&arr)[_N])
 		{
 			return SocketBufferPtr(new SocketBuffer(arr, _N));
 		}
@@ -32,7 +32,7 @@ namespace async
 		// --------------------------
 
 		template<size_t _N>
-		inline SocketBufferPtr Buffer(std::tr1::array<char, _N> &arr)
+		inline SocketBufferPtr MakeBuffer(std::tr1::array<char, _N> &arr)
 		{
 			return SocketBufferPtr(new SocketBuffer(arr.data(), _N));
 		}
@@ -40,7 +40,7 @@ namespace async
 
 		// --------------------------
 
-		inline SocketBufferPtr Buffer(std::vector<char> &arr)
+		inline SocketBufferPtr MakeBuffer(std::vector<char> &arr)
 		{
 			return SocketBufferPtr(new SocketBuffer(&arr[0], arr.size()));
 		}
@@ -48,7 +48,7 @@ namespace async
 
 		// --------------------------
 
-		inline SocketBufferPtr Buffer(std::string &arr)
+		inline SocketBufferPtr MakeBuffer(std::string &arr)
 		{
 			return SocketBufferPtr(new SocketBuffer(&*arr.begin(), arr.size()));
 		}

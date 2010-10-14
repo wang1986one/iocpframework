@@ -43,7 +43,7 @@ namespace async
 			LPFN_CONNECTEX				ConnectEx;
 			LPFN_DISCONNECTEX			DisconnectEx;
 			LPFN_WSARECVMSG				WSARecvMsg;
-
+			
 
 		public:
 			// 提供唯一实例
@@ -56,6 +56,8 @@ namespace async
 
 			// 获取扩展API
 			static void GetExtensionFuncPtr(const SocketPtr &sock, GUID *guid, LPVOID pFunc);
+
+			static void CancelIO(SOCKET sock);
 		};
 	}
 

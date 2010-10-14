@@ -2,6 +2,7 @@
 #define __NETWORK_BASIC_ACCEPTOR_HPP
 
 
+
 namespace async
 {
 	namespace network
@@ -10,44 +11,52 @@ namespace async
 		// -------------------------------------------------
 		// class BasicAcceptor
 
-		template<typename ProtocolT, typename AcceptorServiceT>
+		template<typename ProtocolT>
 		class BasicAcceptor
 		{
 		public:
-			typedef ProtocolT			ProtocolType;
-			typedef AcceptorServiceT	AcceptorServiceType;
+			typedef ProtocolT						ProtocolType;
+			typedef SocketPtr						ImplementType;
+			typedef Socket::AsyncIODispatcherType	AsyncIODispatcherType;	
 
 		private:
-			AcceptorServiceType impl_;
+			ImplementType impl_;
 
 		public:
-			explicit BasicAcceptor(IODispatcher &io)
+			explicit BasicAcceptor(AsyncIODispatcherType &io)
+				: impl_(new Socket(io))
+			{}
+			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol)
 				: impl_(new Socket(io))
 			{
-
+				impl_->Open(protocol.Type(), protocol.Protocol());
 			}
-			BasicAcceptor(IODispatcher &io, const ProtocolType &protocol)
+			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr, bool reuseAddr = true)
 				: impl_(new Socket(io))
 			{
-				impl_.Open(protocol.Type(), protocol.Protocol());
-			}
-			BasicAcceptor(IODispatcher &io, const ProtocolType &protocol, u_short port, const IPAddress &addr, bool reuseAddr = true)
-				: impl_(new Socket(io))
-			{
-				impl_.Open(protocol.Type(), protocol.Protocol());
+				impl_->Open(protocol.Type(), protocol.Protocol());
 
 				if( reuseAddr )
-					impl_.SetOption(ReuseAddr(true));
+					impl_->SetOption(ReuseAddr(true));
 
 				Bind(port, addr);
 				Listen();
 			}
 
 		public:
-			bool Open(const ProtocolType &protocol)
+			ImplementType &Get() 
+			{
+				return impl_;
+			}
+			const ImplementType &Get() const
+			{
+				return impl_;
+			}
+
+			bool Open(const ProtocolType &protocol = ProtocolType::V4())
 			{
 				if( protocol.Type() == SOCK_STREAM )
-					impl_.Open(protocol.Type(), protocol.Protocol());
+					impl_->Open(protocol.Type(), protocol.Protocol());
 				else
 					return false;
 
@@ -56,57 +65,57 @@ namespace async
 
 			bool IsOpen() const
 			{
-				return impl_.IsOpen();
+				return impl_->IsOpen();
 			}
 
 			void Close()
 			{
-				return impl_.Close();
+				return impl_->Close();
 			}
 
-			bool Cancel()
+			void Cancel()
 			{
-				return impl_.Cancel();
+				return impl_->Cancel();
 			}
 
 			template<typename SetSocketOptionT>
 			bool SetOption(const SetSocketOptionT &option)
 			{
-				return impl_.SetOption(option);
+				return impl_->SetOption(option);
 			}
 			template<typename GetSocketOptionT>
 			bool GetOption(GetSocketOptionT &option)
 			{
-				return impl_.GetOption(option)
+				return impl_->GetOption(option)
 			}
 			template<typename IOControlCommandT>
 			bool IOControl(IOControlCommandT &control)
 			{
-				return impl_.IOControl(control);
+				return impl_->IOControl(control);
 			}
 
 			void Bind(u_short port, const IPAddress &addr)
 			{
-				impl_.Bind(ProtocolType::V4(), port, addr);
+				impl_->Bind(ProtocolType::V4().Family(), port, addr);
 			}
 
 			void Listen(int backlog = SOMAXCONN)
 			{
-				impl_.Listen(backlog);
+				impl_->Listen(backlog);
 			}
 
 			void Accept()
 			{
-				impl_.Accept();
+				impl_->Accept();
 			}
 
-			AsyncResultPtr AsyncAccept(size_t szOutSize = 0, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing)
+			AsyncResultPtr AsyncAccept(const AsyncCallbackFunc &callback, size_t szOutSize = 0, const ObjectPtr &asyncState = nothing)
 			{
-				return impl_.AsyncAccept(szOutSize, callback, asyncState);
+				return impl_->BeginAccept(szOutSize, callback, asyncState);
 			}
 			SocketPtr EndAccept(const AsyncResultPtr &asynResult)
 			{
-				return impl_.EndAccept(asynResult);
+				return impl_->EndAccept(asynResult);
 			}
 
 		};

@@ -36,15 +36,19 @@ namespace async
 		class Socket
 			: public Object
 		{
+		public:
+			typedef OverlappedDispatcher	AsyncIODispatcherType;
+
 		private:
 			// socket handle
 			SOCKET socket_;
 
 			// IO服务
-			OverlappedDispatcher &io_;
+			AsyncIODispatcherType &io_;
 
 		public:
-			explicit Socket(OverlappedDispatcher &, int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
+			explicit Socket(AsyncIODispatcherType &);
+			Socket(AsyncIODispatcherType &, int nType, int nProtocol);
 			~Socket();
 
 			// non-copyable
@@ -76,12 +80,14 @@ namespace async
 
 			// WSASocket
 			void Open(int nType, int nProtocol);
+			// shutdown
+			void Shutdown(int shut);
 			// closesocket
 			void Close();
 		
 			bool IsOpen() const;
 			// CancelIO/CancelIOEx
-			bool Cancel();
+			void Cancel();
 
 			// bind
 			void Bind(u_short family, u_short uPort, const IPAddress &addr);
@@ -95,8 +101,8 @@ namespace async
 			void Connect(const IPAddress &addr, u_short uPort);
 			void DisConnect(bool bReuseSocket = true);
 
-			size_t Recv(const SocketBufferPtr &buf);
-			size_t Send(const SocketBufferPtr &buf);
+			size_t Recv(const SocketBufferPtr &buf, DWORD flag);
+			size_t Send(const SocketBufferPtr &buf, DWORD flag);
 
 			// 异步调用接口
 		public:
