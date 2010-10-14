@@ -286,6 +286,14 @@
 				Name="Network"
 				>
 				<File
+					RelativePath="..\include\Network\BasicAcceptor.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\BasicStreamSocket.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\BufferHelper.hpp"
 					>
 				</File>
@@ -319,6 +327,10 @@
 				</File>
 				<File
 					RelativePath="..\include\Network\SockInit.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\TCP.hpp"
 					>
 				</File>
 			</Filter>
@@ -382,6 +394,30 @@
 					</File>
 					<File
 						RelativePath="..\include\Timer\impl\TimerImpl.hpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Logger"
+				>
+				<File
+					RelativePath="..\include\Logger\Logger.hpp"
+					>
+				</File>
+				<Filter
+					Name="impl"
+					>
+					<File
+						RelativePath="..\include\Logger\Impl\BasicLogger.hpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\Logger\Impl\LoggerImpl.hpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\Logger\Impl\LoggerService.hpp"
 						>
 					</File>
 				</Filter>

@@ -4,12 +4,12 @@
 #include <MSTcpIP.h>
 
 //#include "Protocol.h"
-#include"../include/network/SocketProvider.hpp"
+#include "../include/network/SocketProvider.hpp"
+#include "../include/Network/SocketOption.hpp"
 
 
 
-
-// alterable IO
+	// alterable IO
 	void WINAPI APCFunc(ULONG_PTR pParam)
 	{
 		// do nothing
@@ -19,7 +19,7 @@
 
 
 
-	NetworkImpl::NetworkImpl(IODispatcher &io)
+	NetworkImpl::NetworkImpl(OverlappedDispatcher &io)
 		: io_(io)
 		, acceptor_(new Socket(io))
 	{
@@ -48,10 +48,10 @@
 		{
 			// 将建监听socket
 			if( *acceptor_ == INVALID_SOCKET )
-				acceptor_->Create();
+				acceptor_->Open(AF_INET, SOCK_STREAM);
 		
-			acceptor_->Bind(uPort);
-			acceptor_->Listen();
+			acceptor_->Bind(AF_INET, uPort, INADDR_ANY);
+			acceptor_->Listen(SOMAXCONN);
 		} 
 		catch(const std::exception &e)
 		{
@@ -70,7 +70,7 @@
 		acceptor_->Close();
 
 		// 可提醒IO，退出监听线程
-		::QueueUserAPC(i8desk::APCFunc, acceptThread_, NULL);
+		::QueueUserAPC(APCFunc, acceptThread_, NULL);
 		acceptThread_.Stop();
 	}
 
@@ -117,7 +117,7 @@
 			const SocketBufferPtr &addrBuffer = asyncResult->m_buffer;
 
 			// 复制Listen socket属性
-			UpdateAcceptContext context(*listenSocket);
+			async::network::UpdateAcceptContext context(*listenSocket);
 			acceptSocket->SetOption(context);
 
 			// 设置超时
@@ -194,7 +194,7 @@
 					disconnectCallback_(std::tr1::ref(socket));
 
 				asyncResult->m_callback = NULL;
-				socket->BeginDisconnect();
+				socket->BeginDisconnect(asyncResult, true);
 			}
 		}
 		catch(const std::exception &e) 

@@ -238,6 +238,10 @@
 				Name="IOCP"
 				>
 				<File
+					RelativePath="..\include\IOCP\AsyncResult.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\IOCP\Buffer.hpp"
 					>
 				</File>
@@ -246,11 +250,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Dispatcher.cpp"
+					RelativePath="..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Dispatcher.hpp"
+					RelativePath="..\include\IOCP\DispatcherImpl.hpp"
 					>
 				</File>
 				<File

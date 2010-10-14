@@ -27,7 +27,7 @@ namespace async
 			Internal::SockInit<> sockInit_;	
 
 		public:
-			explicit SocketProvider(IODispatcher &);
+			explicit SocketProvider(OverlappedDispatcher &);
 			~SocketProvider();
 
 			// non-copyable
@@ -47,7 +47,8 @@ namespace async
 
 		public:
 			// 提供唯一实例
-			static SocketProvider &GetSingleton(IODispatcher &io)
+			template<typename DispatcherT>
+			static SocketProvider &GetSingleton(DispatcherT &io)
 			{
 				static SocketProvider provider(io);
 				return provider;

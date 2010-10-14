@@ -16,7 +16,7 @@ namespace async
 	namespace network
 	{
 
-		SocketProvider::SocketProvider(IODispatcher &io)
+		SocketProvider::SocketProvider(OverlappedDispatcher &io)
 		{
 			static GUID guidTransmitFile		= WSAID_TRANSMITFILE;
 			static GUID guidAcceptEx			= WSAID_ACCEPTEX;

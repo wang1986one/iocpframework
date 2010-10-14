@@ -18,10 +18,14 @@ namespace async
 			// -------------------------------------------
 			// class LoggerService
 
+			template<typename AsyncServiceT>
 			class LoggerService
 			{
+			public:
+				typedef AsyncServiceT	AsyncServiceType;
+
 			private:
-				iocp::IODispatcher &io_;
+				AsyncServiceType &io_;
 				std::ofstream out_;
 				
 			public:
@@ -37,7 +41,7 @@ namespace async
 
 
 			public:
-				LoggerService(iocp::IODispatcher &io)
+				LoggerService(AsyncServiceType &io)
 					: io_(io)
 				{}
 				~LoggerService()
@@ -48,7 +52,7 @@ namespace async
 				LoggerService &operator=(const LoggerService &);
 
 			public:
-				static LoggerService &GetInstance(iocp::IODispatcher &io)
+				static LoggerService &GetInstance(AsyncServiceType &io)
 				{
 					static LoggerService service(io);
 					return service;
@@ -72,10 +76,9 @@ namespace async
 				// 设置日志文件
 				void UseFile(LoggerImplType &/*impl*/, const std::string &file)
 				{
-					iocp::AsyncResultPtr result(new iocp::AsyncResult(iocp::nothing, iocp::nothing, iocp::nothing, iocp::nothing,
-						std::tr1::bind(&LoggerService::_UseFileImpl, this, std::tr1::placeholders::_1, file)));
+					iocp::AsyncCallbackBasePtr callback(MakeAsyncCallback(std::tr1::bind(&LoggerService::_UseFileImpl, this, file)));
 
-					io_.Dispatch(result);
+					io_.Dispatch(callback);
 				}
 
 				// 记录信息
@@ -85,21 +88,20 @@ namespace async
 					std::ostringstream os;
 					os << impl->id_ << ": " << msg;
 
-					iocp::AsyncResultPtr result(new iocp::AsyncResult(iocp::nothing, iocp::nothing, iocp::nothing, iocp::nothing,
-						std::tr1::bind(&LoggerService::_LogImpl, this, std::tr1::placeholders::_1, os.str())));
+					iocp::AsyncCallbackBasePtr callback(MakeAsyncCallback(std::tr1::bind(&LoggerService::_LogImpl, this, os.str())));
 
-					io_.Dispatch(result);
+					io_.Dispatch(callback);
 				}
 
 			private:
-				void _UseFileImpl(const iocp::AsyncResultPtr &result, const std::string &file)
+				void _UseFileImpl(const std::string &file)
 				{
 					out_.close();
 					out_.clear();
 					out_.open(file.c_str());
 				}
 
-				void _LogImpl(const iocp::AsyncResultPtr &result, const std::string &text)
+				void _LogImpl(const std::string &text)
 				{
 					if( out_ )
 						out_ << text << std::endl;

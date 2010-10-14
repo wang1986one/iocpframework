@@ -85,16 +85,16 @@ typedef std::tr1::shared_ptr<Session> SessionPtr;
 class Server
 {
 private:
-	IODispatcher &io_;
+	OverlappedDispatcher &io_;
 	SocketPtr acceptor_;
 
 public:
-	Server(IODispatcher &io, short port)
+	Server(OverlappedDispatcher &io, short port)
 		: io_(io)
 		, acceptor_(new Socket(io_))
 	{
-		acceptor_->Bind(port);
-		acceptor_->Listen();
+		acceptor_->Bind(AF_INET, port, INADDR_ANY);
+		acceptor_->Listen(SOMAXCONN);
 	}
 
 	~Server()

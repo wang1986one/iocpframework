@@ -15,9 +15,9 @@ namespace async
 
 			template<typename ServiceT>
 			class BasicLogger
-				: public async::iocp::Object
 			{
 				typedef ServiceT								ServiceType;
+				typedef typename ServiceType::AsyncServiceType	AsyncServiceType;
 				typedef typename ServiceType::LoggerImplType	LoggerImplType;
 
 			private:
@@ -25,7 +25,7 @@ namespace async
 				LoggerImplType impl_;
 
 			public:
-				explicit BasicLogger(iocp::IODispatcher &io, const std::string &id)
+				explicit BasicLogger(AsyncServiceType &io, const std::string &id)
 					: service_(ServiceType::GetInstance(io))
 					, impl_(service_.Null())
 				{
