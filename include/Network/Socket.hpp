@@ -41,10 +41,10 @@ namespace async
 			SOCKET socket_;
 
 			// IO服务
-			IODispatcher &io_;
+			OverlappedDispatcher &io_;
 
 		public:
-			explicit Socket(IODispatcher &, int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
+			explicit Socket(OverlappedDispatcher &, int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
 			~Socket();
 
 			// non-copyable
@@ -55,7 +55,7 @@ namespace async
 		public:
 			// explicit转换
 			operator SOCKET()				{ return socket_; }
-			operator SOCKET() const			{ return socket_; }
+			operator const SOCKET() const	{ return socket_; }
 
 			// 显示获取
 			SOCKET GetHandle()				{ return socket_; }
@@ -75,16 +75,18 @@ namespace async
 			bool GetOption(SocketOptionT &option) const;
 
 			// WSASocket
-			void Create(int nType = SOCK_STREAM, int nProtocol = IPPROTO_TCP);
+			void Open(int nType, int nProtocol);
 			// closesocket
 			void Close();
 		
 			bool IsOpen() const;
+			// CancelIO/CancelIOEx
+			bool Cancel();
 
 			// bind
-			void Bind(u_short uPort = 0, const IPAddress &addr = INADDR_ANY);
+			void Bind(u_short family, u_short uPort, const IPAddress &addr);
 			// listen
-			void Listen(int nMax = SOMAXCONN);
+			void Listen(int nMax);
 
 			
 			// 不需设置回调接口
@@ -126,7 +128,7 @@ namespace async
 			void _BeginRecvImpl(const AsyncResultPtr &result, size_t offset, size_t size);
 			void _BeginSendImpl(const AsyncResultPtr &result, size_t offset, size_t size);
 			
-			size_t _EndAsyncOperation(const AsyncResultPtr &asyncResult);
+			
 		};
 
 

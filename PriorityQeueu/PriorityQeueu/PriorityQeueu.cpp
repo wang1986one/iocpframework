@@ -28,7 +28,7 @@ void TimerHanlde(const async::iocp::AsyncResultPtr &result, const async::timer::
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	async::iocp::IODispatcher ioService(1);
+	async::iocp::OverlappedDispatcher ioService(1);
 
 	HandlerPrority priQueue(ioService);
 
@@ -39,10 +39,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	priQueue.Add(priQueue.Wrap(2, std::tr1::bind(&Priority, std::tr1::placeholders::_1, 2)));
 	priQueue.Add(priQueue.Wrap(8, std::tr1::bind(&Priority, std::tr1::placeholders::_1, 8)));
 	priQueue.Add(priQueue.Wrap(1, std::tr1::bind(&Priority, std::tr1::placeholders::_1, 1)));
-
-
-	async::timer::TimerPtr timer(new async::timer::Timer(ioService, 2 * 1000, 0));
-	timer->BeginWait(std::tr1::bind(&TimerHanlde, std::tr1::placeholders::_1, std::tr1::cref(timer), std::tr1::ref(priQueue)));
 
 
 	system("pause");

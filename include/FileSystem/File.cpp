@@ -11,7 +11,7 @@ namespace  async
 
 	namespace filesystem
 	{
-		File::File(IODispatcher &io, LPCTSTR lpszFilePath, DWORD dwAccess, DWORD dwShareMode, 
+		File::File(OverlappedDispatcher &io, LPCTSTR lpszFilePath, DWORD dwAccess, DWORD dwShareMode, 
 			LPSECURITY_ATTRIBUTES lpAttributes, DWORD dwCreatePosition, DWORD dwFlag, HANDLE hTemplate/* = NULL*/)
 			: file_(INVALID_HANDLE_VALUE)
 			, io_(io)

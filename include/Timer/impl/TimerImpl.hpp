@@ -29,7 +29,6 @@ namespace async
 					, due_(due)
 				{
 					timer_ = ::CreateWaitableTimerW(NULL, manualReset ? TRUE : FALSE, timerName);
-
 				}
 
 				~WaitableTimer()
@@ -42,21 +41,25 @@ namespace async
 				}
 
 			public:
+				HANDLE Get()
+				{
+					return timer_;
+				}
+				const HANDLE Get() const
+				{
+					return timer_;
+				}
+
 				operator HANDLE()
 				{
 					return timer_;
 				}
-				operator HANDLE() const
+				operator const HANDLE() const
 				{
 					return timer_;
 				}
 
-				operator size_t()
-				{
-					return (size_t)timer_;
-				}
-
-				bool operator=(const WaitableTimer &timer)
+				bool operator==(const WaitableTimer &timer) const
 				{
 					return timer.timer_ == timer_;
 				}
@@ -102,34 +105,6 @@ namespace async
 	}
 }
 
-namespace std
-{
 
-
-namespace tr1 
-{	
-	// always include std::tr1::hash for unordered_map/set
-	// TEMPLATE CLASS hash
-	template<>
-	class hash<std::tr1::shared_ptr<async::timer::impl::WaitableTimer>>
-		: public unary_function<std::tr1::shared_ptr<async::timer::impl::WaitableTimer>, size_t>
-	{	
-		typedef std::tr1::shared_ptr<async::timer::impl::WaitableTimer> _Kty;
-		
-		// hash functor
-	public:
-		size_t operator()(const _Kty& _Keyval) const
-		{	// hash _Keyval to size_t value by pseudorandomizing transform
-			ldiv_t _Qrem = ldiv((long)(size_t)(*_Keyval), 127773);
-
-			_Qrem.rem = 16807 * _Qrem.rem - 2836 * _Qrem.quot;
-			if (_Qrem.rem < 0)
-				_Qrem.rem += 2147483647;
-			return ((size_t)_Qrem.rem);
-		}
-	};
-}
-
-}
 
 #endif

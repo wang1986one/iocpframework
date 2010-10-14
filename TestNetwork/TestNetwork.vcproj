@@ -246,15 +246,19 @@
 				Name="IOCP"
 				>
 				<File
+					RelativePath="..\include\IOCP\AsyncResult.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\IOCP\Buffer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Dispatcher.cpp"
+					RelativePath="..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Dispatcher.hpp"
+					RelativePath="..\include\IOCP\DispatcherImpl.hpp"
 					>
 				</File>
 				<File
@@ -326,6 +330,18 @@
 				Name="Network"
 				>
 				<File
+					RelativePath="..\include\Network\BasicAcceptor.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\BasicStreamSocket.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\BufferHelper.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\IPAddress.cpp"
 					>
 				</File>
@@ -342,6 +358,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\Network\SocketOption.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\SocketProvider.cpp"
 					>
 				</File>
@@ -351,6 +371,10 @@
 				</File>
 				<File
 					RelativePath="..\include\Network\SockInit.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\TCP.hpp"
 					>
 				</File>
 			</Filter>

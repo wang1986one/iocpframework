@@ -38,10 +38,10 @@ namespace async
 		{
 		private:
 			HANDLE file_;
-			IODispatcher &io_;
+			OverlappedDispatcher &io_;
 
 		public:
-			File(IODispatcher &, LPCTSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE hTemplate = NULL);
+			File(OverlappedDispatcher &, LPCTSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE hTemplate = NULL);
 			~File();
 
 			// non-copyable

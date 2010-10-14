@@ -3,8 +3,9 @@
 
 
 #include "Object.hpp"
-
 #include "IOCP.hpp"
+#include "AsyncResult.hpp"
+
 #include <vector>
 
 
@@ -14,57 +15,41 @@ namespace async
 
 	namespace iocp 
 	{
-		struct AsyncResult;
-		typedef pointer<AsyncResult> AsyncResultPtr;
-
-		typedef std::tr1::function<void(const AsyncResultPtr &asyncResult)> AsyncCallbackFunc;
-
-
-		//---------------------------------------------------------------------------
-		// class AsyncResult
-		// 间接层，负责缓冲区、收发者和回调函数
-
-		struct AsyncResult
-			: public OVERLAPPED
-			, public Object
+		
+		namespace internal
 		{
-			// 发送者
-			ObjectPtr	m_sender;
-			// 缓冲区
-			ObjectPtr	m_buffer;
-			// 异步状态
-			ObjectPtr	m_asynState;
-			// 内部状态
-			ObjectPtr	m_internalState;
-			// 回调函数
-			AsyncCallbackFunc m_callback;
-
-
-			AsyncResult::AsyncResult(const ObjectPtr &sender, const ObjectPtr &buffer,
-				const ObjectPtr &asyncState, const ObjectPtr &internalState, const AsyncCallbackFunc &callback)
-				: m_sender(sender), m_buffer(buffer), m_asynState(asyncState), m_internalState(internalState), m_callback(callback)
+			/************************************************************************
+			*  
+			*	Int2Type		: 常整数映射为类型，由编译期计算出来的结果选择不同的函数，达到静态分派
+			*	调用方式			: Int2Type<isPolymorphics>
+			*	适用情形			: 有需要根据某个编译期常数调用一个或数个不同的函数
+			*					  有必要在编译期实施静态分派
+			*
+			*	Type2Type		: 利用函数重载机制，模拟template偏特化，利用轻量型型别来传递型别信息
+			*
+			***********************************************************************/
+			template<int v>
+			struct Int2Type
 			{
-				RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
-			}
+				enum { value = v };
+			};
 
-			void reset(const ObjectPtr &sender, const ObjectPtr &buffer,
-				const ObjectPtr &asyncState, const ObjectPtr &internalState, const AsyncCallbackFunc &callback)
+			template<typename T>
+			struct Type2Type
 			{
-				m_sender		= sender;
-				m_buffer		= buffer;
-				m_asynState		= asyncState;
-				m_internalState = internalState;
-				m_callback		= callback;
-			}
-
-		private:
-			AsyncResult();
-		};
+				typedef T value_type;
+			};
+		}
 
 
-		// -----------------------------------------------------------------
-		// 获取系统合适的线程数
-		extern size_t GetFitThreadNum(size_t perCPU = 2);
+		// 获取适合系统的线程数
+		inline size_t GetFitThreadNum(size_t perCPU = 2)
+		{
+			SYSTEM_INFO systemInfo = {0};
+			::GetSystemInfo(&systemInfo);
+
+			return perCPU * systemInfo.dwNumberOfProcessors + 2;
+		}
 
 
 
@@ -72,8 +57,11 @@ namespace async
 		// class IODispatcher
 		// 完成端口实现
 
+		template<typename AsyncT>
 		class IODispatcher
 		{
+			typedef AsyncT					AsyncType;
+
 		public:
 			// 线程容器类型
 			typedef std::vector<HANDLE>		Threads;
@@ -81,9 +69,9 @@ namespace async
 
 		private:
 			// iocp Handle
-			CIOCP m_hIOCP;
+			CIOCP iocp_;
 			// 线程容器
-			std::vector<HANDLE>	m_threads;
+			std::vector<HANDLE>	threads_;
 
 		public:
 			explicit IODispatcher(size_t numThreads = GetFitThreadNum());
@@ -91,25 +79,35 @@ namespace async
 
 		public:
 			// 绑定设备到完成端口
-			void Bind(HANDLE hObject);
+			void Bind(HANDLE);
 			// 向完成端口投递请求
-			void Post(const AsyncResultPtr &);
+			template<typename AsyncPtrT>
+			void Post(AsyncPtrT &);
 			// 当仅不在线程池中时才向调度器中分派
-			void Dispatch(const AsyncResultPtr &);
+			template<typename AsyncPtrT>
+			void Dispatch(AsyncPtrT &);
 
 			// 停止服务
 			void Stop();
 
 		private:
+			template<typename AsyncPtrT>
+			void _PostImpl(AsyncPtrT &, internal::Int2Type<FALSE>);
+			template<typename AsyncPtrT>
+			void _PostImpl(AsyncPtrT &, internal::Int2Type<TRUE>);
+
 			void _ThreadIO();
 
 		private:
-			static size_t WINAPI _ThreadIOImpl(LPVOID pObj);
+			static size_t WINAPI _ThreadIOImpl(LPVOID);
 		};
+
+		typedef IODispatcher<AsyncResult>			OverlappedDispatcher;
+		typedef IODispatcher<AsyncCallbackBase>		AsyncCallbackDispatcher;
 	}
-
-
 }
 
+
+#include "DispatcherImpl.hpp"
 
 #endif

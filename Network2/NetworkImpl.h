@@ -28,7 +28,7 @@ using namespace async;
 		enum { MAX_ACCEPT = 1 };
 
 	private:
-		IODispatcher &io_;
+		OverlappedDispatcher &io_;
 		SocketPtr acceptor_;
 
 		// Õ∂µ›Acceptœﬂ≥Ã
@@ -42,7 +42,7 @@ using namespace async;
 		ErrorCallback errorCallback_;
 
 	public:
-		explicit NetworkImpl(IODispatcher &io);
+		explicit NetworkImpl(OverlappedDispatcher &io);
 		~NetworkImpl();
 
 

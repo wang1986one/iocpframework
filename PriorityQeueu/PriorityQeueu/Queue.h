@@ -20,11 +20,11 @@ private:
 
 
 private:
-	async::iocp::IODispatcher &io_;
+	async::iocp::OverlappedDispatcher &io_;
 	std::priority_queue<QueueHandler> handlers_;
 
 public:
-	explicit HandlerPrority(async::iocp::IODispatcher &io)
+	explicit HandlerPrority(async::iocp::OverlappedDispatcher &io)
 		: io_(io)
 	{}
 
@@ -93,10 +93,10 @@ class HandlerPrority::QueueHandler
 private:
 	size_t priority_;
 	async::iocp::AsyncResultPtr result_;
-	async::iocp::IODispatcher &io_;
+	async::iocp::OverlappedDispatcher &io_;
 
 public:
-	QueueHandler(async::iocp::IODispatcher &io, size_t priority, const async::iocp::AsyncResultPtr &result)
+	QueueHandler(async::iocp::OverlappedDispatcher &io, size_t priority, const async::iocp::AsyncResultPtr &result)
 		: priority_(priority)
 		, result_(result)
 		, io_(io)

@@ -16,33 +16,38 @@ namespace async
 			// ---------------------------------------
 			// class BasicTimer
 
-			template<typename ImplT>
+			template<typename ImplT, typename ServiceT>
 			class BasicTimer
-				: public async::iocp::Object
 			{
-				typedef TimerService<ImplT>						TimerServiceType;
-				typedef typename TimerServiceType::TimerPointer	TimerPointer;
+				typedef TimerService<ImplT, ServiceT>				TimerServiceType;
+				typedef typename TimerServiceType::ServiceType		ServiceType;
+				typedef typename TimerServiceType::TimerPointer		TimerPointer;
 
 			private:
-				// Timer指针
-				TimerPointer timer_;
-				async::iocp::IODispatcher &io_;			// IO service
+				TimerServiceType &service_;		// service
+				TimerPointer timer_;			// Timer指针
+				long period_;
+				long due_;
 
 			public:
 				// 不接受回调函数，且注册一个Timer
 				// period为时间间隔
-				BasicTimer(async::iocp::IODispatcher &io, long period, long due)
-					: io_(io)
-					, timer_(TimerServiceType::GetInstance(io).AddTimer(period, due, NULL))
+				BasicTimer(ServiceType &io, long period, long due)
+					: service_(TimerServiceType::GetInstance(io))
+					, period_(period)
+					, due_(due)
 				{}
 				// 接受回调函数，且注册一个Timer
 				template<typename HandlerT>
-				BasicTimer(async::iocp::IODispatcher &io, long period, long due, const HandlerT &handler)
-					: io_(io)
-					, timer_(TimerServiceType::GetInstance(io).AddTimer(period, due, handler))
+				BasicTimer(ServiceType &io, long period, long due, const HandlerT &handler)
+					: service_(TimerServiceType::GetInstance(io))
+					, timer_(service_.AddTimer(period, due, handler))
 				{}
 				~BasicTimer()
-				{}
+				{
+					assert(timer_);
+					service_.EraseTimer(timer_);
+				}
 
 			private:
 				BasicTimer(const BasicTimer &);
@@ -78,7 +83,7 @@ namespace async
 				template<typename HandlerT>
 				void BeginWait(const HandlerT &handler)
 				{
-					TimerServiceType::GetInstance(io_).ChangeCallback(timer_, handler);
+					timer_ = service_.AddTimer(period_, due_, handler);
 					timer_->AsyncWait();
 				}
 				

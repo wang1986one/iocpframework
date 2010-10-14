@@ -13,14 +13,14 @@ namespace async
 	namespace network
 	{
 
-		Socket::Socket(IODispatcher &io, int nType /* = SOCK_STREAM */, int nProtocol /* = IPPROTO_TCP */)
+		Socket::Socket(OverlappedDispatcher &io, int nType /* = SOCK_STREAM */, int nProtocol /* = IPPROTO_TCP */)
 			: socket_(INVALID_SOCKET)
 			, io_(io)
 		{
 			SocketProvider &provider = SocketProvider::GetSingleton(io_);
 
 			// 创建
-			Create(nType, nProtocol);
+			Open(nType, nProtocol);
 
 			// 绑定到IOCP
 			io_.Bind(reinterpret_cast<HANDLE>(socket_));
@@ -32,9 +32,9 @@ namespace async
 		}
 
 
-		void Socket::Create(int nType /* = SOCK_STREAM */, int nProtocol /* = IPPROTO_TCP */)
+		void Socket::Open(int nType /* SOCK_STREAM */, int nProtocol /* IPPROTO_TCP */)
 		{
-			if( socket_ != INVALID_SOCKET )
+			if( IsOpen() )
 				return;
 
 			socket_ = ::WSASocket(AF_INET, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -44,19 +44,46 @@ namespace async
 
 		void Socket::Close()
 		{
-			if( socket_ == INVALID_SOCKET )
+			if( !IsOpen() )
 				return;
 
 			::shutdown(socket_, SD_BOTH);
 			::closesocket(socket_);
 			socket_ = INVALID_SOCKET;
 		}
-
-
-		void Socket::Bind(u_short uPort /* = 0 */, const IPAddress &addr /* = INADDR_ANY */)
+		
+		bool Socket::Cancel()
 		{
+			if( !IsOpen() )
+				return false;
+
+			else if( FARPROC cancelFuncPtr = ::GetProcAddress(::GetModuleHandleA("KERNEL32"), "CancelIoEx") )
+			{
+				// 仅在Vista以后支持，可以从不同的线程来取消IO操作
+				typedef BOOL (__stdcall *CancelIOExPtr)(HANDLE, LPOVERLAPPED);
+				CancelIOExPtr cancelIOEx = reinterpret_cast<CancelIOExPtr>(cancelFuncPtr);
+
+				if( !cancelIOEx(reinterpret_cast<HANDLE>(socket_), 0) )
+					return false;
+			}
+			else
+			{
+				// 此处忽略了在同一线程的检查
+				// CancelIO只能在同一个线程中取消IO操作
+				if( !::CancelIo(reinterpret_cast<HANDLE>(socket_)) )
+					return false;
+			}
+
+			return true;
+		}
+
+		void Socket::Bind(u_short family/* = AF_INET*/, u_short uPort /* = 0 */, const IPAddress &addr /* = INADDR_ANY */)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("socket not open");
+
 			sockaddr_in addrIn = {0};
-			addrIn.sin_family		= AF_INET;
+			addrIn.sin_family		= family;
 			addrIn.sin_port			= ::htons(uPort);
 			addrIn.sin_addr.s_addr	= ::htonl(addr.Address());
 
@@ -96,17 +123,6 @@ namespace async
 			return EndSend(BeginSend(buf, 0, buf->size()));
 		}
 
-
-		size_t Socket::_EndAsyncOperation(const AsyncResultPtr &asyncResult)
-		{
-			DWORD size = 0;
-
-			if( 0 == ::GetOverlappedResult((HANDLE)socket_, asyncResult.Get(), &size, TRUE) )
-				throw Win32Exception("GetOverlappedResult");
-
-			return size;
-		}
-
 		AsyncResultPtr Socket::BeginAccept(size_t szOutSide/* = 0*/, const AsyncCallbackFunc &callback /* = 0 */, const ObjectPtr &asyncState/* = nothing*/)
 		{
 			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSide));
@@ -131,7 +147,7 @@ namespace async
 
 		SocketPtr Socket::EndAccept(const AsyncResultPtr &asynResult)
 		{
-			_EndAsyncOperation(asynResult);
+			asynResult->EndAsync(socket_);
 			return asynResult->m_internalState;
 		}
 
@@ -156,7 +172,7 @@ namespace async
 
 		void Socket::EndConnect(const AsyncResultPtr &asyncResult)
 		{
-			_EndAsyncOperation(asyncResult);
+			asyncResult->EndAsync(socket_);
 		}
 
 
@@ -180,7 +196,7 @@ namespace async
 
 		void Socket::EndDisconnect(const AsyncResultPtr &asyncResult)
 		{
-			_EndAsyncOperation(asyncResult);
+			asyncResult->EndAsync(socket_);
 		}
 
 
@@ -205,7 +221,7 @@ namespace async
 
 		size_t Socket::EndRecv(const AsyncResultPtr &asyncResult)
 		{
-			return _EndAsyncOperation(asyncResult);
+			return asyncResult->EndAsync(socket_);;
 		}
 
 
@@ -230,7 +246,7 @@ namespace async
 
 		size_t Socket::EndSend(const AsyncResultPtr &asyncResult)
 		{
-			return _EndAsyncOperation(asyncResult);
+			return asyncResult->EndAsync(socket_);
 		}
 
 

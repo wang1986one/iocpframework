@@ -6,7 +6,7 @@
 
 
 
-void AsyncWait(const async::iocp::AsyncResultPtr &result, async::timer::Timer &timer)
+void AsyncWait(async::timer::Timer &timer)
 {
 	std::cout << "AsyncWait" << std::endl;
 
@@ -27,13 +27,13 @@ void AsyncWait(const async::iocp::AsyncResultPtr &result, async::timer::Timer &t
 }
 
 
-void AsyncWait2(const async::iocp::AsyncResultPtr &result)
+void AsyncWait2()
 {
 	std::cout << "AsyncWait2" << std::endl;
 }
 
 
-void AsyncWait3(const async::iocp::AsyncResultPtr &result, async::timer::TimerPtr &timer)
+void AsyncWait3(async::timer::TimerPtr &timer)
 {
 	static int count = 1000;
 
@@ -52,37 +52,70 @@ void AsyncWait3(const async::iocp::AsyncResultPtr &result, async::timer::TimerPt
 	std::cout << "AsyncWait3" << std::endl;
 }
 
-void AsyncWait4(const async::iocp::AsyncResultPtr &result)
+void AsyncWait4()
 {
 	std::cout << "AsyncWait4" << std::endl;
 }
 
+
+// Debug Memory Info
+void DebugAllocSize(LONG allocCount, size_t size)
+{
+	std::cout << "Alloc " << allocCount << ": " << size << std::endl;
+}
+
+void DebugDeallocSize(LONG deallocCount, size_t size)
+{
+	std::cout << "Dealloc " << deallocCount << ": " << size << std::endl;
+}
+
+
+
 int _tmain(int argc, _TCHAR* argv[])
 {
-	async::iocp::IODispatcher io;
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
-	try
+	// ²âÊÔÄÚ´æÉêÇëÊÍ·Å
+	async::iocp::DefaultDebug::RegisterCallback(std::tr1::bind(&DebugAllocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2),
+		std::tr1::bind(&DebugDeallocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+
+
+	
 	{
-		async::timer::Timer timer(io, 2000);
-		timer.BeginWait(std::tr1::bind(&AsyncWait, std::tr1::placeholders::_1, std::tr1::ref(timer)));
+		async::iocp::AsyncCallbackDispatcher io;
+		
+		try
+		{
+			{
+				async::timer::Timer timer(io, 2000, 0);
+				timer.BeginWait(std::tr1::bind(&AsyncWait, std::tr1::ref(timer)));
 
-		async::timer::Timer timer2(io, 4000, std::tr1::bind(&AsyncWait2, std::tr1::placeholders::_1));
-		timer2.BeginWait();
+				async::timer::Timer timer2(io, 4000, 0, std::tr1::bind(&AsyncWait2));
+				timer2.BeginWait();
 
+				system("pause");
+			}
+			
 
-		async::timer::TimerPtr timer3(new async::timer::Timer(io, 2000));
-		timer3->Wait();
-		timer3->BeginWait(std::tr1::bind(&AsyncWait3, std::tr1::placeholders::_1, std::tr1::ref(timer3)));
+			{
+				async::timer::TimerPtr timer3(new async::timer::Timer(io, 2000, 0));
+				timer3->BeginWait(std::tr1::bind(&AsyncWait3, std::tr1::ref(timer3)));
+			
+				system("pause");
+			}
 
+			async::timer::Timer timer4(io, 500, 0);
+			timer4.BeginWait(std::tr1::bind(&AsyncWait4));
 
-		async::timer::Timer timer4(io, 500);
-		timer4.BeginWait(std::tr1::bind(&AsyncWait4, std::tr1::placeholders::_1));
+			system("pause");
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
 
 	}
-	catch(std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
+	
 	
 
 	system("pause");
