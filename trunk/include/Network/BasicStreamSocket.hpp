@@ -96,7 +96,12 @@ namespace async
 			// 连接远程服务
 			void Connect(const IPAddress &addr, u_short port)
 			{
-				AsyncConnect(addr, port, NULL);
+				impl_->Connect(ProtocolType::V4().Family(), addr, port);
+			}
+
+			void DisConnect(int shut = SD_BOTH)
+			{
+				impl_->DisConnect(shut, true);
 			}
 
 			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short port, const AsyncCallbackFunc &handler)
@@ -106,7 +111,7 @@ namespace async
 
 			AsyncResultPtr AsyncDisconnect(const AsyncCallbackFunc &handler, bool reuse = true)
 			{
-				return impl_->BeginDisconnect(reuse, handler);
+				return impl_->BeginDisconnect(handler, reuse);
 			}
 
 			// 阻塞式发送数据直到数据发送成功或出错
@@ -125,7 +130,7 @@ namespace async
 			template<typename MutableBufferT>
 			const AsyncResultPtr AsyncSend(MutableBufferT &buffer, size_t offset, size_t size, const AsyncCallbackFunc &callback)
 			{
-				return impl_->BeginSend(buffer, offset, size, callback, nothing, nothing);
+				return impl_->BeginSend(buffer, offset, size, callback);
 			}
 			
 			size_t EndSend(const AsyncResultPtr &result)
@@ -149,7 +154,7 @@ namespace async
 			template<typename MutableBufferT>
 			AsyncResultPtr AsyncRecv(const MutableBufferT &buffer, size_t offset, size_t size, const AsyncCallbackFunc &callback)
 			{
-				return impl_->BeginRecv(buffer, offset, size, callback, nothing, nothing);
+				return impl_->BeginRecv(buffer, offset, size, callback);
 			}
 
 			size_t EndRecv(const AsyncResultPtr &result)

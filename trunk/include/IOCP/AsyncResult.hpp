@@ -39,32 +39,26 @@ namespace async
 			// 是否利用OVERLAPPED
 			enum { IS_OVERLAPPED = TRUE };
 
-			// 发送者
-			ObjectPtr	m_sender;
 			// 缓冲区
 			ObjectPtr	m_buffer;
 			// 异步状态
-			ObjectPtr	m_asynState;
-			// 内部状态
-			ObjectPtr	m_internalState;
+			ObjectPtr	m_accept;
 			// 回调函数
 			AsyncCallbackFunc m_callback;
 
 
-			AsyncResult::AsyncResult(const ObjectPtr &sender, const ObjectPtr &buffer,
-				const ObjectPtr &asyncState, const ObjectPtr &internalState, const AsyncCallbackFunc &callback)
-				: m_sender(sender), m_buffer(buffer), m_asynState(asyncState), m_internalState(internalState), m_callback(callback)
+			AsyncResult::AsyncResult(const ObjectPtr &buffer,
+				const ObjectPtr &accept, const AsyncCallbackFunc &callback)
+				: m_buffer(buffer), m_accept(accept), m_callback(callback)
 			{
 				RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
 			}
 
-			void reset(const ObjectPtr &sender, const ObjectPtr &buffer,
-				const ObjectPtr &asyncState, const ObjectPtr &internalState, const AsyncCallbackFunc &callback)
+			void reset(const ObjectPtr &buffer,
+				const ObjectPtr &accept, const AsyncCallbackFunc &callback)
 			{
-				m_sender		= sender;
 				m_buffer		= buffer;
-				m_asynState		= asyncState;
-				m_internalState = internalState;
+				m_accept		= accept;
 				m_callback		= callback;
 			}
 
