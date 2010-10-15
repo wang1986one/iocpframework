@@ -48,7 +48,7 @@ namespace async
 
 		public:
 			explicit Socket(AsyncIODispatcherType &);
-			Socket(AsyncIODispatcherType &, int nType, int nProtocol);
+			Socket(AsyncIODispatcherType &, int family, int type, int protocol);
 			~Socket();
 
 			// non-copyable
@@ -79,7 +79,7 @@ namespace async
 			bool GetOption(SocketOptionT &option) const;
 
 			// WSASocket
-			void Open(int nType, int nProtocol);
+			void Open(int family, int nType, int nProtocol);
 			// shutdown
 			void Shutdown(int shut);
 			// closesocket
@@ -97,7 +97,7 @@ namespace async
 			
 			// 不需设置回调接口
 		public:
-			SocketPtr Accept();
+			void Accept();
 			void Connect(const IPAddress &addr, u_short uPort);
 			void DisConnect(bool bReuseSocket = true);
 

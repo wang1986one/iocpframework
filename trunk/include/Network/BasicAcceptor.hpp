@@ -29,12 +29,12 @@ namespace async
 			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol)
 				: impl_(new Socket(io))
 			{
-				impl_->Open(protocol.Type(), protocol.Protocol());
+				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 			}
 			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr, bool reuseAddr = true)
 				: impl_(new Socket(io))
 			{
-				impl_->Open(protocol.Type(), protocol.Protocol());
+				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 
 				if( reuseAddr )
 					impl_->SetOption(ReuseAddr(true));
@@ -56,7 +56,7 @@ namespace async
 			bool Open(const ProtocolType &protocol = ProtocolType::V4())
 			{
 				if( protocol.Type() == SOCK_STREAM )
-					impl_->Open(protocol.Type(), protocol.Protocol());
+					impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 				else
 					return false;
 
@@ -96,6 +96,7 @@ namespace async
 
 			void Bind(u_short port, const IPAddress &addr)
 			{
+				// warning: only support AF_INET
 				impl_->Bind(ProtocolType::V4().Family(), port, addr);
 			}
 
