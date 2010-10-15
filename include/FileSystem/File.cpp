@@ -36,9 +36,9 @@ namespace  async
 
 		// Read
 		AsyncResultPtr File::BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *index
-			, const AsyncCallbackFunc &callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/ , const ObjectPtr &internalState/* = nothing*/)
+			, const AsyncCallbackFunc &callback)
 		{
-			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
+			AsyncResultPtr asynResult(new AsyncResult(buf, nothing, callback));
 			asynResult->AddRef();
 
 			// ÉèÖÃÆ«ÒÆ
@@ -74,15 +74,15 @@ namespace  async
 
 		size_t File::EndRead(const AsyncResultPtr &asynResult)
 		{
-			return _EndAsyncOperation(asynResult);
+			return asynResult->EndAsync(file_);
 		}
 
 
 		// Write
 		AsyncResultPtr File::BeginWrite(const FileBufferPtr &buf, size_t bufOffset, size_t bufSize, const LARGE_INTEGER *index
-			, const AsyncCallbackFunc &callback/* = 0*/, const ObjectPtr &asyncState/* = nothing*/, const ObjectPtr &internalState/* = nothing*/)
+			, const AsyncCallbackFunc &callback)
 		{
-			AsyncResultPtr asynResult(new AsyncResult(this, buf, asyncState, internalState, callback));
+			AsyncResultPtr asynResult(new AsyncResult(buf, nothing, callback));
 			asynResult->AddRef();
 
 			// ÉèÖÃÆ«ÒÆ
@@ -117,7 +117,7 @@ namespace  async
 
 		size_t File::EndWrite(const AsyncResultPtr &asynResult)
 		{
-			return _EndAsyncOperation(asynResult);
+			return asynResult->EndAsync(file_);
 		}
 
 
@@ -130,16 +130,6 @@ namespace  async
 			}
 		}
 
-
-		size_t File::_EndAsyncOperation(const AsyncResultPtr &asyncResult)
-		{
-			DWORD size = 0;
-
-			if( 0 == ::GetOverlappedResult(file_, asyncResult.Get(), &size, TRUE) )
-				throw Win32Exception("GetOverlappedResult");
-
-			return size;
-		}
 	}
 
 }

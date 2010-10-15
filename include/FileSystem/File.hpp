@@ -51,11 +51,11 @@ namespace async
 
 
 		public:
-			HANDLE operator()()
+			operator HANDLE()
 			{
 				return file_;
 			}
-			const HANDLE operator()() const
+			operator const HANDLE () const
 			{
 				return file_;
 			}
@@ -64,27 +64,27 @@ namespace async
 			{
 				return file_;
 			}
-			HANDLE GetHandle() const
+			const HANDLE GetHandle() const
 			{
 				return file_;
 			}
 
 		public:
+			void Close();
+
+		public:
 			// Read
 			AsyncResultPtr BeginRead(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *fileOffset
-				, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+				, const AsyncCallbackFunc &callback);
 			size_t EndRead(const AsyncResultPtr &asynResult);
 
 			// Write
 			AsyncResultPtr BeginWrite(const FileBufferPtr &buf, size_t nOffset, size_t nBufSize, const LARGE_INTEGER *fileOffset
-				, const AsyncCallbackFunc &callback = NULL, const ObjectPtr &asyncState = nothing, const ObjectPtr &internalState = nothing);
+				, const AsyncCallbackFunc &callback );
 			size_t EndWrite(const AsyncResultPtr &asynResult);
 
 
-			void Close();
-
-		private:
-			size_t _EndAsyncOperation(const AsyncResultPtr &asyncResult);
+			
 		};
 	}
 

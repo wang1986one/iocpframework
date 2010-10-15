@@ -26,6 +26,9 @@ namespace async
 			explicit BasicAcceptor(AsyncIODispatcherType &io)
 				: impl_(new Socket(io))
 			{}
+			explicit BasicAcceptor(const ImplementType &impl)
+				: impl_(impl)
+			{}
 			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol)
 				: impl_(new Socket(io))
 			{
@@ -105,16 +108,16 @@ namespace async
 				impl_->Listen(backlog);
 			}
 
-			void Accept()
+			ImplementType Accept(SOCKADDR_IN *remoteAddr = NULL)
 			{
-				impl_->Accept();
+				return impl_->Accept(remoteAddr);
 			}
 
-			AsyncResultPtr AsyncAccept(const AsyncCallbackFunc &callback, size_t szOutSize = 0, const ObjectPtr &asyncState = nothing)
+			AsyncResultPtr AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const AsyncCallbackFunc &callback)
 			{
-				return impl_->BeginAccept(szOutSize, callback, asyncState);
+				return impl_->BeginAccept(acceptSocket, szOutSide, callback);
 			}
-			SocketPtr EndAccept(const AsyncResultPtr &asynResult)
+			ImplementType EndAccept(const AsyncResultPtr &asynResult)
 			{
 				return impl_->EndAccept(asynResult);
 			}

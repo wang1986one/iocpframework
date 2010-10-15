@@ -26,7 +26,7 @@ namespace async
 			static GUID guidDisconnectEx		= WSAID_DISCONNECTEX;
 			static GUID guidWSARecvMsg			= WSAID_WSARECVMSG;
 
-			SocketPtr socket(new Socket(io, SOCK_STREAM, IPPROTO_TCP));
+			SocketPtr socket(new Socket(io, AF_INET, SOCK_STREAM, IPPROTO_TCP));
 			GetExtensionFuncPtr(socket, &guidTransmitFile,			&TransmitFile);
 			GetExtensionFuncPtr(socket, &guidAcceptEx,				&AcceptEx);
 			GetExtensionFuncPtr(socket, &guidGetAcceptExSockaddrs,	&GetAcceptExSockaddrs);
