@@ -20,13 +20,13 @@ namespace async
 			SocketProvider &provider = SocketProvider::GetSingleton(io_);
 		}
 
-		Socket::Socket(AsyncIODispatcherType &io, int nType, int nProtocol)
+		Socket::Socket(AsyncIODispatcherType &io, int family, int type, int protocol)
 			: socket_(INVALID_SOCKET)
 			, io_(io)
 		{
 			SocketProvider &provider = SocketProvider::GetSingleton(io_);
 
-			Open(nType, nProtocol);
+			Open(family, type, protocol);
 		}
 
 		Socket::~Socket()
@@ -35,12 +35,12 @@ namespace async
 		}
 
 
-		void Socket::Open(int nType /* SOCK_STREAM */, int nProtocol /* IPPROTO_TCP */)
+		void Socket::Open(int family, int nType /* SOCK_STREAM */, int nProtocol /* IPPROTO_TCP */)
 		{
 			if( IsOpen() )
-				return;
+				throw std::logic_error("Socket already opened!");
 
-			socket_ = ::WSASocket(AF_INET, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED);
+			socket_ = ::WSASocket(family, nType, nProtocol, NULL, 0, WSA_FLAG_OVERLAPPED);
 			if( socket_ == INVALID_SOCKET )
 				throw Win32Exception("WSASocket");
 
@@ -69,9 +69,7 @@ namespace async
 			if( !IsOpen() )
 				throw std::logic_error("Socket not Open");
 			else
-			{
 				SocketProvider::CancelIO(socket_);
-			}
 		}
 
 		void Socket::Bind(u_short family/* AF_INET*/, u_short uPort /* 0 */, const IPAddress &addr /* INADDR_ANY */)

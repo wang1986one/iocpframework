@@ -31,7 +31,7 @@ namespace async
 			BasicStreamSocket(AsyncIODispatcherType &io, const ProtocolType &protocol)
 				: impl_(new Socket(io))
 			{
-				impl_->Open(protocol.Type(), protocol.Protocol());
+				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 			}
 			~BasicStreamSocket()
 			{}
@@ -48,7 +48,7 @@ namespace async
 
 			void Open(const ProtocolType &protocol = ProtocolType::V4())
 			{
-				impl_->Open(protocol.Type(), protocol.Protocol());
+				impl_->Open(protocol.family(), protocol.Type(), protocol.Protocol());
 			}
 	
 			bool IsOpen() const
