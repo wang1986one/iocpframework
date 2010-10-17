@@ -21,15 +21,17 @@ private:
 	std::tr1::array<char, 4096> buf_;
 
 public:
-	Session(const SocketPtr &sock)
-		: socket_(sock)
+	explicit Session(OverlappedDispatcher &io, const SocketPtr &sock)
+		: socket_(io, sock)
 		, data_(MakeBuffer(buf_))
-	{
-	}
+	{}
 	~Session()
 	{
 		//Stop();
 	}
+
+
+public:
 	Tcp::StreamSocket& GetSocket()
 	{
 		return socket_;
@@ -39,8 +41,12 @@ public:
 	{
 		try
 		{		
-			socket_.AsyncRecv(data_, 0, data_->allocSize(), 
-				std::tr1::bind(&Session::_HandleRead, shared_from_this(), std::tr1::placeholders::_1));
+			//socket_.AsyncRead(data_, 0, data_->allocSize(), 
+			//	std::tr1::bind(&Session::_HandleRead, shared_from_this(), std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+
+			AsyncRead(socket_.Get(), data_, TransferAtLeast(15),
+				std::tr1::bind(&Session::_HandleRead, shared_from_this(), std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+
 		}
 		catch(std::exception &e)
 		{
@@ -54,19 +60,24 @@ public:
 	}
 
 private:
-	void _HandleRead(const AsyncResultPtr &asyncResult)
+	void _HandleRead(const AsyncResultPtr &asyncResult, u_long bytes)
 	{
 		try
 		{
-			size_t bytes = socket_.EndRecv(asyncResult);
+			//size_t bytes = socket_.EndRead(asyncResult);
 			if( bytes == 0 )
 			{
-				socket_.AsyncDisconnect(std::tr1::bind(&Session::_DisConnect, shared_from_this(), std::tr1::placeholders::_1));
+				socket_.AsyncDisconnect(std::tr1::bind(&Session::_DisConnect, shared_from_this()));
 				return;
 			}
 
 			data_->resize(bytes);
-			socket_.AsyncSend(data_, 0, bytes, std::tr1::bind(&Session::_HandleWrite, shared_from_this(), std::tr1::placeholders::_1));
+			std::cout.write(data_->data(), bytes) << std::endl;
+
+			//socket_.AsyncWrite(data_, 0, bytes, 
+			//	std::tr1::bind(&Session::_HandleWrite, shared_from_this(), std::tr1::placeholders::_1));
+			AsyncWrite(socket_.Get(), data_, TransferAll(), 
+				std::tr1::bind(&Session::_HandleWrite, shared_from_this()));
 		}
 		catch(const std::exception &e)
 		{
@@ -74,12 +85,12 @@ private:
 		}
 	}
 
-	void _HandleWrite(const AsyncResultPtr &asyncResult)
+	void _HandleWrite()
 	{
 		Start();
 	}
 
-	void _DisConnect(const AsyncResultPtr &asyncResult)
+	void _DisConnect()
 	{
 		Stop();
 	}
@@ -87,6 +98,16 @@ private:
 
 typedef std::tr1::shared_ptr<Session> SessionPtr;
 
+
+inline SocketPtr CreateSocket(OverlappedDispatcher &io)
+{
+	return SocketPtr(new Socket(io, Tcp::V4().Family(), Tcp::V4().Type(), Tcp::V4().Protocol()));
+}
+
+inline SessionPtr CreateSession(OverlappedDispatcher &io, const SocketPtr &socket)
+{
+	return SessionPtr(new Session(io, socket));
+}
 
 class Server
 {
@@ -121,7 +142,9 @@ private:
 	{		
 		try
 		{
-			acceptor_.AsyncAccept(std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1));
+			SocketPtr acceptSock(CreateSocket(io_));
+			acceptor_.AsyncAccept(acceptSock, 0, 
+				std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1));
 		} 
 		catch(const std::exception &e)
 		{
@@ -141,8 +164,8 @@ private:
 		{
 			const SocketPtr &acceptSocket = acceptor_.EndAccept(asyncResult);
 
-			SessionPtr session_(new Session(acceptSocket));
-			session_->Start();
+			SessionPtr session(CreateSession(io_, acceptSocket));
+			session->Start();
 
 			_StartAccept();
 		}
