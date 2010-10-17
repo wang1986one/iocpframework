@@ -117,8 +117,14 @@ namespace async
 
 			void resize(size_t nNewSize)
 			{
+				// 如果是外部缓冲区
 				if( !internal_ )
-					return;
+				{
+					if( nNewSize <= allocSize_ )
+						bufferSize_ = nNewSize;
+					else
+						throw std::out_of_range("buffer out of range");
+				}
 
 				if( nNewSize <= allocSize_ )
 					bufferSize_ = nNewSize;

@@ -14,9 +14,9 @@ namespace async
 		namespace HandlerInvoke
 		{
 			template<typename HandlerT, typename T>
-			inline void Invoke(const HandlerT &callback, const T &val)
+			inline void Invoke(const HandlerT &callback, const T &val, u_long size)
 			{
-				callback(std::tr1::cref(val));
+				callback(std::tr1::cref(val), size);
 			}
 		}
 
@@ -25,7 +25,7 @@ namespace async
 		struct AsyncResult;
 		typedef pointer<AsyncResult> AsyncResultPtr;
 
-		typedef std::tr1::function<void(const AsyncResultPtr &asyncResult)> AsyncCallbackFunc;
+		typedef std::tr1::function<void(const AsyncResultPtr &asyncResult, u_long)> AsyncCallbackFunc;
 
 
 		//---------------------------------------------------------------------------
@@ -47,8 +47,7 @@ namespace async
 			AsyncCallbackFunc m_callback;
 
 
-			AsyncResult::AsyncResult(const ObjectPtr &buffer,
-				const ObjectPtr &accept, const AsyncCallbackFunc &callback)
+			AsyncResult::AsyncResult(const ObjectPtr &buffer, const ObjectPtr &accept, const AsyncCallbackFunc &callback)
 				: m_buffer(buffer), m_accept(accept), m_callback(callback)
 			{
 				RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
@@ -63,7 +62,7 @@ namespace async
 			}
 
 			template<typename HandleT>
-			size_t EndAsync(HandleT &handle)
+			size_t EndAsync(HandleT handle)
 			{
 				DWORD size = 0;
 
@@ -76,18 +75,26 @@ namespace async
 
 		public:
 			template<typename KeyT, typename OverlappedT>
-			static void Call(KeyT *key, OverlappedT *overlapped)
+			static void Call(KeyT *key, OverlappedT *overlapped, u_long size)
 			{
 				AsyncResultPtr asynResult = static_cast<AsyncResult *>(overlapped);
 				asynResult->Release();
 
-				Call(asynResult);
+				_CallImpl(asynResult, size);
 			}
 
 			static void Call(const AsyncResultPtr &result)
 			{
+				_CallImpl(result, 0);
+			}
+
+
+		private:
+			static void _CallImpl(const AsyncResultPtr &result, u_long size)
+			{
 				if( result->m_callback != NULL )
-					HandlerInvoke::Invoke(result->m_callback, result);
+					HandlerInvoke::Invoke(result->m_callback, result, size);
+					//result->m_callback(std::tr1::cref(result), size);
 			}
 
 		private:
@@ -119,10 +126,11 @@ namespace async
 			}
 
 			template<typename KeyT, typename OverlappedT>
-			static void Call(KeyT *key, OverlappedT *overlapped)
+			static void Call(KeyT *key, OverlappedT *overlapped, u_long/* size*/)
 			{
 				AsyncCallbackBasePtr p = reinterpret_cast<AsyncCallbackBase *>(key);
 				p->Release();
+
 				p->Invoke();
 			}
 

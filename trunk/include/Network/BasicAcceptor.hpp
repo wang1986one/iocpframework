@@ -26,7 +26,7 @@ namespace async
 			explicit BasicAcceptor(AsyncIODispatcherType &io)
 				: impl_(new Socket(io))
 			{}
-			explicit BasicAcceptor(const ImplementType &impl)
+			explicit BasicAcceptor(AsyncIODispatcherType &io, const ImplementType &impl)
 				: impl_(impl)
 			{}
 			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol)
@@ -34,7 +34,7 @@ namespace async
 			{
 				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 			}
-			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr, bool reuseAddr = true)
+			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr = INADDR_ANY, bool reuseAddr = true)
 				: impl_(new Socket(io))
 			{
 				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
@@ -108,14 +108,14 @@ namespace async
 				impl_->Listen(backlog);
 			}
 
-			ImplementType Accept(SOCKADDR_IN *remoteAddr = NULL)
+			ImplementType Accept()
 			{
-				return impl_->Accept(remoteAddr);
+				return impl_->Accept();
 			}
 
 			AsyncResultPtr AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const AsyncCallbackFunc &callback)
 			{
-				return impl_->BeginAccept(acceptSocket, szOutSide, callback);
+				return impl_->AsyncAccept(acceptSocket, szOutSide, callback);
 			}
 			ImplementType EndAccept(const AsyncResultPtr &asynResult)
 			{
