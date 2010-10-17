@@ -33,7 +33,7 @@ void PrintRecv(const SocketPtr &sock, const SocketBufferPtr &buffer, NetworkImpl
 {
 	std::cout << buffer->data() << std::endl;
 
-	server.Send(sock, buffer, nothing);
+	server.Send(sock, buffer);
 }
 
 

@@ -17,11 +17,11 @@ using namespace async;
 	class NetworkImpl
 	{
 		// 回调接口
-		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, ObjectPtr &, const SOCKADDR_IN &)>	AcceptCallback;
-		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, const ObjectPtr &)>					RecvCallback;
-		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, size_t, const ObjectPtr &)>			SendCallback;
-		typedef std::tr1::function<void(const SocketPtr &)>																DisconnectCallback;
-		typedef std::tr1::function<void(const SocketPtr &, const std::exception &)>										ErrorCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, const SOCKADDR_IN &)>	AcceptCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &)>						RecvCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const SocketBufferPtr &, size_t)>				SendCallback;
+		typedef std::tr1::function<void(const SocketPtr &)>													DisconnectCallback;
+		typedef std::tr1::function<void(const SocketPtr &, const std::exception &)>							ErrorCallback;
 
 	public:
 		// 一次投递Accept个数
@@ -57,15 +57,15 @@ using namespace async;
 		void Stop();
 
 		// 发送数据
-		void Send(const SocketPtr &, const SocketBufferPtr &, const ObjectPtr &obj);
+		void Send(const SocketPtr &, const SocketBufferPtr &);
 		AsyncResultPtr Send(const SocketPtr &, const AsyncResultPtr &, size_t);
 
 		// IOCP回调处理
 	private:
 		void _OnAccept(const AsyncResultPtr &);
-		void _OnRecv(const AsyncResultPtr &);
-		void _OnSend(const AsyncResultPtr &);
-
+		void _OnRecv(const AsyncResultPtr &, const SocketPtr &);
+		void _OnSend(const AsyncResultPtr &, const SocketPtr &);
+		void _OnDisConnect(const AsyncResultPtr &, const SocketPtr &);
 	private:
 		DWORD _ThreadAccept();
 	};
