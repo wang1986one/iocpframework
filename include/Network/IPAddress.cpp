@@ -9,30 +9,25 @@ namespace async
 	{
 
 		IPAddress::IPAddress(u_long address)
-			: address(address)
+			: address_(address)
 		{
 		}
 
-		u_long IPAddress::Address() const
-		{
-			return address;
-		}
-
-		bool IPAddress::operator==(const IPAddress &ipaddr)
-		{
-			return address == ipaddr.address;
-		}
-
-		bool IPAddress::operator!=(const IPAddress &ipaddr)
-		{
-			return address != ipaddr.address;
-		}
 
 		IPAddress IPAddress::Parse(const std::string &str)
 		{
 			u_long address = ::ntohl(::inet_addr(str.c_str()));
 
 			return IPAddress(address);
+		}
+
+		std::string	IPAddress::Parse(const IPAddress &addr)
+		{
+			in_addr tmp = {0};
+			tmp.s_addr = addr;
+
+			char *p = ::inet_ntoa(tmp);
+			return p;
 		}
 	}
 

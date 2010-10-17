@@ -88,7 +88,7 @@ namespace async
 			addrIn.sin_port			= ::htons(uPort);
 			addrIn.sin_addr.s_addr	= ::htonl(addr.Address());
 
-			if( 0 != ::bind(socket_, (const SOCKADDR *)&addrIn, sizeof(SOCKADDR)) )
+			if( SOCKET_ERROR == ::bind(socket_, (const SOCKADDR *)&addrIn, sizeof(SOCKADDR)) )
 				throw Win32Exception("bind");
 		}
 
@@ -97,7 +97,7 @@ namespace async
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
 
-			if( 0 != ::listen(socket_, nMax) )
+			if( SOCKET_ERROR == ::listen(socket_, nMax) )
 				throw Win32Exception("listen");
 		}
 
@@ -124,7 +124,7 @@ namespace async
 			serverAddr.sin_addr.s_addr	= ::htonl(addr.Address());
 			serverAddr.sin_port			= ::htons(uPort);
 
-			if( !::connect(socket_, reinterpret_cast<const sockaddr *>(&serverAddr), sizeof(SOCKADDR_IN)) )
+			if( SOCKET_ERROR == ::connect(socket_, reinterpret_cast<const sockaddr *>(&serverAddr), sizeof(SOCKADDR_IN)) )
 				throw Win32Exception("connect");
 		}
 
@@ -145,16 +145,20 @@ namespace async
 				Close();
 			}
 		}
+		
+		size_t Socket::Read(const SocketBufferPtr &buffer, size_t offset, DWORD flag)
+		{
+			return _ReadImpl(buffer->data(offset), buffer->allocSize() - offset, flag);
+		}
 
-
-		size_t Socket::Recv(const SocketBufferPtr &buffer, DWORD flag)
+		size_t Socket::_ReadImpl(char *buffer, size_t sz, DWORD flag)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = reinterpret_cast<char *>(buffer->data());
-			wsabuf.len = buffer->allocSize();
+			wsabuf.buf = buffer;
+			wsabuf.len = sz;
 
 			if( wsabuf.len == 0 )
 				throw std::logic_error("Buffer allocate size is zero");
@@ -167,27 +171,34 @@ namespace async
 			return dwSize;
 		}
 
-		size_t Socket::Send(const SocketBufferPtr &buffer, DWORD flag)
+
+		size_t Socket::Write(const SocketBufferPtr &buffer, size_t offset, DWORD flag)
+		{
+			return _WriteImpl(buffer->data(offset), buffer->size() - offset, flag);
+		}
+
+		size_t Socket::_WriteImpl(char *buffer, size_t sz, DWORD flag)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = reinterpret_cast<char *>(buffer->data());
-			wsabuf.len = buffer->size();
+			wsabuf.buf = buffer;
+			wsabuf.len = sz;
 
 			if( wsabuf.len == 0 )
 				throw std::logic_error("Buffer size is zero");
 
 			DWORD dwSize = 0;
-
 			if( 0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, flag, 0, 0) )
 				throw Win32Exception("WSASend");
 
 			return dwSize;
 		}
 
-		AsyncResultPtr Socket::BeginAccept(const SocketPtr &acceptSocket, size_t szOutSide, const AsyncCallbackFunc &callback)
+
+
+		AsyncResultPtr Socket::AsyncAccept(const SocketPtr &acceptSocket, size_t szOutSide, const AsyncCallbackFunc &callback)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
@@ -222,7 +233,7 @@ namespace async
 
 
 		// Òì²½µ÷ÓÃ
-		AsyncResultPtr Socket::BeginConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback)
+		AsyncResultPtr Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
@@ -234,7 +245,7 @@ namespace async
 
 			return asynResult;
 		}
-		const AsyncResultPtr &Socket::BeginConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
+		const AsyncResultPtr &Socket::AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
 		{
 			result->AddRef();
 
@@ -248,7 +259,7 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::BeginDisconnect(const AsyncCallbackFunc &callback, bool bReuseSocket/* = true*/)
+		AsyncResultPtr Socket::AsyncDisconnect(const AsyncCallbackFunc &callback, bool bReuseSocket/* = true*/)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(nothing, nothing, callback));
 			asynResult->AddRef();
@@ -257,7 +268,7 @@ namespace async
 
 			return asynResult;
 		}
-		const AsyncResultPtr &Socket::BeginDisconnect(const AsyncResultPtr &result, bool bReuseSocket /* = true */)
+		const AsyncResultPtr &Socket::AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket /* = true */)
 		{
 			result->AddRef();
 
@@ -272,51 +283,51 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::BeginRecv(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback)
+		AsyncResultPtr Socket::AsyncRead(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(buf, nothing, callback));
 			asynResult->AddRef();
 
-			_BeginRecvImpl(asynResult, nOffset, nSize);
+			_BeginReadImpl(asynResult, nOffset, nSize);
 
 			return asynResult;
 		}
 
-		const AsyncResultPtr &Socket::BeginRecv(const AsyncResultPtr &result, size_t offset, size_t size)
+		const AsyncResultPtr &Socket::AsyncRead(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
 			result->AddRef();
 
-			_BeginRecvImpl(result, offset, size);
+			_BeginReadImpl(result, offset, size);
 
 			return result;
 		}
 
-		size_t Socket::EndRecv(const AsyncResultPtr &asyncResult)
+		size_t Socket::EndRead(const AsyncResultPtr &asyncResult)
 		{
 			return asyncResult->EndAsync(socket_);;
 		}
 
 
-		AsyncResultPtr Socket::BeginSend(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback)
+		AsyncResultPtr Socket::AsyncWrite(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback)
 		{
 			AsyncResultPtr asynResult(new AsyncResult(buf, nothing, callback));
 			asynResult->AddRef();
 			
-			_BeginSendImpl(asynResult, nOffset, nSize);
+			_BeginWriteImpl(asynResult, nOffset, nSize);
 
 			return asynResult;
 		}
 
-		const AsyncResultPtr &Socket::BeginSend(const AsyncResultPtr &result, size_t offset, size_t size)
+		const AsyncResultPtr &Socket::AsyncWrite(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
 			result->AddRef();
 
-			_BeginSendImpl(result, offset, size);
+			_BeginWriteImpl(result, offset, size);
 
 			return result;
 		}
 
-		size_t Socket::EndSend(const AsyncResultPtr &asyncResult)
+		size_t Socket::EndWrite(const AsyncResultPtr &asyncResult)
 		{
 			return asyncResult->EndAsync(socket_);
 		}
@@ -354,7 +365,7 @@ namespace async
 			}
 		}
 
-		void Socket::_BeginRecvImpl(const AsyncResultPtr &result, size_t offset, size_t size)
+		void Socket::_BeginReadImpl(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
 			const SocketBufferPtr &buffer = result->m_buffer;
 
@@ -373,7 +384,7 @@ namespace async
 			}
 		}
 
-		void Socket::_BeginSendImpl(const AsyncResultPtr &result, size_t offset, size_t size)
+		void Socket::_BeginWriteImpl(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
 			const SocketBufferPtr &buffer = result->m_buffer;
 			WSABUF wsabuf = {0};

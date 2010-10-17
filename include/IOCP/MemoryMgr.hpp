@@ -25,8 +25,6 @@ namespace async
 			typedef async::memory::SGIMTMemoryPool SmallObjectMemoryPool;
 			typedef async::memory::MemAllocator<char, SmallObjectMemoryPool>	AllocType;
 
-			//typedef std::allocator<char> AllocType;
-
 
 			//  Socket和File内存池
 			static const size_t DEFAULT_SOCKET_SIZE = 4 * 1024;		
@@ -35,18 +33,12 @@ namespace async
 			typedef async::memory::SGIMemoryPool<true, DEFAULT_SOCKET_SIZE>		SocketMemoryPool;
 			typedef async::memory::SGIMemoryPool<true, DEFAULT_FILE_SIZE>		FileMemoryPool;
 
-			//typedef std::allocator<char> SocketMemoryPool;
-			//typedef std::allocator<char> FileMemoryPool;
-
 		public:
 			// 小对象使用
 			static AllocType &GetMemory()
 			{
 				static SmallObjectMemoryPool memoryPool;
 				static AllocType alloc(memoryPool);
-
-				//static AllocType alloc;
-
 
 				return alloc;
 			}

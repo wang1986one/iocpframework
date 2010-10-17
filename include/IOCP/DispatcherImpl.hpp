@@ -134,12 +134,6 @@ namespace async
 			while(true)
 			{
 				bool bSuc = iocp_.GetStatus(reinterpret_cast<ULONG_PTR *>(&key), &dwSize, &pOverlapped);
-				//BOOL bSuc = ::GetQueuedCompletionStatus(iocp_, &dwSize, uKey, &pOverlapped, INFINITE);
-				//if( !bSuc )
-				//{
-				//	//throw Win32Exception("GetQueuedCompletionStatus");
-				//	continue;
-				//}
 
 				if( key == 0 && pOverlapped == 0 )
 					break;
@@ -147,7 +141,7 @@ namespace async
 				try
 				{
 					// »Øµ÷
-					AsyncType::Call(key, pOverlapped);
+					AsyncType::Call(key, pOverlapped, dwSize);
 				}
 				catch(const std::exception &e)
 				{
