@@ -1,0 +1,78 @@
+#ifndef __IOCP_INTERNAL_CONDITION_HPP
+#define __IOCP_INTERNAL_CONDITION_HPP
+
+
+
+namespace async
+{
+	namespace iocp
+	{
+
+		namespace internal
+		{
+			// 默认单次传输字节大小
+			enum { DEFAULT_MAX_TRANSFER = 64 * 1024 };
+
+
+			// ----------------------------------------------------
+			// struct TransferAll
+
+			struct TransferAllT
+			{
+				typedef size_t	result_type;
+
+				result_type operator()(size_t) const
+				{
+					return DEFAULT_MAX_TRANSFER;
+				}
+			};
+
+
+			// ----------------------------------------------------
+			// class TransferAtLeat
+
+			class TransferAtLeatT
+			{
+			public:
+				typedef size_t	result_type;
+
+			private:
+				size_t min_;
+
+			public:
+				explicit TransferAtLeatT(size_t min)
+					: min_(min)
+				{}
+
+			public:
+				result_type operator()(size_t/* bytes*/) const
+				{
+					//return bytes >= min_ ? 0 : DEFAULT_MAX_TRANSFER;
+					return min_;
+				}
+			};
+		}
+
+
+		// 传输条件
+
+		inline internal::TransferAllT TransferAll()
+		{
+			return internal::TransferAllT();
+		}
+
+		inline internal::TransferAtLeatT TransferAtLeast(size_t min)	
+		{
+			return internal::TransferAtLeatT(min);
+		}
+	}
+}
+
+
+
+
+
+
+
+
+#endif
