@@ -133,15 +133,18 @@ namespace async
 
 			while(true)
 			{
+				::SetLastError(0);
 				bool bSuc = iocp_.GetStatus(reinterpret_cast<ULONG_PTR *>(&key), &dwSize, &pOverlapped);
+				u_long err = ::GetLastError();
 
+				// 请求退出
 				if( key == 0 && pOverlapped == 0 )
 					break;
 
 				try
 				{
 					// 回调
-					AsyncType::Call(key, pOverlapped, dwSize);
+					AsyncType::Call(key, pOverlapped, dwSize, err);
 				}
 				catch(const std::exception &e)
 				{
