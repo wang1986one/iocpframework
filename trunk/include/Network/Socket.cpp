@@ -204,7 +204,7 @@ namespace async
 				throw std::logic_error("Socket not open");
 
 			if( !acceptSocket->IsOpen() )
-				throw std::logic_error("Accept socket not open");
+				throw std::logic_error("Remote socket not open");
 
 			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSide));
 			AsyncResultPtr asyncResult(new AsyncResult(acceptBuffer, acceptSocket, callback));

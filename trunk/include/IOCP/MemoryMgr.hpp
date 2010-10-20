@@ -27,8 +27,8 @@ namespace async
 
 
 			//  SocketºÍFileÄÚ´æ³Ø
-			static const size_t DEFAULT_SOCKET_SIZE = 4 * 1024;		
-			static const size_t DEFAULT_FILE_SIZE	= 4 * 1024;
+			static const size_t DEFAULT_SOCKET_SIZE = 8 * 1024;		
+			static const size_t DEFAULT_FILE_SIZE	= 8 * 1024;
 
 			typedef async::memory::SGIMemoryPool<true, DEFAULT_SOCKET_SIZE>		SocketMemoryPool;
 			typedef async::memory::SGIMemoryPool<true, DEFAULT_FILE_SIZE>		FileMemoryPool;

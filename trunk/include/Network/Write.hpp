@@ -65,30 +65,25 @@ namespace async
 					, handler_(handler)
 				{}
 
-				void operator()(const AsyncResultPtr &result, u_long size)
+				void operator()(const AsyncResultPtr &result, u_long size, u_long error)
 				{
-					transfers_ += size; //result->EndAsync(stream_->GetHandle());
+					transfers_ += size;
 
-					if( transfers_ < total_ && size != 0)
+					if( transfers_ < total_ && size != 0 && error == 0 )
 					{
 						if( transfers_ <= condition_(transfers_) )
 						{
-							using std::tr1::placeholders::_1;
-							using std::tr1::placeholders::_2;
+							using namespace std::tr1::placeholders;
 
-
-							static AsyncCallbackFunc callback = std::tr1::bind(&ThisType::operator(), this, _1, _2);
+							static AsyncCallbackFunc callback = std::tr1::bind(&ThisType::operator(), this, _1, _2, _3);
 							stream_->AsyncWrite(buffer_, transfers_, total_ - transfers_, callback);
 
 							return;
 						}
 					}
 					
-					// call user callback
-					if( size == 0 )
-						transfers_ = 0;
-
-					iocp::HandlerInvoke::Invoke(handler_, result, transfers_);
+					// »Øµ÷
+					iocp::HandlerInvoke::Invoke(handler_, result, transfers_, error);
 					iocp::internal::HandlerDealloc(this);
 				}
 			};
@@ -105,12 +100,12 @@ namespace async
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>
 		void AsyncWrite(SyncWriteStreamT &s, ConstBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
 		{
-			typedef internal::ReadHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookReadHandler;
-			HookReadHandler *hook = iocp::internal::HandlerAlloc<HookReadHandler>(s, buffer, condition, handler);
+			typedef internal::WriteHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
+			HookWriteHandler *hook = iocp::internal::HandlerAlloc<HookWriteHandler>(s, buffer, condition, handler);
 
 			s->AsyncWrite(buffer, 0, buffer->size(),
-				std::tr1::bind(&HookReadHandler::operator(), hook, 
-				std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+				std::tr1::bind(&HookWriteHandler::operator(), hook, 
+				std::tr1::placeholders::_1, std::tr1::placeholders::_2, std::tr1::placeholders::_3));
 		}
 
 

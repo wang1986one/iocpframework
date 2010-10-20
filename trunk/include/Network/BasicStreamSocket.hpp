@@ -37,6 +37,7 @@ namespace async
 			{}
 
 		public:
+			// 显示获取
 			ImplementType &Get() 
 			{
 				return impl_;
@@ -45,7 +46,19 @@ namespace async
 			{
 				return impl_;
 			}
+		
+			// 支持隐式转换
+			operator ImplementType()
+			{
+				return impl_;
+			}
+			operator const ImplementType() const
+			{
+				return impl_;
+			}
 
+
+		public:
 			void Open(const ProtocolType &protocol = ProtocolType::V4())
 			{
 				impl_->Open(protocol.family(), protocol.Type(), protocol.Protocol());
