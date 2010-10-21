@@ -15,6 +15,9 @@
 #include "Write.hpp"
 #include "Read.hpp"
 
+#include "../iocp/ReadWriteBuffer.hpp"
+
+
 namespace async
 {
 	namespace network

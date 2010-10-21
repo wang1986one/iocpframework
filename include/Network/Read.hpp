@@ -41,10 +41,10 @@ namespace async
 
 		namespace internal
 		{
-			template<typename AsyncWriteStreamT, typename MutableBufferT, typename CompletionConditionT, typename WriteHandlerT>
+			template<typename AsyncWriteStreamT, typename MutableBufferT, typename CompletionConditionT, typename ReadHandlerT>
 			class ReadHandler
 			{
-				typedef ReadHandler<AsyncWriteStreamT, MutableBufferT, CompletionConditionT, WriteHandlerT>	ThisType;
+				typedef ReadHandler<AsyncWriteStreamT, MutableBufferT, CompletionConditionT, ReadHandlerT>	ThisType;
 				//typedef typename AsyncWriteStreamT::ImplementType											ImplementType;
 
 			private:
@@ -53,15 +53,15 @@ namespace async
 				CompletionConditionT condition_;
 				size_t transfers_;
 				size_t total_;
-				WriteHandlerT handler_;
+				ReadHandlerT handler_;
 
 			public:
-				ReadHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const CompletionConditionT &condition, const WriteHandlerT &handler)
+				ReadHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const CompletionConditionT &condition, const ReadHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer)
 					, condition_(condition)
 					, transfers_(0)
-					, total_(buffer->allocSize())
+					, total_(buffer.size())
 					, handler_(handler)
 				{}
 
@@ -75,8 +75,8 @@ namespace async
 						{
 							using namespace std::tr1::placeholders;
 
-							static AsyncCallbackFunc callback = std::tr1::bind(&ThisType::operator(), this, _1, _2, _3);
-							stream_->AsyncRead(buffer_, transfers_, total_ - transfers_, callback);
+							//static AsyncCallbackFunc callback = std::tr1::bind(&ThisType::operator(), this, _1, _2, _3);
+							stream_.AsyncRead(Buffer(buffer_ + transfers_), std::tr1::bind(&ThisType::operator(), this, _1, _2, _3));
 
 							return;
 						}
@@ -104,9 +104,11 @@ namespace async
 
 			HookReadHandler *hook = iocp::internal::HandlerAlloc<HookReadHandler>(s, buffer, condition, handler);
 			
-			s->AsyncRead(buffer, 0, buffer->allocSize(), 
+			s.AsyncRead(buffer, 
 				std::tr1::bind(&HookReadHandler::operator(), hook, 
-				std::tr1::placeholders::_1, std::tr1::placeholders::_2, std::tr1::placeholders::_3));
+				std::tr1::placeholders::_1, 
+				std::tr1::placeholders::_2, 
+				std::tr1::placeholders::_3));
 		}
 
 

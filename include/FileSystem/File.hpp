@@ -24,8 +24,7 @@ namespace async
 
 
 		// class FileBuffer
-		typedef BufferT<char, MemoryMgr::DEFAULT_FILE_SIZE, async::memory::MemAllocator<char, MemoryMgr::FileMemoryPool> > FileBuffer;
-		//typedef BufferT<char, MemoryMgr::DEFAULT_FILE_SIZE, std::allocator<char> > FileBuffer;
+		typedef BufferT<char, async::memory::MemAllocator<char, MemoryMgr::FileMemoryPool> > FileBuffer;
 		typedef pointer<FileBuffer> FileBufferPtr;
 
 

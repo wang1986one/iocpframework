@@ -49,19 +49,19 @@ namespace async
 
 			private:
 				AsyncWriteStreamT &stream_;
-				ConstBufferT &buffer_;
+				const ConstBufferT &buffer_;
 				CompletionConditionT condition_;
 				size_t transfers_;
 				size_t total_;
 				WriteHandlerT handler_;
 
 			public:
-				WriteHandler(AsyncWriteStreamT &stream, ConstBufferT &buffer, const CompletionConditionT &condition, const WriteHandlerT &handler)
+				WriteHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, const CompletionConditionT &condition, const WriteHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer_)
 					, condition_(condition)
 					, transfers_(0)
-					, total_(buffer->size())
+					, total_(buffer.size())
 					, handler_(handler)
 				{}
 
@@ -75,8 +75,8 @@ namespace async
 						{
 							using namespace std::tr1::placeholders;
 
-							static AsyncCallbackFunc callback = std::tr1::bind(&ThisType::operator(), this, _1, _2, _3);
-							stream_->AsyncWrite(buffer_, transfers_, total_ - transfers_, callback);
+							//static WriteHandlerT callback = std::tr1::bind(&ThisType::operator(), this, _1, _2, _3);
+							stream_.AsyncWrite(Buffer(buffer_ + transfers_), std::tr1::bind(&ThisType::operator(), this, _1, _2, _3));
 
 							return;
 						}
@@ -92,18 +92,18 @@ namespace async
 		// 异步读取指定的数据
 
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename HandlerT>
-		void AsyncWrite(SyncWriteStreamT &s, ConstBufferT &buffer, const HandlerT &handler)
+		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const HandlerT &handler)
 		{
 			AsyncWrite(s, buffer, iocp::TransferAll(), handler);
 		}
 
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>
-		void AsyncWrite(SyncWriteStreamT &s, ConstBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
+		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
 		{
 			typedef internal::WriteHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
 			HookWriteHandler *hook = iocp::internal::HandlerAlloc<HookWriteHandler>(s, buffer, condition, handler);
 
-			s->AsyncWrite(buffer, 0, buffer->size(),
+			s.AsyncWrite(buffer, 
 				std::tr1::bind(&HookWriteHandler::operator(), hook, 
 				std::tr1::placeholders::_1, std::tr1::placeholders::_2, std::tr1::placeholders::_3));
 		}

@@ -113,7 +113,8 @@ namespace async
 				return impl_->Accept();
 			}
 
-			AsyncResultPtr AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const AsyncCallbackFunc &callback)
+			template<typename HandlerT>
+			AsyncResultPtr AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const HandlerT &callback)
 			{
 				return impl_->AsyncAccept(acceptSocket, szOutSide, callback);
 			}
@@ -121,7 +122,6 @@ namespace async
 			{
 				return impl_->EndAccept(asynResult);
 			}
-
 		};
 	}
 }

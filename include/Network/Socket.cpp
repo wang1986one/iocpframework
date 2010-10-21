@@ -196,55 +196,13 @@ namespace async
 			return dwSize;
 		}
 
+		
 
-
-		AsyncResultPtr Socket::AsyncAccept(const SocketPtr &acceptSocket, size_t szOutSide, const AsyncCallbackFunc &callback)
-		{
-			if( !IsOpen() )
-				throw std::logic_error("Socket not open");
-
-			if( !acceptSocket->IsOpen() )
-				throw std::logic_error("Remote socket not open");
-
-			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSide));
-			AsyncResultPtr asyncResult(new AsyncResult(acceptBuffer, acceptSocket, callback));
-			asyncResult->AddRef();
-
-			// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
-			// 如果为0，则立即返回。若大于0，则接受数据后再返回
-			DWORD dwRecvBytes = 0;
-			if( !SocketProvider::GetSingleton(io_).AcceptEx(socket_, acceptSocket->socket_, acceptBuffer->data(), szOutSide,
-				sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &dwRecvBytes, asyncResult.Get()) 
-				&& ::WSAGetLastError() != ERROR_IO_PENDING )
-			{
-				asyncResult->Release();
-
-				throw Win32Exception("AcceptEx");
-			}
-
-			return asyncResult;
-		}
-
-		SocketPtr Socket::EndAccept(const AsyncResultPtr &asynResult)
-		{
-			asynResult->EndAsync(socket_);
-			return asynResult->m_accept;
-		}
+		
 
 
 		// 异步调用
-		AsyncResultPtr Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback)
-		{
-			if( !IsOpen() )
-				throw std::logic_error("Socket not open");
-
-			AsyncResultPtr asynResult(new AsyncResult(nothing, nothing, callback));
-			asynResult->AddRef();
-
-			_BeginConnectImpl(asynResult, addr, uPort);
-
-			return asynResult;
-		}
+		
 		const AsyncResultPtr &Socket::AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
 		{
 			result->AddRef();
@@ -259,15 +217,7 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::AsyncDisconnect(const AsyncCallbackFunc &callback, bool bReuseSocket/* = true*/)
-		{
-			AsyncResultPtr asynResult(new AsyncResult(nothing, nothing, callback));
-			asynResult->AddRef();
-
-			_BeginDisconnectImpl(asynResult, bReuseSocket);
-
-			return asynResult;
-		}
+		
 		const AsyncResultPtr &Socket::AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket /* = true */)
 		{
 			result->AddRef();
@@ -283,24 +233,17 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::AsyncRead(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback)
-		{
-			AsyncResultPtr asynResult(new AsyncResult(buf, nothing, callback));
-			asynResult->AddRef();
+		
+		
 
-			_BeginReadImpl(asynResult, nOffset, nSize);
-
-			return asynResult;
-		}
-
-		const AsyncResultPtr &Socket::AsyncRead(const AsyncResultPtr &result, size_t offset, size_t size)
+		/*const AsyncResultPtr &Socket::AsyncRead(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
 			result->AddRef();
 
 			_BeginReadImpl(result, offset, size);
 
 			return result;
-		}
+		}*/
 
 		size_t Socket::EndRead(const AsyncResultPtr &asyncResult)
 		{
@@ -308,24 +251,16 @@ namespace async
 		}
 
 
-		AsyncResultPtr Socket::AsyncWrite(const SocketBufferPtr &buf, size_t nOffset, size_t nSize, const AsyncCallbackFunc &callback)
-		{
-			AsyncResultPtr asynResult(new AsyncResult(buf, nothing, callback));
-			asynResult->AddRef();
-			
-			_BeginWriteImpl(asynResult, nOffset, nSize);
+		
 
-			return asynResult;
-		}
-
-		const AsyncResultPtr &Socket::AsyncWrite(const AsyncResultPtr &result, size_t offset, size_t size)
+		/*const AsyncResultPtr &Socket::AsyncWrite(const AsyncResultPtr &result, size_t offset, size_t size)
 		{
 			result->AddRef();
 
 			_BeginWriteImpl(result, offset, size);
 
 			return result;
-		}
+		}*/
 
 		size_t Socket::EndWrite(const AsyncResultPtr &asyncResult)
 		{
@@ -365,12 +300,10 @@ namespace async
 			}
 		}
 
-		void Socket::_BeginReadImpl(const AsyncResultPtr &result, size_t offset, size_t size)
+		void Socket::_BeginReadImpl(const AsyncResultPtr &result, char *buf, size_t size)
 		{
-			const SocketBufferPtr &buffer = result->m_buffer;
-
 			WSABUF wsabuf = {0};
-			wsabuf.buf = reinterpret_cast<char *>(buffer->data(offset));
+			wsabuf.buf = buf;
 			wsabuf.len = size;
 
 			DWORD dwFlag = 0;
@@ -384,11 +317,10 @@ namespace async
 			}
 		}
 
-		void Socket::_BeginWriteImpl(const AsyncResultPtr &result, size_t offset, size_t size)
+		void Socket::_BeginWriteImpl(const AsyncResultPtr &result, const char *buf, size_t size)
 		{
-			const SocketBufferPtr &buffer = result->m_buffer;
 			WSABUF wsabuf = {0};
-			wsabuf.buf = reinterpret_cast<char *>(buffer->data(offset));
+			wsabuf.buf = const_cast<char *>(buf);
 			wsabuf.len = size;
 
 			DWORD dwFlag = 0;

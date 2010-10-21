@@ -26,7 +26,7 @@ namespace async
 
 
 		// class SocketBuffer
-		typedef BufferT<char, MemoryMgr::DEFAULT_SOCKET_SIZE, async::memory::MemAllocator<char, MemoryMgr::SocketMemoryPool> > SocketBuffer;
+		typedef BufferT<char, async::memory::MemAllocator<char, MemoryMgr::SocketMemoryPool> > SocketBuffer;
 		typedef pointer<SocketBuffer> SocketBufferPtr;
 
 
@@ -96,7 +96,7 @@ namespace async
 			void Listen(int nMax);
 
 			
-			// 不需设置回调接口
+			// 不需设置回调接口,同步函数
 		public:
 			SocketPtr Accept();
 			void Connect(int family, const IPAddress &addr, u_short uPort);
@@ -112,32 +112,36 @@ namespace async
 			// 异步调用接口
 		public:
 			// szOutSize指定额外的缓冲区大小，以用来Accept远程连接后且收到第一块数据包才返回
-			AsyncResultPtr AsyncAccept(const SocketPtr &acceptSocket, size_t szOutSize, const AsyncCallbackFunc &callback);
-			SocketPtr EndAccept(const AsyncResultPtr &asynResult);
+			template<typename HandlerT>
+			AsyncResultPtr AsyncAccept(const SocketPtr &remoteSocket, size_t szOutSize, const HandlerT &callback);
 
 			// 异步连接需要先绑定端口
-			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short uPort, const AsyncCallbackFunc &callback);
+			template<typename HandlerT>
+			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback);
 			const AsyncResultPtr &AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void EndConnect(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr AsyncDisconnect(const AsyncCallbackFunc &callback, bool bReuseSocket = true);
+			template<typename HandlerT>
+			AsyncResultPtr AsyncDisconnect(const HandlerT &callback, bool bReuseSocket = true);
 			const AsyncResultPtr &AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket = true);
 			void EndDisconnect(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr AsyncRead(const SocketBufferPtr &buf, size_t offset, size_t size, const AsyncCallbackFunc &callback);
-			const AsyncResultPtr &AsyncRead(const AsyncResultPtr &result, size_t offset, size_t size);
+			template<typename HandlerT>
+			AsyncResultPtr AsyncRead(char *buf, size_t size, const HandlerT &callback);
+			//const AsyncResultPtr &AsyncRead(const AsyncResultPtr &result, size_t offset, size_t size);
 			size_t EndRead(const AsyncResultPtr &asyncResult);
 
-			AsyncResultPtr AsyncWrite(const SocketBufferPtr &buf,size_t offset, size_t size, const AsyncCallbackFunc &callback);
-			const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, size_t offset, size_t size);
+			template<typename HandlerT>
+			AsyncResultPtr AsyncWrite(const char *buf, size_t size, const HandlerT &callback);
+			//const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, size_t offset, size_t size);
 			size_t EndWrite(const AsyncResultPtr &asyncResult);
 
 			
 		private:
 			void _BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void _BeginDisconnectImpl(const AsyncResultPtr &result, bool bReuseSocket = true);
-			void _BeginReadImpl(const AsyncResultPtr &result, size_t offset, size_t size);
-			void _BeginWriteImpl(const AsyncResultPtr &result, size_t offset, size_t size);
+			void _BeginReadImpl(const AsyncResultPtr &result, char *buf, size_t size);
+			void _BeginWriteImpl(const AsyncResultPtr &result, const char *buf, size_t size);
 			
 			
 		};
@@ -193,6 +197,89 @@ namespace async
 				return false;
 		}
 
+
+#include "Accept.hpp"
+
+		// 异步接收远程连接
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncAccept(const SocketPtr &remoteSocket, size_t szOutSize, const HandlerT &callback)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("Socket not open");
+
+			if( !remoteSocket->IsOpen() )
+				throw std::logic_error("Remote socket not open");
+
+			typedef internal::AcceptorHandle<HandlerT> HookAcceptor;
+			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
+			AsyncResultPtr asyncResult(new AsyncResult(HookAcceptor(*this, remoteSocket, acceptBuffer, callback)));
+			asyncResult->AddRef();
+
+			// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
+			// 如果为0，则立即返回。若大于0，则接受数据后再返回
+			DWORD dwRecvBytes = 0;
+			if( !SocketProvider::GetSingleton(io_).AcceptEx(socket_, remoteSocket->socket_, acceptBuffer->data(), szOutSize,
+				sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &dwRecvBytes, asyncResult.Get()) 
+				&& ::WSAGetLastError() != ERROR_IO_PENDING )
+			{
+				asyncResult->Release();
+
+				throw Win32Exception("AcceptEx");
+			}
+
+			return asyncResult;
+		}
+		
+		// 异步连接服务
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("Socket not open");
+
+			AsyncResultPtr asynResult(new AsyncResult(callback));
+			asynResult->AddRef();
+
+			_BeginConnectImpl(asynResult, addr, uPort);
+
+			return asynResult;
+		}
+
+		// 异步关闭连接
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncDisconnect(const HandlerT &callback, bool bReuseSocket/* = true*/)
+		{
+			AsyncResultPtr asynResult(new AsyncResult(callback));
+			asynResult->AddRef();
+
+			_BeginDisconnectImpl(asynResult, bReuseSocket);
+
+			return asynResult;
+		}
+
+		// 异步接接收数据
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncRead(char *buf, size_t size, const HandlerT &callback)
+		{
+			AsyncResultPtr asynResult(new AsyncResult(callback));
+			asynResult->AddRef();
+
+			_BeginReadImpl(asynResult, buf, size);
+
+			return asynResult;
+		}
+
+		// 异步发送数据
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncWrite(const char *buf, size_t size, const HandlerT &callback)
+		{
+			AsyncResultPtr asynResult(new AsyncResult(callback));
+			asynResult->AddRef();
+
+			_BeginWriteImpl(asynResult, buf, size);
+
+			return asynResult;
+		}
 	}
 
 
