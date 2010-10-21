@@ -19,7 +19,7 @@ namespace async
 		// class BufferT
 		// 提供缓冲区服务，支持STL标准接口
 
-		template<typename T, size_t __DefaultSize, typename AllocT>
+		template<typename T, typename AllocT>
 		class BufferT
 			: public Object
 		{
@@ -45,24 +45,13 @@ namespace async
 			bool internal_;		// 是否外部提供缓冲区
 
 		public:
-			BufferT()
+			explicit BufferT(size_t defaultSize = MemoryMgr::DEFAULT_SOCKET_SIZE)
 				: alloc_(BufferPool)
-				, allocSize_(__DefaultSize)
+				, allocSize_(defaultSize)
 				, bufferSize_(0)
-				, buffer_(_Allocate(allocSize_))
+				, buffer_(_Allocate(defaultSize))
 				, internal_(true)
 			{}
-			explicit BufferT(size_t nSize)
-				: alloc_(BufferPool)
-				, allocSize_(nSize)
-				, bufferSize_(0)
-				, internal_(true)
-			{
-				if( nSize < 4 )
-					allocSize_ = 4;
-
-				buffer_ = _Allocate(allocSize_);
-			}
 			BufferT(pointer pStr, size_t nSize)
 				: alloc_(BufferPool)
 				, allocSize_(nSize)
@@ -179,8 +168,8 @@ namespace async
 			}
 		};
 
-		template<typename T, size_t __DefaultSize, typename AllocT>
-		typename BufferT<T, __DefaultSize, AllocT>::alloc_type BufferT<T, __DefaultSize, AllocT>::BufferPool;
+		template<typename T, typename AllocT>
+		typename BufferT<T, AllocT>::alloc_type BufferT<T, AllocT>::BufferPool;
 
 
 	} // end of iocp

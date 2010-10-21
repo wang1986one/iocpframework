@@ -117,12 +117,14 @@ namespace async
 				impl_->DisConnect(shut, true);
 			}
 
-			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short port, const AsyncCallbackFunc &handler)
+			template<typename HandlerT>
+			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
 			{
 				return impl_->AsyncConnect(addr, port, handler);
 			}
 
-			AsyncResultPtr AsyncDisconnect(const AsyncCallbackFunc &handler, bool reuse = true)
+			template<typename HandlerT>
+			AsyncResultPtr AsyncDisconnect(const HandlerT &handler, bool reuse = true)
 			{
 				return impl_->AsyncDisconnect(handler, reuse);
 			}
@@ -145,16 +147,16 @@ namespace async
 			}
 
 			// 异步发送数据
-			template<typename MutableBufferT>
-			const AsyncResultPtr AsyncWrite(MutableBufferT &buffer, const AsyncCallbackFunc &callback)
+			template<typename ConstBufferT, typename HandlerT>
+			const AsyncResultPtr AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
 			{
-				return impl_->AsyncWrite(buffer, 0, buffer->size(), callback);
+				return impl_->AsyncWrite(buffer.data(), buffer.size(), callback);
 			}
-			template<typename MutableBufferT>
+			/*template<typename MutableBufferT>
 			const AsyncResultPtr AsyncWrite(MutableBufferT &buffer, size_t offset, size_t size, const AsyncCallbackFunc &callback)
 			{
 				return impl_->AsyncWrite(buffer, offset, size, callback);
-			}
+			}*/
 			
 			size_t EndWrite(const AsyncResultPtr &result)
 			{
@@ -163,32 +165,32 @@ namespace async
 
 			// 阻塞式接收数据直到成功或出错
 			template<typename MutableBufferT>
-			size_t Read(const MutableBufferT &buffer)
+			size_t Read(MutableBufferT &buffer)
 			{
 				return impl_->Read(buffer, 0, 0);
 			}
 			template<typename MutableBufferT>
-			size_t Read(const MutableBufferT &buffer, u_long flag)
+			size_t Read(MutableBufferT &buffer, u_long flag)
 			{
 				return impl_->Read(buffer, 0, flag);
 			}
 			template<typename MutableBufferT>
-			size_t Read(const MutableBufferT &buffer, size_t offset, u_long flag)
+			size_t Read(MutableBufferT &buffer, size_t offset, u_long flag)
 			{
 				return impl_->Read(buffer, offset, flag);
 			}
 
 			// 异步接收数据
-			template<typename MutableBufferT>
-			AsyncResultPtr AsyncRead(const MutableBufferT &buffer, const AsyncCallbackFunc &callback)
+			template<typename MutableBufferT, typename HandlerT>
+			AsyncResultPtr AsyncRead(MutableBufferT &buffer, const HandlerT &callback)
 			{
-				return impl_->AsyncRead(buffer, 0, buffer->allocSize(), callback);
+				return impl_->AsyncRead(buffer.data(), buffer.size(), callback);
 			}
-			template<typename MutableBufferT>
+			/*template<typename MutableBufferT>
 			AsyncResultPtr AsyncRead(const MutableBufferT &buffer, size_t offset, size_t size, const AsyncCallbackFunc &callback)
 			{
 				return impl_->AsyncRead(buffer, offset, size, callback);
-			}
+			}*/
 
 			size_t EndRead(const AsyncResultPtr &result)
 			{

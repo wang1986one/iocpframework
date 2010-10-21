@@ -22,10 +22,81 @@ namespace async
 
 
 
+		
+
+		//---------------------------------------------------------------------------
+		// class AsyncCallbackBase
+		// 非IO异步回调组件
+
+		struct AsyncCallbackBase;
+		typedef pointer<AsyncCallbackBase> AsyncCallbackBasePtr;
+
+		struct AsyncCallbackBase
+			: public Object
+		{
+			// 是否利用OVERLAPPED
+			enum { IS_OVERLAPPED = FALSE };		
+
+			// 利用函数指针，避免virtual function
+			typedef void (*CallbackFuncPtr)(AsyncCallbackBase *, u_long, u_long);
+			CallbackFuncPtr callback_;
+
+			AsyncCallbackBase(CallbackFuncPtr callback)
+				: callback_(callback)
+			{}
+
+			void Invoke(u_long size, u_long error)
+			{
+				callback_(this, size, error);
+			}
+
+			template<typename KeyT, typename OverlappedT>
+			static void Call(KeyT *key, OverlappedT *overlapped, u_long size, u_long error)
+			{
+				AsyncCallbackBasePtr p = reinterpret_cast<AsyncCallbackBase *>(key);
+				p->Release();
+
+				p->Invoke(size, error);
+			}
+
+			static void Call(AsyncCallbackBasePtr &result)
+			{
+				result->Invoke(0, ::GetLastError());
+			}
+		};
+
+
+		template<typename HandlerT>
+		struct AsyncCallback
+			: public AsyncCallbackBase
+		{
+			HandlerT handler_;
+
+			explicit AsyncCallback(const HandlerT &handler)
+				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call)
+				, handler_(handler)
+			{}
+
+		private:
+			static void Call(AsyncCallbackBase *param, u_long size, u_long error)
+			{
+				AsyncCallback<HandlerT> *pThis = static_cast<AsyncCallback<HandlerT> *>(param);
+				pThis->handler_(pThis, size, error);
+			}
+		};
+
+		template<typename HandlerT>
+		inline AsyncCallbackBasePtr MakeAsyncCallback(const HandlerT &handler)
+		{
+			return new AsyncCallback<HandlerT>(handler);
+		}
+
+
+
 		struct AsyncResult;
 		typedef pointer<AsyncResult> AsyncResultPtr;
 
-		typedef std::tr1::function<void(const AsyncResultPtr &asyncResult, u_long bytes, u_long error)> AsyncCallbackFunc;
+		//typedef std::tr1::function<void(const AsyncResultPtr &asyncResult, u_long bytes, u_long error)> AsyncCallbackFunc;
 
 
 		//---------------------------------------------------------------------------
@@ -39,26 +110,21 @@ namespace async
 			// 是否利用OVERLAPPED
 			enum { IS_OVERLAPPED = TRUE };
 
-			// 缓冲区
-			ObjectPtr	m_buffer;
-			// 异步状态
-			ObjectPtr	m_accept;
 			// 回调函数
-			AsyncCallbackFunc m_callback;
+			AsyncCallbackBasePtr m_callback;
+	
 
-
-			AsyncResult::AsyncResult(const ObjectPtr &buffer, const ObjectPtr &accept, const AsyncCallbackFunc &callback)
-				: m_buffer(buffer), m_accept(accept), m_callback(callback)
+			template<typename HandlerT>
+			explicit AsyncResult(const HandlerT &callback)
+				: m_callback(MakeAsyncCallback(callback))
 			{
 				RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
 			}
 
-			void reset(const ObjectPtr &buffer, const ObjectPtr &accept, const AsyncCallbackFunc &callback)
+			/*void reset(const AsyncCallbackFunc &callback)
 			{
-				m_buffer		= buffer;
-				m_accept		= accept;
 				m_callback		= callback;
-			}
+			}*/
 
 			template<typename HandleT>
 			size_t EndAsync(HandleT handle)
@@ -91,84 +157,14 @@ namespace async
 		private:
 			static void _CallImpl(const AsyncResultPtr &result, u_long size, u_long error)
 			{
-				if( result->m_callback != NULL )
-					HandlerInvoke::Invoke(result->m_callback, result, size, error);
+				result->m_callback->Invoke(size, error);
+				//if( result->m_callback->callback_ != NULL )
+					//HandlerInvoke::Invoke(result->m_callback->callback_, result, size, error);
 			}
 
 		private:
 			AsyncResult();
 		};
-
-
-
-
-		//---------------------------------------------------------------------------
-		// class AsyncCallbackBase
-		// 非IO异步回调组件
-
-		struct AsyncCallbackBase;
-		typedef pointer<AsyncCallbackBase> AsyncCallbackBasePtr;
-
-		struct AsyncCallbackBase
-			: public Object
-		{
-			// 是否利用OVERLAPPED
-			enum { IS_OVERLAPPED = FALSE };		
-
-			// 利用函数指针，避免virtual function
-			typedef void (*CallbackFuncPtr)(AsyncCallbackBase *, u_long);
-			CallbackFuncPtr callback_;
-
-			AsyncCallbackBase(CallbackFuncPtr callback)
-				: callback_(callback)
-			{}
-
-			void Invoke(u_long error)
-			{
-				callback_(this, error);
-			}
-
-			template<typename KeyT, typename OverlappedT>
-			static void Call(KeyT *key, OverlappedT *overlapped, u_long/* size*/, u_long error)
-			{
-				AsyncCallbackBasePtr p = reinterpret_cast<AsyncCallbackBase *>(key);
-				p->Release();
-
-				p->Invoke(error);
-			}
-
-			static void Call(AsyncCallbackBasePtr &result)
-			{
-				result->Invoke(::GetLastError());
-			}
-		};
-
-
-		template<typename HandlerT>
-		struct AsyncCallback
-			: public AsyncCallbackBase
-		{
-			HandlerT handler_;
-
-			explicit AsyncCallback(const HandlerT &handler)
-				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call)
-				, handler_(handler)
-			{}
-
-		private:
-			static void Call(AsyncCallbackBase *param, u_long error)
-			{
-				AsyncCallback<HandlerT> *pThis = static_cast<AsyncCallback<HandlerT> *>(param);
-				pThis->handler_(error);
-			}
-		};
-
-		template<typename HandlerT>
-		inline AsyncCallbackBasePtr MakeAsyncCallback(const HandlerT &handler)
-		{
-			return new AsyncCallback<HandlerT>(handler);
-		}
-
 
 	}
 }
