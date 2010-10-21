@@ -28,8 +28,28 @@ BOOL WINAPI console_ctrl_handler(DWORD ctrl_type)
 	}
 }
 
+// Debug Memory Info
+void DebugAllocSize(LONG allocCount, size_t size)
+{
+	std::cout << "Alloc " << allocCount << ": " << size << std::endl;
+}
+
+void DebugDeallocSize(LONG deallocCount, size_t size)
+{
+	std::cout << "Dealloc " << deallocCount << ": " << size << std::endl;
+}
+
+
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	// ²âÊÔÄÚ´æÉêÇëÊÍ·Å
+	async::iocp::DefaultDebug::RegisterCallback(std::tr1::bind(&DebugAllocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2),
+		std::tr1::bind(&DebugDeallocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+
+
 	try
 	{
 		http::Server server("127.0.0.1", "5050",

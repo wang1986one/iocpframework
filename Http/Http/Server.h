@@ -35,7 +35,7 @@ namespace http
 		void Stop();
 
 	private:
-		void _HandleAccept(const async::iocp::AsyncResultPtr &);
+		void _HandleAccept(const async::iocp::AsyncResultPtr &, u_long, const async::network::SocketPtr &);
 		void _HandleStop();
 	};
 }

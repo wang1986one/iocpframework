@@ -47,7 +47,7 @@ namespace http
 		/// Convert the reply into a vector of buffers. The buffers do not own the
 		/// underlying memory blocks, therefore the reply object must remain valid and
 		/// not be changed until the write operation has completed.
-		std::vector<async::network::SocketBufferPtr> ToBuffers();
+		std::vector<async::iocp::ConstBuffer> ToBuffers();
 
 		// ·µ»ØÒ»¸öReply
 		static Reply StockReply(StatusType status);
