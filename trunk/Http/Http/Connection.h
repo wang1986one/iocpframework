@@ -44,6 +44,7 @@ namespace http
 		void Stop();
 
 	private:
+		void _CopyBuffer(const std::vector<async::iocp::ConstBuffer> &buf);
 		void _HandleRead(const async::iocp::AsyncResultPtr &result, size_t bytes, u_long error);
 		void _HandleWrite(size_t bytes, u_long error);
 	};

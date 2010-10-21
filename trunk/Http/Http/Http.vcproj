@@ -262,6 +262,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\IOCP\ReadWriteBuffer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\ReadWriteBuffer.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\IOCP\WinException.cpp"
 					>
 				</File>
@@ -285,6 +293,10 @@
 			<Filter
 				Name="network"
 				>
+				<File
+					RelativePath="..\..\include\Network\Accept.hpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\include\Network\BasicAcceptor.hpp"
 					>
@@ -345,14 +357,6 @@
 			<Filter
 				Name="filesystem"
 				>
-				<File
-					RelativePath="..\..\include\FileSystem\File.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\FileSystem\File.hpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="multithread"

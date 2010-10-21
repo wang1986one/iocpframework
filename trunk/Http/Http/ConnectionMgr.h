@@ -4,15 +4,19 @@
 #include <set>
 #include "Connection.h"
 
-
+#include "../../include/MultiThread/Lock.hpp"
 
 namespace http
 {
 
 	class ConnectionMgr
 	{
+		typedef async::thread::CAutoCriticalSection CSLock;
+		typedef async::thread::CAutoLock<CSLock>	AutoLock;
+
 	private:
 		std::set<ConnectionPtr> connections_;
+		CSLock lock_;
 
 	public:
 		ConnectionMgr(){}

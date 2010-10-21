@@ -95,23 +95,23 @@ namespace http
 
 
 
-	std::vector<async::network::SocketBufferPtr> Reply::ToBuffers()
+	std::vector<async::iocp::ConstBuffer> Reply::ToBuffers()
 	{
-		std::vector<async::network::SocketBufferPtr> buffers;
-		buffers.push_back(async::network::MakeBuffer(status_strings::ToBuffer(status)));
+		std::vector<async::iocp::ConstBuffer> buffers;
+		buffers.push_back(async::iocp::Buffer(status_strings::ToBuffer(status)));
 
 		for(std::size_t i = 0; i != headers.size(); ++i)
 		{
 			Header& h = headers[i];
 
-			buffers.push_back(async::network::MakeBuffer(h.name));
-			buffers.push_back(async::network::MakeBuffer(misc_strings::nameValueSeparator));
-			buffers.push_back(async::network::MakeBuffer(h.value));
-			buffers.push_back(async::network::MakeBuffer(misc_strings::crlf));
+			buffers.push_back(async::iocp::Buffer(h.name));
+			buffers.push_back(async::iocp::Buffer(misc_strings::nameValueSeparator));
+			buffers.push_back(async::iocp::Buffer(h.value));
+			buffers.push_back(async::iocp::Buffer(misc_strings::crlf));
 		}
 
-		buffers.push_back(async::network::MakeBuffer(misc_strings::crlf));
-		buffers.push_back(async::network::MakeBuffer(content));
+		buffers.push_back(async::iocp::Buffer(misc_strings::crlf));
+		buffers.push_back(async::iocp::Buffer(content));
 
 		return buffers;
 	}
