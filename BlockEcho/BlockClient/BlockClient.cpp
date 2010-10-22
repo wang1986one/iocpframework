@@ -16,20 +16,20 @@ int _tmain(int argc, _TCHAR* argv[])
 		OverlappedDispatcher io(1);
 
 		Tcp::StreamSocket sock(io, Tcp::V4());
-		sock.Connect(IPAddress::Parse("192.168.1.103"), 5050);
+		sock.Connect(AF_INET, IPAddress::Parse("192.168.1.103"), 5050);
 
 		char request[1024] = {0};
 		std::cin.getline(request, 1024);
 
 		size_t requestLen = ::strlen(request);
 		
-		SocketBufferPtr buf(MakeBuffer(request, requestLen));
-		size_t sendLen = sock.Write(buf);
+		AutoBufferPtr buf(MakeBuffer(request, requestLen));
+		size_t sendLen = sock.Write(ConstBuffer(buf->data(), buf->size()));
 
 		char reply[1024] = {0};
 
-		SocketBufferPtr recvBuf(MakeBuffer(reply));
-		size_t replyLen = sock.Read(recvBuf);
+		AutoBufferPtr recvBuf(MakeBuffer(reply));
+		size_t replyLen = sock.Read(MutableBuffer(recvBuf->data(), recvBuf->capacity()));
 		recvBuf->resize(replyLen);
 
 		std::cout.write(reply, replyLen);

@@ -26,15 +26,16 @@ DWORD Session(StreamSocketPtr socket)
 		while(1)
 		{
 			static char data[MaxLenth];
-			static SocketBufferPtr buffer(MakeBuffer(data));
+			static AutoBufferPtr buffer(MakeBuffer(data));
+			buffer->resize(MaxLenth);
 
-			size_t len = socket->Read(buffer);
+			size_t len = socket->Read(MutableBuffer(buffer->data(), buffer->size()));
 			buffer->resize(len);
 			if( len == 0 )
 				break;
 
 			//size_t sendLen = socket->Write(buffer);
-			Write(*socket, buffer/*, TransferAtLeast(2)*/);
+			Write(*socket, ConstBuffer(buffer->data(), buffer->size())/*, TransferAtLeast(2)*/);
 		}
 	}
 	catch(std::exception &e)
