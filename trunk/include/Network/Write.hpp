@@ -23,14 +23,14 @@ namespace async
 		{
 			size_t transfers = 0;
 			size_t totalTransfer = condition(transfers);
-			size_t bufSize = buffer->size();
+			size_t bufSize = buffer.size();
 
 			while( transfers <= totalTransfer )
 			{
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Write(buffer, transfers, 0);	
+				size_t ret = s.Write(ConstBuffer(buffer.data() + transfers, bufSize - transfers), 0);	
 				transfers += ret;
 			}
 

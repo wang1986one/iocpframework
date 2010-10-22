@@ -30,7 +30,7 @@ namespace async
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Read(buffer, transfers, 0);	
+				size_t ret = s.Read(MutableBuffer(buffer.data() + transfers, bufSize - transfers));	
 				transfers += ret;
 			}
 
