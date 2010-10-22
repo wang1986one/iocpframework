@@ -15,7 +15,7 @@ namespace http
 		: socket_(io, async::network::Tcp::V4())
 		, connectionMgr_(mgr)
 		, requestHandler_(handler)
-		, socketBuffer_(new async::network::SocketBuffer())
+		, socketBuffer_()
 	{}
 
 
@@ -28,8 +28,8 @@ namespace http
 	{
 		using namespace std::tr1::placeholders;
 
-		socket_.AsyncRead(async::iocp::Buffer(buffer_), std::tr1::bind(&Connection::_HandleRead,
-			shared_from_this(), _1, _2, _3));
+		socket_.AsyncRead(async::iocp::Buffer(buffer_), 
+			std::tr1::bind(&Connection::_HandleRead, shared_from_this(), _1, _2));
 	}
 
 	void Connection::Stop()
@@ -45,17 +45,17 @@ namespace http
 		{
 			total += buf[i].size();
 		}
-		socketBuffer_->resize(total);
+		socketBuffer_.resize(total);
 
 		size_t index = 0;
 		for(size_t i =0; i != buf.size(); ++i)
 		{
-			std::copy(buf[i].begin(), buf[i].end(), socketBuffer_->data(index));
+			std::copy(buf[i].begin(), buf[i].end(), socketBuffer_.data(index));
 			index += buf[i].size();
 		}
 	}
 
-	void Connection::_HandleRead(const async::iocp::AsyncResultPtr &result, size_t bytes, u_long error)
+	void Connection::_HandleRead(size_t bytes, u_long error)
 	{
 		if( error == ERROR_OPERATION_ABORTED || bytes == 0 )
 		{
@@ -76,21 +76,21 @@ namespace http
 					requestHandler_.HandleRequest(request_, reply_);
 
 					_CopyBuffer(reply_.ToBuffers());
-					AsyncWrite(socket_, async::iocp::Buffer(socketBuffer_->data(), socketBuffer_->size()),
-						std::tr1::bind(&Connection::_HandleWrite, shared_from_this(), _2, _3));
+					AsyncWrite(socket_, async::iocp::Buffer(socketBuffer_.data(), socketBuffer_.size()),
+						std::tr1::bind(&Connection::_HandleWrite, shared_from_this(), _1, _2));
 				}	
 				else if( result == FALSE_VALUE )
 				{
 					reply_ = Reply::StockReply(Reply::bad_request);
 
 					_CopyBuffer(reply_.ToBuffers());
-					AsyncWrite(socket_, async::iocp::Buffer(socketBuffer_->data(), socketBuffer_->size()),
-						std::tr1::bind(&Connection::_HandleWrite, shared_from_this(), _2, _3));
+					AsyncWrite(socket_, async::iocp::Buffer(socketBuffer_.data(), socketBuffer_.size()),
+						std::tr1::bind(&Connection::_HandleWrite, shared_from_this(), _1, _2));
 				}
 				else	// ParseRet::INDETERMINATE
 				{
 					socket_.AsyncRead(async::iocp::Buffer(buffer_), 
-						std::tr1::bind(&Connection::_HandleRead, shared_from_this(), _1, _2, _3));
+						std::tr1::bind(&Connection::_HandleRead, shared_from_this(), _1, _2));
 				}
 			}
 			catch(std::exception &e)
@@ -112,7 +112,7 @@ namespace http
 			//socket_.AsyncDisconnect(NULL);
 		}
 		
-		if( error != ERROR_OPERATION_ABORTED )
+		//if( error != ERROR_OPERATION_ABORTED )
 		{
 			connectionMgr_.Stop(shared_from_this());
 		}

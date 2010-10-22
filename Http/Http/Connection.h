@@ -25,7 +25,7 @@ namespace http
 		RequestHandler &requestHandler_;
 
 		std::tr1::array<char, 8192> buffer_;
-		async::network::SocketBufferPtr socketBuffer_;
+		async::iocp::AutoBuffer socketBuffer_;
 		Request request_;
 		RequestParser requestParser_;
 		Reply reply_;
@@ -45,7 +45,7 @@ namespace http
 
 	private:
 		void _CopyBuffer(const std::vector<async::iocp::ConstBuffer> &buf);
-		void _HandleRead(const async::iocp::AsyncResultPtr &result, size_t bytes, u_long error);
+		void _HandleRead(size_t bytes, u_long error);
 		void _HandleWrite(size_t bytes, u_long error);
 	};
 
