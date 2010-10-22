@@ -21,7 +21,7 @@ namespace http
 		using namespace std::tr1::placeholders;
 
 		acceptor_.AsyncAccept(newConnection_->Socket().Get(), 0, 
-			std::tr1::bind(&Server::_HandleAccept, this, _1, _3, _4));
+			std::tr1::bind(&Server::_HandleAccept, this, _2, _3));
 	}
 
 	void Server::Stop()
@@ -32,7 +32,7 @@ namespace http
 		io_.Post(result);
 	}
 
-	void Server::_HandleAccept(const async::iocp::AsyncResultPtr &result, u_long error, const async::network::SocketPtr &remoteSocket)
+	void Server::_HandleAccept(u_long error, const async::network::SocketPtr &remoteSocket)
 	{
 		if( error == ERROR_OPERATION_ABORTED )
 		{
@@ -42,14 +42,13 @@ namespace http
 
 		try
 		{
-			//const async::network::SocketPtr &remoteSocket = acceptor_.EndAccept(result);
 			connectionMgr_.Start(newConnection_);
 
 			newConnection_.reset(new Connection(io_, connectionMgr_, requestHandler_));
 			
 			using namespace std::tr1::placeholders;
 			acceptor_.AsyncAccept(newConnection_->Socket().Get(), 0, 
-				std::tr1::bind(&Server::_HandleAccept, this, _1, _3, _4));
+				std::tr1::bind(&Server::_HandleAccept, this, _2, _3));
 		}
 		catch(std::exception &e)
 		{

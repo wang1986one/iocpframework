@@ -27,9 +27,7 @@ namespace http
 
 	
 	private:
-		/// Perform URL-decoding on a string. Returns false if the encoding was
-		/// invalid.
-		static bool UrlDecode(const std::string& in, std::string& out);
+		static bool _UrlDecode(const std::string& in, std::string& out);
 	};
 }
 

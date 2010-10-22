@@ -44,9 +44,7 @@ namespace http
 		// 回复内容的征文
 		std::string content;
 
-		/// Convert the reply into a vector of buffers. The buffers do not own the
-		/// underlying memory blocks, therefore the reply object must remain valid and
-		/// not be changed until the write operation has completed.
+		//
 		std::vector<async::iocp::ConstBuffer> ToBuffers();
 
 		// 返回一个Reply

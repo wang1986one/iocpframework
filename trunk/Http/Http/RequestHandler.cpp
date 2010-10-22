@@ -23,7 +23,7 @@ namespace http
 	{
 		// Decode url to path.
 		std::string request_path;
-		if( !UrlDecode(req.uri, request_path) )
+		if( !_UrlDecode(req.uri, request_path) )
 		{
 			rep = Reply::StockReply(Reply::bad_request);
 			return;
@@ -81,7 +81,7 @@ namespace http
 		rep.headers[1].value	= mime_types::ExtensionToType(extension);
 	}
 
-	bool RequestHandler::UrlDecode(const std::string& in, std::string& out)
+	bool RequestHandler::_UrlDecode(const std::string& in, std::string& out)
 	{
 		out.clear();
 		out.reserve(in.size());

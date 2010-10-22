@@ -56,14 +56,11 @@ namespace http
 		//ÖØÖÃ×´Ì¬
 		void Reset();
 
-		/// Parse some data. The tribool return value is true when a complete request
-		/// has been parsed, false if the data is invalid, indeterminate when more
-		/// data is required. The InputIterator return value indicates how much of the
-		/// input has been consumed.
+		// ·µ»ØÖµ TRUE_VALUE, FALSE_VALUE, INDETERMINATE
 		template<typename InputIteratorT>
 		std::tr1::tuple<ParseRet, ParseRet> Parse(Request& req, InputIteratorT begin, InputIteratorT end)
 		{
-			while (begin != end)
+			while(begin != end)
 			{
 				ParseRet result = Consume(req, *begin++);
 				if( result != INDETERMINATE )

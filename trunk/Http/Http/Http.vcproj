@@ -306,10 +306,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Network\BufferHelper.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\Network\IPAddress.cpp"
 					>
 				</File>
