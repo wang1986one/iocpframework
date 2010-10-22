@@ -25,11 +25,6 @@ namespace async
 
 
 
-		// class SocketBuffer
-		typedef BufferT<char, async::memory::MemAllocator<char, MemoryMgr::SocketMemoryPool> > SocketBuffer;
-		typedef pointer<SocketBuffer> SocketBufferPtr;
-
-
 		//----------------------------------------------------------------------
 		// class Socket
 
@@ -91,7 +86,7 @@ namespace async
 			void Cancel();
 
 			// bind
-			void Bind(u_short family, u_short uPort, const IPAddress &addr);
+			void Bind(int family, u_short uPort, const IPAddress &addr);
 			// listen
 			void Listen(int nMax);
 
@@ -102,12 +97,8 @@ namespace async
 			void Connect(int family, const IPAddress &addr, u_short uPort);
 			void DisConnect(int shut, bool bReuseSocket = true);
 
-			size_t Read(const SocketBufferPtr &buffer, size_t offset, DWORD flag);
-			size_t Write(const SocketBufferPtr &buffer, size_t offset, DWORD flag);
-
-		private:
-			size_t _ReadImpl(char *buffer, size_t sz, DWORD flag);
-			size_t _WriteImpl(char *buffer, size_t sz, DWORD flag);
+			size_t Read(char *buf, size_t size, DWORD flag);
+			size_t Write(const char *buffer, size_t size, DWORD flag);
 
 			// 异步调用接口
 		public:
@@ -118,22 +109,29 @@ namespace async
 			// 异步连接需要先绑定端口
 			template<typename HandlerT>
 			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback);
+			
 			const AsyncResultPtr &AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void EndConnect(const AsyncResultPtr &asyncResult);
 
+			// 异步断开连接
 			template<typename HandlerT>
-			AsyncResultPtr AsyncDisconnect(const HandlerT &callback, bool bReuseSocket = true);
-			const AsyncResultPtr &AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket = true);
+			AsyncResultPtr AsyncDisconnect(const HandlerT &callback, bool bReuseSocket);
+			
+			const AsyncResultPtr &AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket);
 			void EndDisconnect(const AsyncResultPtr &asyncResult);
 
+			// 异步读取
 			template<typename HandlerT>
 			AsyncResultPtr AsyncRead(char *buf, size_t size, const HandlerT &callback);
-			//const AsyncResultPtr &AsyncRead(const AsyncResultPtr &result, size_t offset, size_t size);
+
+			const AsyncResultPtr &AsyncRead(const AsyncResultPtr &result, char *buf, size_t size);
 			size_t EndRead(const AsyncResultPtr &asyncResult);
 
+			// 异步写入
 			template<typename HandlerT>
 			AsyncResultPtr AsyncWrite(const char *buf, size_t size, const HandlerT &callback);
-			//const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, size_t offset, size_t size);
+			
+			const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, const char *buf, size_t size);
 			size_t EndWrite(const AsyncResultPtr &asyncResult);
 
 			
@@ -211,7 +209,7 @@ namespace async
 				throw std::logic_error("Remote socket not open");
 
 			typedef internal::AcceptorHandle<HandlerT> HookAcceptor;
-			SocketBufferPtr acceptBuffer(new SocketBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
+			iocp::AutoBufferPtr acceptBuffer(iocp::CreateAutoBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
 			AsyncResultPtr asyncResult(new AsyncResult(HookAcceptor(*this, remoteSocket, acceptBuffer, callback)));
 			asyncResult->AddRef();
 

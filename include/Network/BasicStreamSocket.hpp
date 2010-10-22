@@ -61,7 +61,7 @@ namespace async
 		public:
 			void Open(const ProtocolType &protocol = ProtocolType::V4())
 			{
-				impl_->Open(protocol.family(), protocol.Type(), protocol.Protocol());
+				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 			}
 	
 			bool IsOpen() const
@@ -100,33 +100,43 @@ namespace async
 				return impl_->IOControl(control);
 			}
 
-			void Bind(u_short port, const IPAddress &addr)
+			void Bind(int family, u_short port, const IPAddress &addr)
 			{
-				impl_->Bind(ProtocolType::V4().Family(), port, addr);
+				impl_->Bind(family, port, addr);
 			}
 
 
 			// 连接远程服务
-			void Connect(const IPAddress &addr, u_short port)
+			void Connect(int family, const IPAddress &addr, u_short port)
 			{
-				impl_->Connect(ProtocolType::V4().Family(), addr, port);
+				impl_->Connect(family, addr, port);
 			}
 
 			void DisConnect(int shut = SD_BOTH)
 			{
 				impl_->DisConnect(shut, true);
 			}
-
+			 
+			// 异步链接
 			template<typename HandlerT>
 			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
 			{
 				return impl_->AsyncConnect(addr, port, handler);
 			}
+			const AsyncResultPtr &AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
+			{
+				return impl_->AsyncConnect(result, addr, uPort);
+			}
 
+			// 异步断开链接
 			template<typename HandlerT>
 			AsyncResultPtr AsyncDisconnect(const HandlerT &handler, bool reuse = true)
 			{
 				return impl_->AsyncDisconnect(handler, reuse);
+			}
+			const AsyncResultPtr &AsyncDisconnect(const AsyncResultPtr &result, bool reuse = true)
+			{
+				return impl_->AsyncDisconnect(result, reuse);
 			}
 
 			// 阻塞式发送数据直到数据发送成功或出错
@@ -140,45 +150,38 @@ namespace async
 			{
 				return impl_->Write(buffer, 0, flag);
 			}
-			template<typename ConstBufferT>
-			size_t Write(const ConstBufferT &buffer, size_t offset, DWORD flag)
-			{
-				return impl_->Write(buffer, offset, flag);
-			}
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			const AsyncResultPtr AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
+			AsyncResultPtr AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
 			{
 				return impl_->AsyncWrite(buffer.data(), buffer.size(), callback);
 			}
-			/*template<typename MutableBufferT>
-			const AsyncResultPtr AsyncWrite(MutableBufferT &buffer, size_t offset, size_t size, const AsyncCallbackFunc &callback)
+
+			template<typename ConstBufferT>
+			const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, const ConstBufferT &buffer)
 			{
-				return impl_->AsyncWrite(buffer, offset, size, callback);
-			}*/
+				return impl_->AsyncWrite(result, buffer.data(), buffer.size());
+			}
 			
 			size_t EndWrite(const AsyncResultPtr &result)
 			{
 				return impl_->EndWrite(result);
 			}
 
+
 			// 阻塞式接收数据直到成功或出错
 			template<typename MutableBufferT>
 			size_t Read(MutableBufferT &buffer)
 			{
-				return impl_->Read(buffer, 0, 0);
+				return impl_->Read(buffer.data(), 0, 0);
 			}
 			template<typename MutableBufferT>
 			size_t Read(MutableBufferT &buffer, u_long flag)
 			{
-				return impl_->Read(buffer, 0, flag);
+				return impl_->Read(buffer.data(), 0, flag);
 			}
-			template<typename MutableBufferT>
-			size_t Read(MutableBufferT &buffer, size_t offset, u_long flag)
-			{
-				return impl_->Read(buffer, offset, flag);
-			}
+	
 
 			// 异步接收数据
 			template<typename MutableBufferT, typename HandlerT>
@@ -186,11 +189,12 @@ namespace async
 			{
 				return impl_->AsyncRead(buffer.data(), buffer.size(), callback);
 			}
-			/*template<typename MutableBufferT>
-			AsyncResultPtr AsyncRead(const MutableBufferT &buffer, size_t offset, size_t size, const AsyncCallbackFunc &callback)
+
+			template<typename MutableBufferT>
+			const AsyncResultPtr &AsyncRead(const AsyncResultPtr &result, MutableBufferT &buffer)
 			{
-				return impl_->AsyncRead(buffer, offset, size, callback);
-			}*/
+				return impl_->AsyncRead(result, buffer.data(), buffer.size());
+			}
 
 			size_t EndRead(const AsyncResultPtr &result)
 			{

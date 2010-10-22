@@ -13,23 +13,23 @@ namespace internal
 	{	
 		network::Socket &acceptor_;
 		network::SocketPtr remoteSocket_;
-		network::SocketBufferPtr buf_;
+		iocp::AutoBufferPtr buf_;
 		HandlerT handler_;
 
-		AcceptorHandle(network::Socket &acceptor, const network::SocketPtr &remoteSocket, const SocketBufferPtr &buf, const HandlerT &handler)
+		AcceptorHandle(network::Socket &acceptor, const network::SocketPtr &remoteSocket, const iocp::AutoBufferPtr &buf, const HandlerT &handler)
 			: acceptor_(acceptor)
 			, remoteSocket_(remoteSocket)
 			, buf_(buf)
 			, handler_(handler)
 		{}
 
-		void operator()(const iocp::AsyncResultPtr &reuslt, u_long size, u_long error)
+		void operator()(u_long size, u_long error)
 		{
 			// ¸´ÖÆListen socketÊôÐÔ
 			async::network::UpdateAcceptContext context(acceptor_);
 			remoteSocket_->SetOption(context);
 
-			handler_(std::tr1::cref(reuslt), size, error, std::tr1::cref(remoteSocket_));
+			handler_(size, error, std::tr1::cref(remoteSocket_));
 		}
 	};
 }

@@ -86,7 +86,6 @@ namespace async
 
 			void deallocate(pointer p) 
 			{
-				Destroy(p);
 				return m_alloc->Deallocate(p, sizeof(value_type));
 			}
 			void deallocate(pointer p, size_type num) 

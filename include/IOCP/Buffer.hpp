@@ -3,8 +3,9 @@
 
 
 
-#include "Object.hpp"
-
+#include <array>
+#include <vector>
+#include <string>
 
 #pragma warning(disable: 4996) // 去掉
 
@@ -20,8 +21,7 @@ namespace async
 		// 提供缓冲区服务，支持STL标准接口
 
 		template<typename T, typename AllocT>
-		class BufferT
-			: public Object
+		class AutoBufferT
 		{
 		public:
 			typedef T			value_type;
@@ -38,42 +38,42 @@ namespace async
 			static alloc_type BufferPool;
 			AllocT alloc_;		// 分配器
 
-			size_t allocSize_;	// 已分配缓冲区大小
+			bool internal_;		// 是否外部提供缓冲区
+			size_t capacity_;	// 已分配缓冲区大小
 			size_t bufferSize_;	// 已使用缓冲区大小
 
 			value_type *buffer_;// 缓冲区指针
-			bool internal_;		// 是否外部提供缓冲区
-
+			
 		public:
-			explicit BufferT(size_t defaultSize = MemoryMgr::DEFAULT_SOCKET_SIZE)
+			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SOCKET_SIZE)
 				: alloc_(BufferPool)
-				, allocSize_(defaultSize)
+				, internal_(true)
+				, capacity_(defaultSize)
 				, bufferSize_(0)
 				, buffer_(_Allocate(defaultSize))
-				, internal_(true)
 			{}
-			BufferT(pointer pStr, size_t nSize)
+			AutoBufferT(pointer pStr, size_t nSize)
 				: alloc_(BufferPool)
-				, allocSize_(nSize)
+				, internal_(false)
+				, capacity_(nSize)
 				, bufferSize_(nSize)
 				, buffer_(pStr)
-				, internal_(false)
 			{
 			}
-			BufferT(pointer beg, const_pointer end)
+			AutoBufferT(pointer beg, pointer end)
 				: alloc_(BufferPool)
-				, allocSize_(std::distance(beg, end))
-				, bufferSize_(allocSize_)
-				, buffer_(beg)
 				, internal_(false)
+				, capacity_(std::distance(beg, end))
+				, bufferSize_(capacity_)
+				, buffer_(beg)
 			{
 			}
 
-			~BufferT()
+			~AutoBufferT()
 			{
 				// 如果为内部分配缓冲区，则需要自动释放
 				if( internal_ )
-					alloc_.deallocate(buffer_, allocSize_);
+					alloc_.deallocate(buffer_, capacity_);
 			}
 
 		public:
@@ -99,9 +99,9 @@ namespace async
 			{
 				return bufferSize_;
 			}
-			size_t allocSize() const
+			size_t capacity() const
 			{
-				return allocSize_;
+				return capacity_;
 			}
 
 			void resize(size_t nNewSize)
@@ -109,13 +109,13 @@ namespace async
 				// 如果是外部缓冲区
 				if( !internal_ )
 				{
-					if( nNewSize <= allocSize_ )
+					if( nNewSize <= capacity_ )
 						bufferSize_ = nNewSize;
 					else
 						throw std::out_of_range("buffer out of range");
 				}
 
-				if( nNewSize <= allocSize_ )
+				if( nNewSize <= capacity_ )
 					bufferSize_ = nNewSize;
 				else
 				{
@@ -123,12 +123,12 @@ namespace async
 					pointer pNewBuf = _Allocate(nNewSize);
 
 					// 复制缓冲区
-					std::copy(buffer_, buffer_ + allocSize_, pNewBuf);
+					std::copy(buffer_, buffer_ + capacity_, pNewBuf);
 
 					// 释放旧缓冲区
-					alloc_.deallocate(buffer_, allocSize_);
+					alloc_.deallocate(buffer_, capacity_);
 
-					allocSize_	= nNewSize;
+					capacity_	= nNewSize;
 					bufferSize_ = nNewSize;
 					buffer_		= pNewBuf;
 				}
@@ -136,14 +136,14 @@ namespace async
 
 			pointer data(size_t offset = 0)
 			{
-				if( offset >= allocSize_ )
+				if( offset >= capacity_ )
 					throw std::out_of_range("buffer offset >= allocSize_");
 
 				return buffer_ + offset;
 			}
 			const_pointer data(size_t offset = 0) const
 			{
-				if( offset >= allocSize_ )
+				if( offset >= capacity_ )
 					throw std::out_of_range("buffer offset >= allocSize_");
 
 				return buffer_ + offset;
@@ -169,7 +169,120 @@ namespace async
 		};
 
 		template<typename T, typename AllocT>
-		typename BufferT<T, AllocT>::alloc_type BufferT<T, AllocT>::BufferPool;
+		typename AutoBufferT<T, AllocT>::alloc_type AutoBufferT<T, AllocT>::BufferPool;
+
+		typedef AutoBufferT<char, async::memory::MemAllocator<char, MemoryMgr::SocketMemoryPool>> AutoBuffer;
+		typedef std::tr1::shared_ptr<AutoBuffer>	AutoBufferPtr;
+
+
+
+
+		// -------------------- Buffer Memory -------------------------------------
+		namespace buffer_memory
+		{
+			typedef async::memory::SGIMTMemoryPool SmallObjectMemoryPool;
+			typedef async::memory::MemAllocator<AutoBuffer, SmallObjectMemoryPool>	BufferAllocator;
+
+			inline BufferAllocator &GetBufferAllocator()
+			{
+				static SmallObjectMemoryPool pool;
+				static BufferAllocator bufferAllocator(pool);
+
+				return bufferAllocator;
+			}
+		}
+
+
+
+		inline void DestroyAutoBuffer(buffer_memory::BufferAllocator::pointer p)
+		{
+			return buffer_memory::GetBufferAllocator().deallocate(p);
+		}
+
+		inline AutoBufferPtr CreateAutoBuffer()
+		{
+			return AutoBufferPtr(::new(buffer_memory::GetBufferAllocator().allocate()) AutoBuffer(),
+				&DestroyAutoBuffer);
+		}
+
+		inline AutoBufferPtr CreateAutoBuffer(size_t size)
+		{
+			return AutoBufferPtr(::new(buffer_memory::GetBufferAllocator().allocate()) AutoBuffer(size),
+				&DestroyAutoBuffer);
+		}
+
+		inline AutoBufferPtr CreateAutoBuffer(AutoBuffer::pointer buf, size_t size)
+		{
+			return AutoBufferPtr(::new(buffer_memory::GetBufferAllocator().allocate()) AutoBuffer(buf, size),
+				&DestroyAutoBuffer);
+		}
+
+		inline AutoBufferPtr CreateAutoBuffer(AutoBuffer::pointer beg, AutoBuffer::pointer end)
+		{
+			return AutoBufferPtr(::new(buffer_memory::GetBufferAllocator().allocate()) AutoBuffer(beg, end),
+				&DestroyAutoBuffer);
+		}
+
+		
+
+		// -------------------- Buffer Helper Function -----------------------------
+
+		inline AutoBufferPtr MakeBuffer(char *buf, size_t sz)
+		{
+			return AutoBufferPtr(CreateAutoBuffer(buf, sz));
+		}
+		inline AutoBufferPtr MakeBuffer(const char *buf, size_t sz)
+		{
+			return MakeBuffer(const_cast<char *>(buf), sz);
+		}
+
+		// --------------------------
+
+		template<size_t _N>
+		inline AutoBufferPtr MakeBuffer(char (&arr)[_N])
+		{
+			return AutoBufferPtr(CreateAutoBuffer(arr, _N));
+		}
+		template<size_t _N>
+		inline AutoBufferPtr MakeBuffer(const char (&arr)[_N])
+		{
+			return MakeBuffer(const_cast<char (&)[_N]>(arr));
+		}
+
+		// --------------------------
+
+		template<size_t _N>
+		inline AutoBufferPtr MakeBuffer(std::tr1::array<char, _N> &arr)
+		{
+			return AutoBufferPtr(CreateAutoBuffer(arr.data(), _N));
+		}
+		template<size_t _N>
+		inline AutoBufferPtr MakeBuffer(const std::tr1::array<char, _N> &arr)
+		{
+			return MakeBuffer(const_cast<std::tr1::array<char, _N> &>(arr));
+		}
+
+		// --------------------------
+
+		inline AutoBufferPtr MakeBuffer(std::vector<char> &arr)
+		{
+			return AutoBufferPtr(CreateAutoBuffer(&arr[0], arr.size()));
+		}
+		inline AutoBufferPtr MakeBuffer(const std::vector<char> &arr)
+		{
+			return MakeBuffer(const_cast<std::vector<char> &>(arr));
+		}
+
+		// --------------------------
+
+		inline AutoBufferPtr MakeBuffer(std::string &arr)
+		{
+			return AutoBufferPtr(CreateAutoBuffer(&*arr.begin(), arr.length()));
+		}
+		inline AutoBufferPtr MakeBuffer(const std::string &arr)
+		{
+			return MakeBuffer(const_cast<std::string &>(arr));
+		}
 
 
 	} // end of iocp
