@@ -266,6 +266,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\IOCP\ReadWriteBuffer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\ReadWriteBuffer.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\IOCP\WinException.cpp"
 					>
 				</File>
@@ -273,20 +281,32 @@
 					RelativePath="..\..\include\IOCP\WinException.hpp"
 					>
 				</File>
+				<Filter
+					Name="internal"
+					>
+					<File
+						RelativePath="..\..\include\IOCP\internal\Condition.hpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\IOCP\internal\HandlerAlloc.hpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="network"
 				>
+				<File
+					RelativePath="..\..\include\Network\Accept.hpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\include\Network\BasicAcceptor.hpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\include\Network\BasicStreamSocket.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\BufferHelper.hpp"
 					>
 				</File>
 				<File
@@ -333,18 +353,6 @@
 					RelativePath="..\..\include\Network\Write.hpp"
 					>
 				</File>
-				<Filter
-					Name="internal"
-					>
-					<File
-						RelativePath="..\..\include\Network\internal\Condition.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\Network\internal\ConsumingBuffer.hpp"
-						>
-					</File>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="multithread"
