@@ -13,10 +13,10 @@ namespace async
 
 		namespace HandlerInvoke
 		{
-			template<typename HandlerT, typename T>
-			inline void Invoke(const HandlerT &callback, const T &val, u_long size, u_long error)
+			template<typename HandlerT>
+			inline void Invoke(const HandlerT &callback, u_long size, u_long error)
 			{
-				callback(std::tr1::cref(val), size, error);
+				callback(size, error);
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace async
 			static void Call(AsyncCallbackBase *param, u_long size, u_long error)
 			{
 				AsyncCallback<HandlerT> *pThis = static_cast<AsyncCallback<HandlerT> *>(param);
-				pThis->handler_(pThis, size, error);
+				pThis->handler_(size, error);
 			}
 		};
 
@@ -111,20 +111,21 @@ namespace async
 			enum { IS_OVERLAPPED = TRUE };
 
 			// »Øµ÷º¯Êý
-			AsyncCallbackBasePtr m_callback;
+			AsyncCallbackBasePtr callback_;
 	
 
 			template<typename HandlerT>
 			explicit AsyncResult(const HandlerT &callback)
-				: m_callback(MakeAsyncCallback(callback))
+				: callback_(MakeAsyncCallback(callback))
 			{
 				RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
 			}
-
-			/*void reset(const AsyncCallbackFunc &callback)
+			
+			template<typename HandlerT>
+			void Reset(const HandlerT &callback)
 			{
-				m_callback		= callback;
-			}*/
+				callback_ = MakeAsyncCallback(callback);
+			}
 
 			template<typename HandleT>
 			size_t EndAsync(HandleT handle)
@@ -157,9 +158,7 @@ namespace async
 		private:
 			static void _CallImpl(const AsyncResultPtr &result, u_long size, u_long error)
 			{
-				result->m_callback->Invoke(size, error);
-				//if( result->m_callback->callback_ != NULL )
-					//HandlerInvoke::Invoke(result->m_callback->callback_, result, size, error);
+				result->callback_->Invoke(size, error);
 			}
 
 		private:

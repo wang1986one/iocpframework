@@ -42,7 +42,7 @@ namespace async
 				if( reuseAddr )
 					impl_->SetOption(ReuseAddr(true));
 
-				Bind(port, addr);
+				Bind(protocol.Family(), port, addr);
 				Listen();
 			}
 
@@ -56,14 +56,12 @@ namespace async
 				return impl_;
 			}
 
-			bool Open(const ProtocolType &protocol = ProtocolType::V4())
+			void Open(const ProtocolType &protocol = ProtocolType::V4())
 			{
 				if( protocol.Type() == SOCK_STREAM )
 					impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
 				else
-					return false;
-
-				return true;
+					throw std::logic_error("not Stream socket!");
 			}
 
 			bool IsOpen() const
@@ -97,10 +95,10 @@ namespace async
 				return impl_->IOControl(control);
 			}
 
-			void Bind(u_short port, const IPAddress &addr)
+			void Bind(int family, u_short port, const IPAddress &addr)
 			{
 				// warning: only support AF_INET
-				impl_->Bind(ProtocolType::V4().Family(), port, addr);
+				impl_->Bind(family, port, addr);
 			}
 
 			void Listen(int backlog = SOMAXCONN)
@@ -117,10 +115,6 @@ namespace async
 			AsyncResultPtr AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const HandlerT &callback)
 			{
 				return impl_->AsyncAccept(acceptSocket, szOutSide, callback);
-			}
-			ImplementType EndAccept(const AsyncResultPtr &asynResult)
-			{
-				return impl_->EndAccept(asynResult);
 			}
 		};
 	}
