@@ -209,7 +209,7 @@ namespace async
 				throw std::logic_error("Remote socket not open");
 
 			typedef internal::AcceptorHandle<HandlerT> HookAcceptor;
-			iocp::AutoBufferPtr acceptBuffer(iocp::CreateAutoBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
+			iocp::AutoBufferPtr acceptBuffer(MakeBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
 			AsyncResultPtr asyncResult(new AsyncResult(HookAcceptor(*this, remoteSocket, acceptBuffer, callback)));
 			asyncResult->AddRef();
 

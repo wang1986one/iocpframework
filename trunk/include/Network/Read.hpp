@@ -3,7 +3,6 @@
 
 
 #include "../iocp/internal/Condition.hpp"
-#include "../iocp/internal/HandlerAlloc.hpp"
 
 
 namespace async
@@ -30,7 +29,7 @@ namespace async
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Read(MutableBuffer(buffer.data() + transfers, bufSize - transfers));	
+				size_t ret = s.Read(buffer + transfers);	
 				transfers += ret;
 			}
 
