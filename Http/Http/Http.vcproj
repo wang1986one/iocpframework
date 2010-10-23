@@ -230,10 +230,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Callback.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
@@ -255,6 +251,10 @@
 				</File>
 				<File
 					RelativePath="..\..\include\IOCP\Object.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\ObjectFactory.hpp"
 					>
 				</File>
 				<File
@@ -282,10 +282,6 @@
 					>
 					<File
 						RelativePath="..\..\include\IOCP\internal\Condition.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\IOCP\internal\HandlerAlloc.hpp"
 						>
 					</File>
 				</Filter>
