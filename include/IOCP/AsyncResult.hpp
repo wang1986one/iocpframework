@@ -96,9 +96,6 @@ namespace async
 		struct AsyncResult;
 		typedef pointer<AsyncResult> AsyncResultPtr;
 
-		//typedef std::tr1::function<void(const AsyncResultPtr &asyncResult, u_long bytes, u_long error)> AsyncCallbackFunc;
-
-
 		//---------------------------------------------------------------------------
 		// class AsyncResult
 		// 间接层，负责缓冲区、收发者和回调函数
