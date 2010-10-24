@@ -233,14 +233,6 @@
 			<Filter
 				Name="FileSystem"
 				>
-				<File
-					RelativePath="..\include\FileSystem\File.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\FileSystem\File.hpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="IOCP"
@@ -278,7 +270,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\IOCP\ObjectFactory.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\IOCP\Pointer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\ReadWriteBuffer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\ReadWriteBuffer.hpp"
 					>
 				</File>
 				<File
@@ -294,10 +298,6 @@
 					>
 					<File
 						RelativePath="..\include\IOCP\internal\Condition.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\IOCP\internal\HandlerAlloc.hpp"
 						>
 					</File>
 				</Filter>
@@ -342,15 +342,15 @@
 				Name="Network"
 				>
 				<File
+					RelativePath="..\include\Network\Accept.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\BasicAcceptor.hpp"
 					>
 				</File>
 				<File
 					RelativePath="..\include\Network\BasicStreamSocket.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Network\BufferHelper.hpp"
 					>
 				</File>
 				<File

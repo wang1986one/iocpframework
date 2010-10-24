@@ -40,6 +40,17 @@ namespace async
 				, size_(size)
 			{}
 
+			MutableBuffer &operator=(const MutableBuffer &rhs)
+			{
+				if( &rhs != this )
+				{
+					data_ = rhs.data_;
+					size_ = rhs.size_;
+				}
+
+				return *this;
+			}
+
 		public:
 			pointer data()
 			{
@@ -121,6 +132,17 @@ namespace async
 				: data_(buf.data())
 				, size_(buf.size())
 			{}
+
+			ConstBuffer &operator=(const ConstBuffer &rhs)
+			{
+				if( &rhs != this )
+				{
+					data_ = rhs.data_;
+					size_ = rhs.size_;
+				}
+
+				return *this;
+			}
 
 		public:
 			const_pointer data() const

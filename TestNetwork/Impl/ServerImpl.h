@@ -6,9 +6,6 @@
 #include "../../include/network/Socket.hpp"
 #include "../../include/Network/tcp.hpp"
 
-#include "../../include/Network/BufferHelper.hpp"
-
-
 
 using namespace async::network;
 
@@ -17,13 +14,11 @@ class Session
 {
 private:
 	Tcp::StreamSocket socket_;
-	SocketBufferPtr data_;
 	std::tr1::array<char, 4096> buf_;
 
 public:
 	explicit Session(OverlappedDispatcher &io, const SocketPtr &sock)
 		: socket_(io, sock)
-		, data_(MakeBuffer(buf_))
 	{}
 	~Session()
 	{
@@ -41,11 +36,10 @@ public:
 	{
 		try
 		{		
-			//socket_.AsyncRead(data_, 0, data_->allocSize(), 
-			//	std::tr1::bind(&Session::_HandleRead, shared_from_this(), std::tr1::placeholders::_1, std::tr1::placeholders::_2));
-
-			AsyncRead(socket_.Get(), data_, TransferAtLeast(15),
-				std::tr1::bind(&Session::_HandleRead, shared_from_this(), std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+			
+			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(15),
+				std::tr1::bind(&Session::_HandleRead, shared_from_this(), 
+				std::tr1::placeholders::_1, std::tr1::placeholders::_2));
 
 		}
 		catch(std::exception &e)
@@ -60,23 +54,21 @@ public:
 	}
 
 private:
-	void _HandleRead(const AsyncResultPtr &asyncResult, u_long bytes)
+	void _HandleRead(u_long bytes, u_long error)
 	{
 		try
 		{
-			//size_t bytes = socket_.EndRead(asyncResult);
 			if( bytes == 0 )
 			{
 				socket_.AsyncDisconnect(std::tr1::bind(&Session::_DisConnect, shared_from_this()));
+				//Stop();
 				return;
 			}
 
-			data_->resize(bytes);
-			std::cout.write(data_->data(), bytes) << std::endl;
+			std::cout.write(buf_.data(), bytes) << std::endl;
 
-			//socket_.AsyncWrite(data_, 0, bytes, 
-			//	std::tr1::bind(&Session::_HandleWrite, shared_from_this(), std::tr1::placeholders::_1));
-			AsyncWrite(socket_.Get(), data_, TransferAll(), 
+
+			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), 
 				std::tr1::bind(&Session::_HandleWrite, shared_from_this()));
 		}
 		catch(const std::exception &e)
@@ -144,7 +136,7 @@ private:
 		{
 			SocketPtr acceptSock(CreateSocket(io_));
 			acceptor_.AsyncAccept(acceptSock, 0, 
-				std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1));
+				std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
 		} 
 		catch(const std::exception &e)
 		{
@@ -158,12 +150,13 @@ private:
 	}
 
 private:
-	void _OnAccept(const AsyncResultPtr &asyncResult)
+	void _OnAccept(u_long error, const SocketPtr &acceptSocket)
 	{
+		if( error != 0 )
+			return;
+
 		try
 		{
-			const SocketPtr &acceptSocket = acceptor_.EndAccept(asyncResult);
-
 			SessionPtr session(CreateSession(io_, acceptSocket));
 			session->Start();
 
