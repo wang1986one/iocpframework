@@ -3,7 +3,6 @@
 
 #include "../../Basic.hpp"
 #include "../../iocp/WinException.hpp"
-#include "../../iocp/Callback.hpp"
 
 
 namespace async

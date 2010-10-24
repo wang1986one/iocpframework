@@ -44,22 +44,21 @@ namespace async
 			class WriteHandler
 			{
 				typedef WriteHandler<AsyncWriteStreamT, ConstBufferT, CompletionConditionT, WriteHandlerT>	ThisType;
-				//typedef typename AsyncWriteStreamT::ImplementType											ImplementType;
 
 			private:
 				AsyncWriteStreamT &stream_;
-				const ConstBufferT &buffer_;
+				ConstBufferT buffer_;
 				CompletionConditionT condition_;
 				size_t transfers_;
 				size_t total_;
 				WriteHandlerT handler_;
 
 			public:
-				WriteHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, const CompletionConditionT &condition, const WriteHandlerT &handler)
+				WriteHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, const CompletionConditionT &condition, size_t transfer, const WriteHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer_)
 					, condition_(condition)
-					, transfers_(0)
+					, transfers_(transfer)
 					, total_(buffer.size())
 					, handler_(handler)
 				{}
@@ -70,13 +69,10 @@ namespace async
 
 					if( transfers_ < total_ && size != 0 && error == 0 )
 					{
-						if( transfers_ <= condition_(transfers_) )
+						if( transfers_ <= condition_() )
 						{
-							using namespace std::tr1::placeholders;
-
-							//static WriteHandlerT callback = std::tr1::bind(&ThisType::operator(), this, _1, _2, _3);
-							stream_.AsyncWrite(Buffer(buffer_ + transfers_), 
-								std::tr1::bind(&ThisType::operator(), this, _1, _2));
+							stream_.AsyncWrite(buffer_ + size, 
+								ThisType(stream_, buffer_ + size, condition_, transfers_, handler_));
 
 							return;
 						}
@@ -84,7 +80,6 @@ namespace async
 					
 					// »Øµ÷
 					iocp::HandlerInvoke::Invoke(handler_, transfers_, error);
-					//iocp::internal::HandlerDealloc(this);
 				}
 			};
 		}
@@ -101,11 +96,8 @@ namespace async
 		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
 		{
 			typedef internal::WriteHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
-			//HookWriteHandler *hook = iocp::internal::HandlerAlloc<HookWriteHandler>(s, buffer, condition, handler);
 
-			using namespace std::tr1::placeholders;
-			s.AsyncWrite(buffer, HookWriteHandler(s, buffer, condition, handler));
-				//std::tr1::bind(&HookWriteHandler::operator(), hook, _1, _2));
+			s.AsyncWrite(buffer, HookWriteHandler(s, buffer, condition, 0, handler));
 		}
 
 

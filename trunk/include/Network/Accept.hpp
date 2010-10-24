@@ -29,7 +29,7 @@ namespace internal
 			async::network::UpdateAcceptContext context(acceptor_);
 			remoteSocket_->SetOption(context);
 
-			handler_(size, error, std::tr1::cref(remoteSocket_));
+			handler_(error, std::tr1::cref(remoteSocket_));
 		}
 	};
 }

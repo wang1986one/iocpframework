@@ -47,18 +47,18 @@ namespace async
 				
 			private:
 				AsyncWriteStreamT &stream_;
-				MutableBufferT &buffer_;
+				MutableBufferT buffer_;
 				CompletionConditionT condition_;
 				size_t transfers_;
 				size_t total_;
 				ReadHandlerT handler_;
 
 			public:
-				ReadHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const CompletionConditionT &condition, const ReadHandlerT &handler)
+				ReadHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer)
 					, condition_(condition)
-					, transfers_(0)
+					, transfers_(transfer)
 					, total_(buffer.size())
 					, handler_(handler)
 				{}
@@ -69,12 +69,10 @@ namespace async
 
 					if( transfers_ < total_ && size != 0 && error == 0 )
 					{
-						if( transfers_ <= condition_(transfers_) )
+						if( transfers_ <= condition_() )
 						{
-							using namespace std::tr1::placeholders;
-
-							stream_.AsyncRead(Buffer(buffer_ + transfers_), 
-								std::tr1::bind(&ThisType::operator(), this, _1, _2));
+							stream_.AsyncRead(buffer_ + size, 
+								ThisType(stream_, buffer_ + size, condition_, transfers_, handler_));
 
 							return;
 						}
@@ -82,7 +80,6 @@ namespace async
 					
 					// »Øµ÷
 					iocp::HandlerInvoke::Invoke(handler_, transfers_, error);
-					iocp::internal::HandlerDealloc(this);
 				}
 			};
 		}
@@ -100,11 +97,7 @@ namespace async
 		{
 			typedef internal::ReadHandler<SyncWriteStreamT, MutableBufferT, ComplateConditionT, HandlerT> HookReadHandler;
 
-			//HookReadHandler *hook = iocp::internal::HandlerAlloc<HookReadHandler>(s, buffer, condition, handler);
-			
-			using namespace std::tr1::placeholders;
-			s.AsyncRead(buffer, HookReadHandler(s, buffer, condition, handler));
-				//std::tr1::bind(&HookReadHandler::operator(), hook, _1, _2));
+			s.AsyncRead(buffer, HookReadHandler(s, buffer, condition, 0, handler));
 		}
 
 
