@@ -100,6 +100,9 @@ namespace async
 			size_t Read(char *buf, size_t size, DWORD flag);
 			size_t Write(const char *buffer, size_t size, DWORD flag);
 
+			size_t SendTo(const char *buffer, size_t sz,  const SOCKADDR_IN &addr, DWORD flag);
+			size_t RecvFrom(char *buffer, size_t sz, SOCKADDR_IN &addr, DWORD flag);
+
 			// 异步调用接口
 		public:
 			// szOutSize指定额外的缓冲区大小，以用来Accept远程连接后且收到第一块数据包才返回
@@ -120,21 +123,28 @@ namespace async
 			const AsyncResultPtr &AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket);
 			void EndDisconnect(const AsyncResultPtr &asyncResult);
 
-			// 异步读取
+			// 异步TCP读取
 			template<typename HandlerT>
 			AsyncResultPtr AsyncRead(char *buf, size_t size, const HandlerT &callback);
 
 			const AsyncResultPtr &AsyncRead(const AsyncResultPtr &result, char *buf, size_t size);
 			size_t EndRead(const AsyncResultPtr &asyncResult);
 
-			// 异步写入
+			// 异步TCP写入
 			template<typename HandlerT>
 			AsyncResultPtr AsyncWrite(const char *buf, size_t size, const HandlerT &callback);
 			
 			const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, const char *buf, size_t size);
 			size_t EndWrite(const AsyncResultPtr &asyncResult);
 
-			
+			// 异步UDP读取
+			template<typename HandlerT>
+			AsyncResultPtr AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const HandlerT &callback);
+
+			// 异步UDP读入
+			template<typename HandlerT>
+			AsyncResultPtr AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const HandlerT &callback);
+
 		private:
 			void _BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void _BeginDisconnectImpl(const AsyncResultPtr &result, bool bReuseSocket = true);
@@ -278,6 +288,57 @@ namespace async
 
 			return asynResult;
 		}
+
+		// 异步UDP写出
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const HandlerT &callback)
+		{
+			AsyncResultPtr asynResult(new AsyncResult(callback));
+			asynResult->AddRef();
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = const_cast<char *>(buf);
+			wsabuf.len = size;
+
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+
+			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, dwFlag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), asynResult.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			{
+				asynResult->Release();
+				throw Win32Exception("WSASendTo");
+			}
+
+			return asynResult;
+		}	
+
+		// 异步UDP读入
+		template<typename HandlerT>
+		AsyncResultPtr Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const HandlerT &callback)
+		{
+			AsyncResultPtr asynResult(new AsyncResult(callback));
+			asynResult->AddRef();
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = buf;
+			wsabuf.len = size;
+
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+			int addrLen = sizeof(addr);
+
+			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &dwFlag, reinterpret_cast<sockaddr *>(&addr), &addrLen, asynResult.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+			{
+				asynResult->Release();
+				throw Win32Exception("WSARecvFrom");
+			}
+
+			return asynResult;
+		}
+
+
 	}
 
 

@@ -8,9 +8,7 @@
 #include "BasicAcceptor.hpp"
 #include "BasicStreamSocket.hpp"
 
-
 #include "SocketOption.hpp"
-#include "SocketProvider.hpp"
 #include "Write.hpp"
 #include "Read.hpp"
 
@@ -29,7 +27,7 @@ namespace async
 		{
 		public:
 			typedef BasicAcceptor<Tcp>			Accpetor;
-			typedef BasicStreamSocket<Tcp>		StreamSocket;
+			typedef BasicStreamSocket<Tcp>		Socket;
 			
 
 

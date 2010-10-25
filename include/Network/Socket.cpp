@@ -186,6 +186,47 @@ namespace async
 		}
 
 
+		size_t Socket::SendTo(const char *buffer, size_t sz,  const SOCKADDR_IN &addr, DWORD flag)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("Socket not open");
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = const_cast<char *>(buffer);
+			wsabuf.len = sz;
+
+			if( wsabuf.len == 0 )
+				throw std::logic_error("Buffer size is zero");
+
+			DWORD dwSize = 0;
+			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, flag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), 0, 0) )
+				throw Win32Exception("WSASendTo");
+
+			return dwSize;
+		}
+
+		size_t Socket::RecvFrom(char *buffer, size_t size, SOCKADDR_IN &addr, DWORD flag)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("Socket not open");
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = buffer;
+			wsabuf.len = size;
+
+			if( wsabuf.len == 0 )
+				throw std::logic_error("Buffer allocate size is zero");
+
+			DWORD dwSize = 0;
+			int addrLen = sizeof(addr);
+
+			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &flag, reinterpret_cast<sockaddr *>(&addr), &addrLen, 0, 0) )
+				throw Win32Exception("WSARecvFrom");
+
+			return dwSize;
+		}
+
+
 		// Òì²½µ÷ÓÃ
 		
 		const AsyncResultPtr &Socket::AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
