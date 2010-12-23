@@ -19,7 +19,7 @@ namespace http
 	{}
 
 
-	async::network::Tcp::StreamSocket &Connection::Socket()
+	async::network::Tcp::Socket &Connection::Socket()
 	{
 		return socket_;
 	}

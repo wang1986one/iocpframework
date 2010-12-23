@@ -207,6 +207,7 @@ namespace async
 
 
 #include "Accept.hpp"
+#include "SocketProvider.hpp"
 
 		// 异步接收远程连接
 		template<typename HandlerT>

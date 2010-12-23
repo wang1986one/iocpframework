@@ -13,7 +13,7 @@ class Session
 	: public std::tr1::enable_shared_from_this<Session>
 {
 private:
-	Tcp::StreamSocket socket_;
+	Tcp::Socket socket_;
 	std::tr1::array<char, 4096> buf_;
 
 public:
@@ -27,7 +27,7 @@ public:
 
 
 public:
-	Tcp::StreamSocket& GetSocket()
+	Tcp::Socket& GetSocket()
 	{
 		return socket_;
 	}
@@ -100,6 +100,8 @@ inline SessionPtr CreateSession(OverlappedDispatcher &io, const SocketPtr &socke
 {
 	return SessionPtr(new Session(io, socket));
 }
+
+
 
 class Server
 {

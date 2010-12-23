@@ -394,6 +394,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\Network\UDP.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\Write.hpp"
 					>
 				</File>
