@@ -49,7 +49,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	async::iocp::DefaultDebug::RegisterCallback(
 		std::tr1::bind(&DebugAllocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2),
 		std::tr1::bind(&DebugDeallocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
-d
+
 
 	try
 	{
