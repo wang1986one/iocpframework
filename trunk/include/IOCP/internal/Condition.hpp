@@ -8,7 +8,7 @@ namespace async
 	namespace iocp
 	{
 
-		namespace internal
+		namespace detail
 		{
 			// 默认单次传输字节大小
 			enum { DEFAULT_MAX_TRANSFER = 64 * 1024 };
@@ -55,14 +55,14 @@ namespace async
 
 		// 传输条件
 
-		inline internal::TransferAllT TransferAll()
+		inline detail::TransferAllT TransferAll()
 		{
-			return internal::TransferAllT();
+			return detail::TransferAllT();
 		}
 
-		inline internal::TransferAtLeatT TransferAtLeast(size_t min)	
+		inline detail::TransferAtLeatT TransferAtLeast(size_t min)	
 		{
-			return internal::TransferAtLeatT(min);
+			return detail::TransferAtLeatT(min);
 		}
 	}
 }

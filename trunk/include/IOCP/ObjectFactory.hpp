@@ -34,7 +34,7 @@ namespace async
 		template<typename T, typename PoolTraits = ObjectPool<T>>
 		struct ObjectFactory
 		{
-			static void ReleaseBuffer(typename ObjectPool<T>::Allocator::pointer p)
+			static void ReleaseBuffer(typename PoolTraits::Allocator::pointer p)
 			{
 				return PoolTraits::GetAllocator().deallocate(p);
 			}
