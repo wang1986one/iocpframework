@@ -20,7 +20,7 @@ namespace http
 		: public std::tr1::enable_shared_from_this<Connection>
 	{
 	private:
-		async::network::Tcp::StreamSocket socket_;
+		async::network::Tcp::Socket socket_;
 		ConnectionMgr &connectionMgr_;
 		RequestHandler &requestHandler_;
 
@@ -38,7 +38,7 @@ namespace http
 		Connection &operator=(const Connection &);
 
 	public:
-		async::network::Tcp::StreamSocket &Socket();
+		async::network::Tcp::Socket &Socket();
 
 		void Start();
 		void Stop();
