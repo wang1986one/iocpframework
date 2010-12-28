@@ -7,7 +7,7 @@
 #include "../IOCP/Buffer.hpp"
 
 #include "IPAddress.hpp"
-
+#include "SocketProvider.hpp"
 
 
 namespace async
@@ -207,7 +207,7 @@ namespace async
 
 
 #include "Accept.hpp"
-#include "SocketProvider.hpp"
+
 
 		// 异步接收远程连接
 		template<typename HandlerT>
@@ -219,7 +219,7 @@ namespace async
 			if( !remoteSocket->IsOpen() )
 				throw std::logic_error("Remote socket not open");
 
-			typedef internal::AcceptorHandle<HandlerT> HookAcceptor;
+			typedef detail::AcceptorHandle<HandlerT> HookAcceptor;
 			iocp::AutoBufferPtr acceptBuffer(MakeBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
 			AsyncResultPtr asyncResult(new AsyncResult(HookAcceptor(*this, remoteSocket, acceptBuffer, callback)));
 			asyncResult->AddRef();

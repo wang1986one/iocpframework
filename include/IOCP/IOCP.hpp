@@ -14,19 +14,19 @@ namespace async
 		//--------------------------------------------------------------
 		// class CIOCP
 
-		class CIOCP
+		class Iocp
 		{
 		private:
 			HANDLE m_hIOCP;
 
 		public:
-			CIOCP(int nMaxConcurrency = -1)
+			Iocp(int nMaxConcurrency = -1)
 				: m_hIOCP(NULL)
 			{
 				if( nMaxConcurrency != -1 )
 					Create(nMaxConcurrency);
 			}
-			~CIOCP()
+			~Iocp()
 			{
 				if( m_hIOCP != NULL )
 				{

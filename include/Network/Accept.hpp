@@ -4,7 +4,7 @@
 
 
 
-namespace internal
+namespace detail
 {
 
 	// Hook User Accept Callback

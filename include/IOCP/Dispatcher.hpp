@@ -16,7 +16,7 @@ namespace async
 	namespace iocp 
 	{
 		
-		namespace internal
+		namespace detail
 		{
 			/************************************************************************
 			*  
@@ -69,7 +69,7 @@ namespace async
 
 		private:
 			// iocp Handle
-			CIOCP iocp_;
+			Iocp iocp_;
 			// Ïß³ÌÈÝÆ÷
 			std::vector<HANDLE>	threads_;
 
@@ -92,9 +92,9 @@ namespace async
 
 		private:
 			template<typename AsyncPtrT>
-			void _PostImpl(AsyncPtrT &, internal::Int2Type<FALSE>);
+			void _PostImpl(AsyncPtrT &, detail::Int2Type<FALSE>);
 			template<typename AsyncPtrT>
-			void _PostImpl(AsyncPtrT &, internal::Int2Type<TRUE>);
+			void _PostImpl(AsyncPtrT &, detail::Int2Type<TRUE>);
 
 			void _ThreadIO();
 

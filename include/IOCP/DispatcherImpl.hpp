@@ -64,12 +64,12 @@ namespace async
 		template<typename AsyncPtrT>
 		void IODispatcher<AsyncT>::Post(AsyncPtrT &result)
 		{
-			_PostImpl(result, internal::Int2Type<AsyncType::IS_OVERLAPPED>());
+			_PostImpl(result, detail::Int2Type<AsyncType::IS_OVERLAPPED>());
 		}
 
 		template<typename AsyncT>
 		template<typename AsyncPtrT>
-		void IODispatcher<AsyncT>::_PostImpl(AsyncPtrT &result, internal::Int2Type<FALSE>)
+		void IODispatcher<AsyncT>::_PostImpl(AsyncPtrT &result, detail::Int2Type<FALSE>)
 		{
 			result->AddRef();
 
@@ -78,7 +78,7 @@ namespace async
 		}
 		template<typename AsyncT>
 		template<typename AsyncPtrT>
-		void IODispatcher<AsyncT>::_PostImpl(AsyncPtrT &result, internal::Int2Type<TRUE>)
+		void IODispatcher<AsyncT>::_PostImpl(AsyncPtrT &result, detail::Int2Type<TRUE>)
 		{
 			result->AddRef();
 
