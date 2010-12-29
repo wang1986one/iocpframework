@@ -21,7 +21,7 @@ namespace async
 			{
 				typedef size_t	result_type;
 
-				result_type operator()(size_t min) const
+				result_type operator()(size_t min = 0) const
 				{
 					return DEFAULT_MAX_TRANSFER;
 				}
@@ -45,7 +45,7 @@ namespace async
 				{}
 
 			public:
-				result_type operator()(size_t min) const
+				result_type operator()(size_t min = 0) const
 				{
 					return min_;
 				}

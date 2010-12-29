@@ -99,6 +99,49 @@ namespace async
 		{
 			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2, a3, a4, a5, a6, a7);
 		}
+
+
+		template<typename T, typename Arg1>
+		inline T *ObjectAlloc(Arg1 &a1)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1);
+		}
+
+		template<typename T, typename Arg1, typename Arg2>
+		inline T *ObjectAlloc(Arg1 &a1, Arg2& a2)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2);
+		}
+
+		template<typename T, typename Arg1, typename Arg2, typename Arg3>
+		inline T *ObjectAlloc(Arg1& a1, Arg2& a2, Arg3& a3)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2, a3);
+		}
+
+		template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+		inline T *ObjectAlloc(Arg1& a1, Arg2& a2, Arg3& a3, Arg4 &a4)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2, a3, a4);
+		}
+
+		template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
+		inline T *ObjectAlloc(Arg1& a1, Arg2& a2, Arg3& a3, Arg4 &a4, Arg5 &a5)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2, a3, a4, a5);
+		}
+
+		template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
+		inline T *ObjectAlloc(Arg1& a1, Arg2& a2, Arg3& a3, Arg4 &a4, Arg5 &a5, Arg6 &a6)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2, a3, a4, a5, a6);
+		}
+
+		template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
+		inline T *ObjectAlloc(Arg1& a1, Arg2& a2, Arg3& a3, Arg4 &a4, Arg5 &a5, Arg6 &a6, Arg7 &a7)
+		{
+			return ::new (ObjectFactory<T>::CreateBuffer()) T(a1, a2, a3, a4, a5, a6, a7);
+		}
 	}
 }
 
