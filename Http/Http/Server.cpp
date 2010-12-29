@@ -21,7 +21,7 @@ namespace http
 		using namespace std::tr1::placeholders;
 
 		acceptor_.AsyncAccept(newConnection_->Socket().Get(), 0, 
-			std::tr1::bind(&Server::_HandleAccept, this, _2, _3));
+			std::tr1::bind(&Server::_HandleAccept, this, _1, _2));
 	}
 
 	void Server::Stop()
@@ -48,7 +48,7 @@ namespace http
 			
 			using namespace std::tr1::placeholders;
 			acceptor_.AsyncAccept(newConnection_->Socket().Get(), 0, 
-				std::tr1::bind(&Server::_HandleAccept, this, _2, _3));
+				std::tr1::bind(&Server::_HandleAccept, this, _1, _2));
 		}
 		catch(std::exception &e)
 		{
