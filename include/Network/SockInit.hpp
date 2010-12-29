@@ -11,7 +11,7 @@ namespace async
 
 	namespace network
 	{
-		namespace Internal
+		namespace detail
 		{
 			//------------------------------------------------------------------
 			// class SockInit

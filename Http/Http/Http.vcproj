@@ -298,6 +298,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\Network\BasicDatagramSocket.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\Network\BasicStreamSocket.hpp"
 					>
 				</File>
@@ -339,6 +343,10 @@
 				</File>
 				<File
 					RelativePath="..\..\include\Network\TCP.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\Network\UDP.hpp"
 					>
 				</File>
 				<File
