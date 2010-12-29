@@ -17,7 +17,7 @@ using namespace async::iocp;
 using namespace async::network;
 using namespace async::thread;
 
-typedef std::tr1::shared_ptr<Tcp::StreamSocket> StreamSocketPtr;
+typedef std::tr1::shared_ptr<Tcp::Socket> StreamSocketPtr;
 
 DWORD Session(StreamSocketPtr socket)
 {
@@ -55,7 +55,7 @@ DWORD Server(OverlappedDispatcher &io, u_short port)
 		while(1)
 		{
 			Tcp::Accpetor::ImplementType sock = accpetor.Accept();
-			StreamSocketPtr session(new Tcp::StreamSocket(io, sock));
+			StreamSocketPtr session(new Tcp::Socket(io, sock));
 
 			ThreadImplEx *threadSession(new ThreadImplEx);
 			threadSession->RegisterFunc(std::tr1::bind(&Session, session));

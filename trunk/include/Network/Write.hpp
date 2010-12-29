@@ -18,7 +18,7 @@ namespace async
 
 		// 
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename CompleteConditionT>
-		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, CompleteConditionT &condition)
+		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const CompleteConditionT &condition)
 		{
 			size_t transfers = 0;
 			size_t totalTransfer = condition(transfers);

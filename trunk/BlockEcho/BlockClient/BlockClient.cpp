@@ -15,7 +15,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		OverlappedDispatcher io(1);
 
-		Tcp::StreamSocket sock(io, Tcp::V4());
+		Tcp::Socket sock(io, Tcp::V4());
 		sock.Connect(AF_INET, IPAddress::Parse("192.168.1.103"), 5050);
 
 		char request[1024] = {0};
