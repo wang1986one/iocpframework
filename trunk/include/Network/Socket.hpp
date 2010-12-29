@@ -149,13 +149,18 @@ namespace async
 			void _BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void _BeginDisconnectImpl(const AsyncResultPtr &result, bool bReuseSocket = true);
 			void _BeginReadImpl(const AsyncResultPtr &result, char *buf, size_t size);
-			void _BeginWriteImpl(const AsyncResultPtr &result, const char *buf, size_t size);
-			
-			
+			void _BeginWriteImpl(const AsyncResultPtr &result, const char *buf, size_t size);	
 		};
+	}
 
 
-		// ---------------------------
+
+#include "Accept.hpp"
+
+	namespace network
+	{
+
+	// ---------------------------
 
 		inline bool Socket::IsOpen() const
 		{
@@ -204,10 +209,6 @@ namespace async
 			else
 				return false;
 		}
-
-
-#include "Accept.hpp"
-
 
 		// 异步接收远程连接
 		template<typename HandlerT>
@@ -341,7 +342,6 @@ namespace async
 
 
 	}
-
 
 }
 

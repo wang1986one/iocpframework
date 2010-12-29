@@ -38,7 +38,7 @@ namespace async
 
 
 
-		namespace internal
+		namespace detail
 		{
 			template<typename AsyncWriteStreamT, typename MutableBufferT, typename CompletionConditionT, typename ReadHandlerT>
 			class ReadHandler
@@ -95,7 +95,7 @@ namespace async
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename ComplateConditionT, typename HandlerT>
 		void AsyncRead(SyncWriteStreamT &s, MutableBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
 		{
-			typedef internal::ReadHandler<SyncWriteStreamT, MutableBufferT, ComplateConditionT, HandlerT> HookReadHandler;
+			typedef detail::ReadHandler<SyncWriteStreamT, MutableBufferT, ComplateConditionT, HandlerT> HookReadHandler;
 
 			s.AsyncRead(buffer, HookReadHandler(s, buffer, condition, 0, handler));
 		}

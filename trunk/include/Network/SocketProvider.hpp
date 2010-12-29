@@ -24,7 +24,7 @@ namespace async
 		class SocketProvider
 		{
 		private:
-			Internal::SockInit<> sockInit_;	
+			detail::SockInit<> sockInit_;	
 
 		public:
 			explicit SocketProvider(OverlappedDispatcher &);

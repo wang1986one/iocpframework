@@ -38,7 +38,7 @@ namespace async
 
 
 
-		namespace internal
+		namespace detail
 		{
 			template<typename AsyncWriteStreamT, typename ConstBufferT, typename CompletionConditionT, typename WriteHandlerT>
 			class WriteHandler
@@ -95,7 +95,7 @@ namespace async
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>
 		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
 		{
-			typedef internal::WriteHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
+			typedef detail::WriteHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
 
 			s.AsyncWrite(buffer, HookWriteHandler(s, buffer, condition, 0, handler));
 		}
