@@ -67,7 +67,6 @@ private:
 			if( bytes == 0 )
 			{
 				socket_.AsyncDisconnect(std::tr1::bind(&Session::_DisConnect, shared_from_this()));
-				//Stop();
 				return;
 			}
 
