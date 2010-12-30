@@ -109,7 +109,7 @@ namespace async
 			if( sock == INVALID_SOCKET )
 				throw Win32Exception("accept");
 
-			SocketPtr remote(new Socket(io_, sock));
+			SocketPtr remote(MakeSocket(io_, sock));
 			return remote;
 		}
 

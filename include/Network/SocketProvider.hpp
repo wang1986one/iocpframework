@@ -18,7 +18,7 @@ namespace async
 		using namespace iocp;
 
 		class Socket;
-		typedef pointer<Socket> SocketPtr;
+		typedef std::tr1::shared_ptr<Socket> SocketPtr;
 
 
 		class SocketProvider

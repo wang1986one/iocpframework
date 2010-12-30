@@ -24,21 +24,17 @@ namespace async
 
 		public:
 			explicit BasicAcceptor(AsyncIODispatcherType &io)
-				: impl_(new Socket(io))
+				: impl_(MakeSocket(io))
 			{}
-			explicit BasicAcceptor(AsyncIODispatcherType &io, const ImplementType &impl)
+			explicit BasicAcceptor(const ImplementType &impl)
 				: impl_(impl)
 			{}
 			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol)
-				: impl_(new Socket(io))
-			{
-				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
-			}
+				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
+			{}
 			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr = INADDR_ANY, bool reuseAddr = true)
-				: impl_(new Socket(io))
+				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
 			{
-				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
-
 				if( reuseAddr )
 					impl_->SetOption(ReuseAddr(true));
 

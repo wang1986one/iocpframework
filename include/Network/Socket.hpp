@@ -16,12 +16,10 @@ namespace async
 
 	namespace network
 	{
-		using namespace iocp;
-
 		// forward declare
 
 		class Socket;
-		typedef pointer<Socket> SocketPtr;
+		typedef std::tr1::shared_ptr<Socket> SocketPtr;
 
 
 
@@ -32,7 +30,7 @@ namespace async
 			: public Object
 		{
 		public:
-			typedef OverlappedDispatcher	AsyncIODispatcherType;
+			typedef iocp::OverlappedDispatcher	AsyncIODispatcherType;
 
 		private:
 			// socket handle
@@ -65,7 +63,7 @@ namespace async
 			// WSAIoctl
 			template<typename InT, typename OutT>
 			DWORD IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize);
-			
+
 			// setsocketopt
 			template<typename SocketOptionT>
 			bool SetOption(const SocketOptionT &option);
@@ -80,7 +78,7 @@ namespace async
 			void Shutdown(int shut);
 			// closesocket
 			void Close();
-		
+
 			bool IsOpen() const;
 			// CancelIO/CancelIOEx
 			void Cancel();
@@ -90,7 +88,7 @@ namespace async
 			// listen
 			void Listen(int nMax);
 
-			
+
 			// 不需设置回调接口,同步函数
 		public:
 			SocketPtr Accept();
@@ -112,14 +110,14 @@ namespace async
 			// 异步连接需要先绑定端口
 			template<typename HandlerT>
 			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback);
-			
+
 			const AsyncResultPtr &AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort);
 			void EndConnect(const AsyncResultPtr &asyncResult);
 
 			// 异步断开连接
 			template<typename HandlerT>
 			AsyncResultPtr AsyncDisconnect(const HandlerT &callback, bool bReuseSocket);
-			
+
 			const AsyncResultPtr &AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket);
 			void EndDisconnect(const AsyncResultPtr &asyncResult);
 
@@ -133,7 +131,7 @@ namespace async
 			// 异步TCP写入
 			template<typename HandlerT>
 			AsyncResultPtr AsyncWrite(const char *buf, size_t size, const HandlerT &callback);
-			
+
 			const AsyncResultPtr &AsyncWrite(const AsyncResultPtr &result, const char *buf, size_t size);
 			size_t EndWrite(const AsyncResultPtr &asyncResult);
 
@@ -152,15 +150,50 @@ namespace async
 			void _BeginWriteImpl(const AsyncResultPtr &result, const char *buf, size_t size);	
 		};
 	}
+}
 
+namespace async
+{
+	namespace iocp
+	{
+		typedef async::network::Socket Socket;
+
+		// Socket 工厂
+		template<>
+		struct ObjectFactory< Socket >
+		{
+			typedef async::memory::FixedMemoryPool<true, sizeof(Socket)>	PoolType;
+			typedef ObjectPool< Socket, PoolType >							ObjectPoolType;
+		};
+	}
+}
 
 
 #include "Accept.hpp"
 
+
+namespace async
+{
 	namespace network
 	{
 
-	// ---------------------------
+		inline SocketPtr MakeSocket(Socket::AsyncIODispatcherType &io)
+		{
+			return SocketPtr(ObjectAlloc<Socket>(io), &ObjectDeallocate<Socket>);
+		}
+
+		inline SocketPtr MakeSocket(Socket::AsyncIODispatcherType &io, SOCKET sock)
+		{
+			return SocketPtr(ObjectAlloc<Socket>(io, sock), &ObjectDeallocate<Socket>);
+		}
+
+		inline SocketPtr MakeSocket(Socket::AsyncIODispatcherType &io, int family, int type, int protocol)
+		{
+			return SocketPtr(ObjectAlloc<Socket>(io, family, type, protocol), &ObjectDeallocate<Socket>);
+		}
+
+
+		// ---------------------------
 
 		inline bool Socket::IsOpen() const
 		{
@@ -186,8 +219,8 @@ namespace async
 
 			/*if( option.level() == SOL_SOCKET && option.name() == SO_LINGER )
 			{
-				const ::linger *lingerData = reinterpret_cast<const ::linger *>(option.data());
-				if( lingerData->l_onoff != 0 && lingerData->l_linger != 0 )
+			const ::linger *lingerData = reinterpret_cast<const ::linger *>(option.data());
+			if( lingerData->l_onoff != 0 && lingerData->l_linger != 0 )
 
 			}*/
 
@@ -239,7 +272,7 @@ namespace async
 
 			return asyncResult;
 		}
-		
+
 		// 异步连接服务
 		template<typename HandlerT>
 		AsyncResultPtr Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback)
@@ -339,10 +372,7 @@ namespace async
 
 			return asynResult;
 		}
-
-
 	}
-
 }
 
 
