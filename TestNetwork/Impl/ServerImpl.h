@@ -105,10 +105,18 @@ namespace async
 		struct ObjectFactory< Session >
 		{
 			typedef async::memory::FixedMemoryPool<true, sizeof(Session)>	PoolType;
-			typedef ObjectPool< Session, PoolType >				ObjectPoolType;
+			typedef ObjectPool< Session, PoolType >							ObjectPoolType;
 		};
 	}
 }
+
+
+template<typename T>
+struct NoneDeletor
+{
+	void operator()(T *)
+	{}
+};
 
 
 inline SocketPtr CreateSocket(OverlappedDispatcher &io)

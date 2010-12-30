@@ -14,7 +14,6 @@ int main(int argc, char* argv[])
 
 	OverlappedDispatcher ioService(GetFitThreadNum());
 
-	shared_ptr
 	try
 	{
 		Server server(ioService, 5050);
