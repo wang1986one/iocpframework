@@ -33,11 +33,11 @@ namespace async
 			typedef const T&	const_reference;
 
 			// 内存分配类型
-			typedef typename AllocT::alloc_type alloc_type;
+			typedef typename AllocT::allocator_type allocator_type;
 
 		private:
 			// 类属内存池
-			static alloc_type BufferPool;
+			static allocator_type bufferPool_;
 			AllocT alloc_;		// 分配器
 
 			bool internal_;		// 是否外部提供缓冲区
@@ -48,14 +48,14 @@ namespace async
 			
 		public:
 			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SOCKET_SIZE)
-				: alloc_(BufferPool)
+				: alloc_(bufferPool_)
 				, internal_(true)
 				, capacity_(defaultSize)
 				, bufferSize_(0)
 				, buffer_(_Allocate(defaultSize))
 			{}
 			AutoBufferT(pointer pStr, size_t nSize)
-				: alloc_(BufferPool)
+				: alloc_(bufferPool_)
 				, internal_(false)
 				, capacity_(nSize)
 				, bufferSize_(nSize)
@@ -63,7 +63,7 @@ namespace async
 			{
 			}
 			AutoBufferT(pointer beg, pointer end)
-				: alloc_(BufferPool)
+				: alloc_(bufferPool_)
 				, internal_(false)
 				, capacity_(std::distance(beg, end))
 				, bufferSize_(capacity_)
@@ -171,9 +171,9 @@ namespace async
 		};
 
 		template<typename T, typename AllocT>
-		typename AutoBufferT<T, AllocT>::alloc_type AutoBufferT<T, AllocT>::BufferPool;
+		typename AutoBufferT<T, AllocT>::allocator_type AutoBufferT<T, AllocT>::bufferPool_;
 
-		typedef AutoBufferT<char, async::memory::MemAllocator<char, MemoryMgr::SocketMemoryPool>> AutoBuffer;
+		typedef AutoBufferT< char, async::memory::MemAllocator< char, MemoryMgr::SocketMemoryPool > > AutoBuffer;
 		typedef std::tr1::shared_ptr<AutoBuffer>	AutoBufferPtr;
 
 

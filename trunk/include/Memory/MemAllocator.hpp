@@ -27,7 +27,7 @@ namespace async
 			typedef size_t											size_type;
 			typedef ptrdiff_t										difference_type;
 			
-			typedef AllocT											alloc_type;
+			typedef AllocT											allocator_type;
 
 			// rebind allocator to type U
 			template<typename U>
@@ -36,19 +36,20 @@ namespace async
 				typedef MemAllocator<U, AllocT> other;
 			};
 
+
 		private:
-			AllocT *m_alloc;
+			AllocT &alloc_;
 
 		public:
 			explicit MemAllocator(AllocT &alloc)
-				: m_alloc(&alloc)
+				: alloc_(alloc)
 			{}
 			MemAllocator(const MemAllocator &rhs)
-				: m_alloc(rhs.m_alloc)
+				: alloc_(rhs.alloc_)
 			{}
 			template<typename U>
-			MemAllocator(const MemAllocator<U, AllocT>& rhs)
-				: m_alloc(rhs.m_alloc)
+			explicit MemAllocator(const MemAllocator<U, AllocT>& rhs)
+				: alloc_(rhs.alloc_)
 			{}
 			~MemAllocator()
 			{}
@@ -72,25 +73,25 @@ namespace async
 
 			pointer allocate() 
 			{
-				pointer ret = reinterpret_cast<pointer>(m_alloc->Allocate(sizeof(value_type)));
+				pointer ret = reinterpret_cast<pointer>(alloc_.Allocate(sizeof(value_type)));
 
 				return ret;
 			}
 
 			pointer allocate(size_type num, const void* = 0) 
 			{
-				pointer ret = reinterpret_cast<pointer>(m_alloc->Allocate(num * sizeof(value_type)));
+				pointer ret = reinterpret_cast<pointer>(alloc_.Allocate(num * sizeof(value_type)));
 
 				return ret;
 			}
 
 			void deallocate(pointer p) 
 			{
-				return m_alloc->Deallocate(p, sizeof(value_type));
+				return alloc_.Deallocate(p, sizeof(value_type));
 			}
 			void deallocate(pointer p, size_type num) 
 			{
-				return m_alloc->Deallocate(p, num * sizeof(value_type));
+				return alloc_.Deallocate(p, num * sizeof(value_type));
 			}
 		};
 	}
