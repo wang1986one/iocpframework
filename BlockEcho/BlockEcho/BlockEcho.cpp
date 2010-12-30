@@ -17,25 +17,27 @@ using namespace async::iocp;
 using namespace async::network;
 using namespace async::thread;
 
-typedef std::tr1::shared_ptr<Tcp::Socket> StreamSocketPtr;
 
-DWORD Session(StreamSocketPtr socket)
+
+DWORD Session(SocketPtr socket)
 {
 	try
 	{
+		//socket->Open(Tcp::Family(), Tcp::Type(), Tcp::Protocol());
+
 		while(1)
 		{
 			static char data[MaxLenth];
 			static AutoBufferPtr buffer(MakeBuffer(data));
 			buffer->resize(MaxLenth);
 
-			size_t len = socket->Read(MutableBuffer(buffer->data(), buffer->size()));
+			size_t len = socket->Read(buffer->data(), buffer->size(), 0);
 			buffer->resize(len);
 			if( len == 0 )
 				break;
 
 			//size_t sendLen = socket->Write(buffer);
-			Write(*socket, ConstBuffer(buffer->data(), buffer->size())/*, TransferAtLeast(2)*/);
+			socket->Write(buffer->data(), buffer->size(), 0/*, TransferAtLeast(2)*/);
 		}
 	}
 	catch(std::exception &e)
@@ -55,10 +57,10 @@ DWORD Server(OverlappedDispatcher &io, u_short port)
 		while(1)
 		{
 			Tcp::Accpetor::ImplementType sock = accpetor.Accept();
-			StreamSocketPtr session(new Tcp::Socket(io, sock));
+			SocketPtr session(sock);
 
-			ThreadImplEx *threadSession(new ThreadImplEx);
-			threadSession->RegisterFunc(std::tr1::bind(&Session, session));
+			ThreadImplEx *threadSession(new ThreadImplEx);	// 不管了 没释放
+			threadSession->RegisterFunc(std::tr1::bind(&Session, std::tr1::ref(session)));
 			threadSession->Start();
 		}
 	}
