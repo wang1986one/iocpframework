@@ -40,7 +40,7 @@ namespace async
 		template< typename T >
 		inline void __ReleaseBuffer(typename ObjectFactory<T>::ObjectPoolType::Allocator::pointer p)
 		{
-			return ObjectFactory<T>::ObjectPoolType::GetAllocator().deallocate(p);
+			ObjectFactory<T>::ObjectPoolType::GetAllocator().deallocate(p);
 		}
 
 		template< typename T >
@@ -54,6 +54,7 @@ namespace async
 		template<typename T>
 		inline void ObjectDeallocate(T *p)
 		{
+			p->~T();
 			return __ReleaseBuffer<T>(p);
 		}
 
