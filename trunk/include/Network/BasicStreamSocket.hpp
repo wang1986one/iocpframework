@@ -22,17 +22,15 @@ namespace async
 
 		public:
 			explicit BasicStreamSocket(AsyncIODispatcherType &io)
-				: impl_(new Socket(io))
+				: impl_(MakeSocket(io))
 			{}
-			BasicStreamSocket(AsyncIODispatcherType &io, const ImplementType &impl)
+			explicit BasicStreamSocket(const ImplementType &impl)
 				: impl_(impl)
 			{}
 
 			BasicStreamSocket(AsyncIODispatcherType &io, const ProtocolType &protocol)
-				: impl_(new Socket(io))
-			{
-				impl_->Open(protocol.Family(), protocol.Type(), protocol.Protocol());
-			}
+				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
+			{}
 			~BasicStreamSocket()
 			{}
 

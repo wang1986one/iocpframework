@@ -10,7 +10,7 @@
 using namespace async::network;
 
 
-
+volatile long g_ClientNum = 0;
 
 
 class Session
@@ -21,12 +21,15 @@ private:
 	std::tr1::array<char, 4096> buf_;
 
 public:
-	explicit Session(OverlappedDispatcher &io, const SocketPtr &sock)
-		: socket_(io, sock)
-	{}
+	explicit Session(const SocketPtr &sock)
+		: socket_(sock)
+	{
+		::InterlockedIncrement(&g_ClientNum);
+	}
 	~Session()
 	{
 		//Stop();
+		::InterlockedDecrement(&g_ClientNum);
 	}
 
 
@@ -68,7 +71,7 @@ private:
 				return;
 			}
 
-			std::cout.write(buf_.data(), bytes) << std::endl;
+			//std::cout.write(buf_.data(), bytes) << std::endl;
 
 
 			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), 
@@ -119,14 +122,9 @@ struct NoneDeletor
 };
 
 
-inline SocketPtr CreateSocket(OverlappedDispatcher &io)
+inline SessionPtr CreateSession(const SocketPtr &socket)
 {
-	return SocketPtr(new Socket(io, Tcp::V4().Family(), Tcp::V4().Type(), Tcp::V4().Protocol()));
-}
-
-inline SessionPtr CreateSession(OverlappedDispatcher &io, const SocketPtr &socket)
-{
-	return SessionPtr(ObjectAlloc<Session>(io, socket), &ObjectDeallocate<Session>);
+	return SessionPtr(ObjectAlloc<Session>(socket), &ObjectDeallocate<Session>);
 	//return SessionPtr(new Session(io, socket));
 }
 
@@ -165,7 +163,7 @@ private:
 	{		
 		try
 		{
-			SocketPtr acceptSock(CreateSocket(io_));
+			SocketPtr acceptSock(MakeSocket(io_, Tcp::V4().Family(), Tcp::V4().Type(), Tcp::V4().Protocol()));
 			acceptor_.AsyncAccept(acceptSock, 0, 
 				std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
 		} 
@@ -188,9 +186,9 @@ private:
 
 		try
 		{
-			SessionPtr session(CreateSession(io_, acceptSocket));
+			SessionPtr session(CreateSession(acceptSocket));
 			session->Start();
-
+	
 			_StartAccept();
 		}
 		catch(const std::exception &e)
