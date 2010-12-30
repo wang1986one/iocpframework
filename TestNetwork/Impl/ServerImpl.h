@@ -9,6 +9,10 @@
 
 using namespace async::network;
 
+
+
+
+
 class Session
 	: public std::tr1::enable_shared_from_this<Session>
 {
@@ -36,8 +40,7 @@ public:
 	{
 		try
 		{		
-			
-			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(15),
+			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1),
 				std::tr1::bind(&Session::_HandleRead, shared_from_this(), 
 				std::tr1::placeholders::_1, std::tr1::placeholders::_2));
 
@@ -91,6 +94,23 @@ private:
 typedef std::tr1::shared_ptr<Session> SessionPtr;
 
 
+
+
+// 定制自己的工厂
+namespace async
+{
+	namespace iocp
+	{
+		template<>
+		struct ObjectFactory< Session >
+		{
+			typedef async::memory::FixedMemoryPool<true, sizeof(Session)>	PoolType;
+			typedef ObjectPool< Session, PoolType >				ObjectPoolType;
+		};
+	}
+}
+
+
 inline SocketPtr CreateSocket(OverlappedDispatcher &io)
 {
 	return SocketPtr(new Socket(io, Tcp::V4().Family(), Tcp::V4().Type(), Tcp::V4().Protocol()));
@@ -98,7 +118,8 @@ inline SocketPtr CreateSocket(OverlappedDispatcher &io)
 
 inline SessionPtr CreateSession(OverlappedDispatcher &io, const SocketPtr &socket)
 {
-	return SessionPtr(new Session(io, socket));
+	return SessionPtr(ObjectAlloc<Session>(io, socket), &ObjectDeallocate<Session>);
+	//return SessionPtr(new Session(io, socket));
 }
 
 

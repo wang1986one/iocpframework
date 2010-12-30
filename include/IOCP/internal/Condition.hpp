@@ -17,6 +17,7 @@ namespace async
 			// ----------------------------------------------------
 			// struct TransferAll
 
+			// 传输所有字节
 			struct TransferAllT
 			{
 				typedef size_t	result_type;
@@ -31,6 +32,7 @@ namespace async
 			// ----------------------------------------------------
 			// class TransferAtLeat
 
+			// 最少传输字节
 			class TransferAtLeatT
 			{
 			public:
