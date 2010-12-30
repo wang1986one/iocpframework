@@ -234,10 +234,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Callback.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
