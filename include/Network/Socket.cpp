@@ -301,8 +301,6 @@ namespace async
 
 			sockaddr_in localAddr		= {0};
 			localAddr.sin_family		= AF_INET;
-			localAddr.sin_port			= 0;
-			localAddr.sin_addr.s_addr	= 0;
 
 			// 很变态，需要先bind
 			::bind(socket_, reinterpret_cast<const sockaddr *>(&localAddr), sizeof(localAddr));
