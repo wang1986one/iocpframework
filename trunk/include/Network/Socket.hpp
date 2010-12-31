@@ -27,7 +27,6 @@ namespace async
 		// class Socket
 
 		class Socket
-			: public Object
 		{
 		public:
 			typedef iocp::OverlappedDispatcher	AsyncIODispatcherType;

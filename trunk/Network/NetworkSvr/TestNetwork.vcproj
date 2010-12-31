@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="NetworkCli"
-	ProjectGUID="{8E003496-5B14-4B40-9BC8-4922654497C1}"
-	RootNamespace="NetworkCli"
+	Name="NetworkSvr"
+	ProjectGUID="{12D1D0D6-25EC-4549-92CF-408C1B894944}"
+	RootNamespace="TestNetwork"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -171,10 +171,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\NetworkCli.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -193,6 +189,10 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\TestNetwork.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -214,6 +214,14 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+		</Filter>
+		<Filter
+			Name="impl"
+			>
+			<File
+				RelativePath=".\Impl\ServerImpl.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
@@ -411,18 +419,6 @@
 				</Filter>
 			</Filter>
 		</Filter>
-		<Filter
-			Name="ClientImpl"
-			>
-			<File
-				RelativePath=".\ClientImpl\ClientImpl.hpp"
-				>
-			</File>
-		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
