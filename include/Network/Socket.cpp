@@ -294,13 +294,18 @@ namespace async
 
 		void Socket::_BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
 		{
-			sockaddr_in remoteAddr = {0};
+			sockaddr_in remoteAddr		= {0};
 			remoteAddr.sin_family		= AF_INET;
 			remoteAddr.sin_port			= ::htons(uPort);
 			remoteAddr.sin_addr.s_addr	= ::htonl(addr.Address());
 
+			sockaddr_in localAddr		= {0};
+			localAddr.sin_family		= AF_INET;
+			localAddr.sin_port			= 0;
+			localAddr.sin_addr.s_addr	= 0;
+
 			// 很变态，需要先bind
-			::bind(socket_, reinterpret_cast<const sockaddr *>(&remoteAddr), sizeof(sockaddr_in));
+			::bind(socket_, reinterpret_cast<const sockaddr *>(&localAddr), sizeof(localAddr));
 
 			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, result.Get()) 
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
