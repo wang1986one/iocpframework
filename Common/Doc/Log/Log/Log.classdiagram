@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<logicalClassDesignerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" dslVersion="1.0.0.0" Id="97abb936-6627-47ed-a7de-64b183d3ac3a" name="Log" linkedPackageId="0ec0df21-7a29-4fd3-9971-c90801f32594" xmlns="http://schemas.microsoft.com/dsltools/LogicalClassDesigner">
+  <profileInstances>
+    <packageHasProfileInstances Id="ec8bb6b4-913d-4b2b-96e5-4923d0b46afd">
+      <profileInstance Id="8e13a967-e40a-4dd8-8345-0b8a153f0f2c" name="StandardProfileL2">
+        <elementDefinition Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791" />
+      </profileInstance>
+      <elementDefinition Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b" />
+    </packageHasProfileInstances>
+    <packageHasProfileInstances Id="5335ac0f-10f0-49ad-971e-cd1e83ace076">
+      <profileInstance Id="3c2f1342-fa67-4f50-a232-65bff915059e" name="StandardProfileL3">
+        <elementDefinition Id="532ea607-fb19-44b8-8502-3351b05452be" />
+      </profileInstance>
+      <elementDefinition Id="29349502-908c-4fda-9054-c48619c59ed0" />
+    </packageHasProfileInstances>
+  </profileInstances>
+  <packagedElements>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="e10988af-3b7a-4df7-8d5b-dc0c704486f2" name="FileStorageT" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="ce480795-e1d9-41b2-a1ff-edb37def886e" />
+        <generalsInternal>
+          <generalization Id="17872b62-e49c-40f2-887b-ac70c5d0ce43" isSubstitutable="false">
+            <classMoniker Id="2865f338-bd2c-42a6-8322-9cdd8ced6c81" LastKnownName="StorageBase" />
+            <elementDefinition Id="be9a9f7e-979c-4539-a343-8ff8c0752209" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="a51fe4ce-25c8-4792-ab39-85caa92bc47c" name="ILogStorage" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="4c8df6ae-d2c4-4c02-9c89-851db79d1e7d" />
+        <targetEnds>
+          <association Id="f6e750fd-f0c1-4ee2-9589-39ce74e55fb0" isDerived="false" sourceEndRoleName="ILogStorage" targetEndRoleName="MultiStorage" isLeaf="false" isAbstract="false">
+            <classMoniker Id="a27663f4-d629-4217-9a82-b06d08828387" LastKnownName="MultiStorage" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="bdbe136f-d412-4173-82a8-a3e1ac14b754" name="ILogStorage" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString Id="22ffeacf-a005-4527-a02d-372abc15c7fb" name="Lower">
+                      <elementDefinition Id="a1d9a788-4c8c-45c3-93e6-3ba649dbb742" />
+                    </literalString>
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString Id="8a6755d9-f482-4e32-b021-c42a079a43b0" name="Upper" value=".">
+                      <elementDefinition Id="70e4eaac-2f7f-4bca-959b-6899ee5cfbe4" />
+                    </literalString>
+                  </upperValueInternal>
+                  <elementDefinition Id="651489bc-9694-45e6-bd65-41519f426cb8" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="90cd0794-90db-47ae-960b-e02e8738a9b7" name="MultiStorage" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+                  <elementDefinition Id="6d8adfbc-9de2-45b4-b5c0-97a96fb0e010" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="6b6980bc-1b91-435d-ab91-79b364264a78" />
+          </association>
+        </targetEnds>
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="2865f338-bd2c-42a6-8322-9cdd8ced6c81" name="StorageBase" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="3f6176b3-6d8d-419f-98c8-b42debfb6e0b" />
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="8aa4c4e7-6df6-40c4-9b41-e16f0d702ad8" name="StringStorage" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="e62836fe-ce5a-42a6-ad48-97a45cf3db9a" />
+        <generalsInternal>
+          <generalization Id="ced41ed2-7052-45af-a834-f89b495e2230" isSubstitutable="false">
+            <classMoniker Id="2865f338-bd2c-42a6-8322-9cdd8ced6c81" LastKnownName="StorageBase" />
+            <elementDefinition Id="b71cd47d-5591-4c9b-a7fe-e8d0b9b60db6" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="a27663f4-d629-4217-9a82-b06d08828387" name="MultiStorage" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="32cb01e4-7bdf-4122-b79f-bf52e18ee2d9" />
+        <generalsInternal>
+          <generalization Id="ec70c48f-0395-470f-849c-796e67090aeb" isSubstitutable="false">
+            <classMoniker Id="2865f338-bd2c-42a6-8322-9cdd8ced6c81" LastKnownName="StorageBase" />
+            <elementDefinition Id="9bd4809e-62df-4662-a0ab-a9ce7b44077c" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="47db1f8b-e50b-45a7-a440-0958483410c7" name="Log" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="1165c9da-b1b7-4fac-a481-ee255b7e1bc2" />
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="80be9e8d-1a9a-4b70-8386-d739b4354e45" name="OutputLog" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="4260298b-2298-4b06-82b7-86257a3a909d" />
+        <generalsInternal>
+          <generalization Id="1ea23f42-caf7-4468-8313-01bdc2b17e22" isSubstitutable="false">
+            <classMoniker Id="47db1f8b-e50b-45a7-a440-0958483410c7" LastKnownName="Log" />
+            <elementDefinition Id="d1fbc9b0-3b1b-4ea3-867a-8356e9e7ca31" />
+          </generalization>
+        </generalsInternal>
+        <targetEnds>
+          <association Id="d1aad09b-7e8b-41fc-9ed5-b789e52aa3a4" isDerived="false" sourceEndRoleName="OutputLog" targetEndRoleName="FileStorageT" isLeaf="false" isAbstract="false">
+            <classMoniker Id="e10988af-3b7a-4df7-8d5b-dc0c704486f2" LastKnownName="FileStorageT" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="fc79d1ca-64bc-4a6c-8ffb-e83bbf821e24" name="OutputLog" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="983c3b6a-6627-4884-b966-8db2f45d1074" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="4f886880-b9b2-452f-a6a4-468d424e56b3" name="FileStorageT" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+                  <elementDefinition Id="b763f756-39b2-41fc-84ee-4b74f6476efd" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="12e69108-adfd-4bb9-8abc-d14a837c57b1" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="dea5dc08-a4cd-443c-be15-a8408cff44cc" name="ErrorLog" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="8c4e076d-d3d0-4fa5-9026-37afd25f04bf" />
+        <generalsInternal>
+          <generalization Id="6a40d85e-8e97-4dac-b502-e87f40ccf713" isSubstitutable="false">
+            <classMoniker Id="47db1f8b-e50b-45a7-a440-0958483410c7" LastKnownName="Log" />
+            <elementDefinition Id="0277b39c-5405-4028-aff5-40446b44ede5" />
+          </generalization>
+        </generalsInternal>
+        <targetEnds>
+          <association Id="b6266b97-8c5b-4fa4-ab94-dc3d546cc7e1" isDerived="false" sourceEndRoleName="ErrorLog" targetEndRoleName="FileStorageT" isLeaf="false" isAbstract="false">
+            <classMoniker Id="e10988af-3b7a-4df7-8d5b-dc0c704486f2" LastKnownName="FileStorageT" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="7a10b20f-78ec-4843-8041-079a35cfd602" name="ErrorLog" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="e2ab3814-4579-4558-a32b-22daaca87f88" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="6ed15301-6ef3-4df2-bcb8-dd361d483703" name="FileStorageT" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+                  <elementDefinition Id="51e6f8eb-75b6-48e0-b028-11ad38b4c3ba" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="f8348993-5c64-4204-957f-421572a589df" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="29e6dbb2-3109-473a-bc16-77eb6f93bdc8" name="FileLog" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="76d2e939-f79c-47fe-ad9b-274f32e866c0" />
+        <generalsInternal>
+          <generalization Id="068c6516-35f1-4040-adfd-c82232be317c" isSubstitutable="false">
+            <classMoniker Id="47db1f8b-e50b-45a7-a440-0958483410c7" LastKnownName="Log" />
+            <elementDefinition Id="22333a17-4d90-4e1d-8566-07f2429f6f92" />
+          </generalization>
+        </generalsInternal>
+        <targetEnds>
+          <association Id="02dc5754-fb2d-4b60-87e2-3f4f40706fe7" isDerived="false" sourceEndRoleName="FileLog" targetEndRoleName="FileStorageT" isLeaf="false" isAbstract="false">
+            <classMoniker Id="e10988af-3b7a-4df7-8d5b-dc0c704486f2" LastKnownName="FileStorageT" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="5fac7baa-df68-4814-847c-a8c51c8790c7" name="FileLog" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="188c05cc-740a-4196-9a54-37fb168d40b4" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="e91a3348-bc6f-4c6e-a7e5-26f2d2f98276" name="FileStorageT" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+                  <elementDefinition Id="872af0cb-d53b-4421-bcd0-316263dca566" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="3f639730-47cf-4d45-b91e-a5ed075984db" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="3b815662-4d4b-4f5a-ba68-7004df74e7f0" name="StringLog" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="f6724bde-daee-41b7-b59c-d89e897522b7" />
+        <generalsInternal>
+          <generalization Id="79022fec-4585-4325-a446-1308ab2a5655" isSubstitutable="false">
+            <classMoniker Id="47db1f8b-e50b-45a7-a440-0958483410c7" LastKnownName="Log" />
+            <elementDefinition Id="cfe2be55-f031-4502-a335-d03503ce452e" />
+          </generalization>
+        </generalsInternal>
+        <targetEnds>
+          <association Id="b3660a49-6891-4d75-86cf-8deb7aa286f3" isDerived="false" sourceEndRoleName="StringLog" targetEndRoleName="StringStorage" isLeaf="false" isAbstract="false">
+            <classMoniker Id="8aa4c4e7-6df6-40c4-9b41-e16f0d702ad8" LastKnownName="StringStorage" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="f6cfcacd-7c60-4d30-92c4-62c101794fe2" name="StringLog" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="5d254399-d8a3-41be-bfbe-decd1c72ed14" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="8e10fd0a-178d-49c4-bdb7-7fb77b61dcd2" name="StringStorage" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+                  <elementDefinition Id="5802e991-b82f-43c0-84e2-9afb45a5320b" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="27e69b74-f821-4777-8fbf-c63b4282e600" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="7138a407-16b7-4465-a039-bcdd2ec0ed38" name="MultiLog" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="93cd092d-f909-40bf-ba5e-82a740902d3f" />
+        <generalsInternal>
+          <generalization Id="9d4dbeed-b967-429d-bb66-5b0236f6af1e" isSubstitutable="false">
+            <classMoniker Id="47db1f8b-e50b-45a7-a440-0958483410c7" LastKnownName="Log" />
+            <elementDefinition Id="6e74e854-d8c5-45e8-8bc6-3c640e584626" />
+          </generalization>
+        </generalsInternal>
+        <targetEnds>
+          <association Id="ba7ba7f9-7250-4b9a-80ac-95ff7b90e4ee" isDerived="false" sourceEndRoleName="MultiLog" targetEndRoleName="MultiStorage" isLeaf="false" isAbstract="false">
+            <classMoniker Id="a27663f4-d629-4217-9a82-b06d08828387" LastKnownName="MultiStorage" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="bfdae48c-7f3f-4b2d-9039-10375976dbd6" name="MultiLog" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="5936fd07-4c4b-421f-8c28-90c1121dd5e4" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="cb5aed23-d5bc-4822-b839-c59d21080991" name="MultiStorage" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+                  <elementDefinition Id="c0183cf5-c8b0-48a2-a57d-d5dd9f4eb2a3" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="cc0eef4a-9561-4bea-b417-15291a3add95" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+  </packagedElements>
+  <package Id="0ec0df21-7a29-4fd3-9971-c90801f32594" name="Log">
+    <elementDefinition Id="a96aaeab-a0a3-4a10-8f99-812fbe5887e6" />
+  </package>
+</logicalClassDesignerModel>
