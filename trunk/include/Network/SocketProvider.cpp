@@ -1,11 +1,6 @@
 #include "stdafx.h"
 #include "SocketProvider.hpp"
-
-
 #include "../IOCP/WinException.hpp"
-
-
-
 #include "Socket.hpp"
 
 
@@ -16,7 +11,7 @@ namespace async
 	namespace network
 	{
 
-		SocketProvider::SocketProvider(OverlappedDispatcher &io)
+		SocketProvider::SocketProvider(IODispatcher &io)
 		{
 			static GUID guidTransmitFile		= WSAID_TRANSMITFILE;
 			static GUID guidAcceptEx			= WSAID_ACCEPTEX;

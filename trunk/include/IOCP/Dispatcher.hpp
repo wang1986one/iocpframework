@@ -57,11 +57,8 @@ namespace async
 		// class IODispatcher
 		// 完成端口实现
 
-		template<typename AsyncT>
 		class IODispatcher
 		{
-			typedef AsyncT					AsyncType;
-
 		public:
 			// 线程容器类型
 			typedef std::vector<HANDLE>		Threads;
@@ -82,32 +79,57 @@ namespace async
 			void Bind(HANDLE);
 			// 向完成端口投递请求
 			template<typename AsyncPtrT>
-			void Post(AsyncPtrT &);
+			void Post(AsyncPtrT);
 			// 当仅不在线程池中时才向调度器中分派
 			template<typename AsyncPtrT>
-			void Dispatch(AsyncPtrT &);
+			void Dispatch(AsyncPtrT);
 
 			// 停止服务
 			void Stop();
 
 		private:
-			template<typename AsyncPtrT>
-			void _PostImpl(AsyncPtrT &, detail::Int2Type<FALSE>);
-			template<typename AsyncPtrT>
-			void _PostImpl(AsyncPtrT &, detail::Int2Type<TRUE>);
-
 			void _ThreadIO();
 
 		private:
 			static size_t WINAPI _ThreadIOImpl(LPVOID);
 		};
 
-		typedef IODispatcher<AsyncResult>			OverlappedDispatcher;
-		typedef IODispatcher<AsyncCallbackBase>		AsyncCallbackDispatcher;
+		namespace detail
+		{
+			template<typename IOCPT, typename AsyncPtrT>
+			inline bool PostStatus(IOCPT &iocp, AsyncPtrT result, detail::Int2Type<FALSE> &)
+			{
+				return iocp.PostStatus(reinterpret_cast<ULONG_PTR>(&*result), 0, 0);
+			}
+			template<typename IOCPT, typename AsyncPtrT>
+			inline bool PostStatus(IOCPT &iocp, AsyncPtrT result, detail::Int2Type<TRUE> &)
+			{
+				return iocp.PostStatus(0, 0, &*result);
+			}
+		}
+
+		template<typename AsyncPtrT>
+		void IODispatcher::Post(AsyncPtrT result)
+		{
+			result->AddRef();
+
+			typedef std::tr1::remove_pointer<AsyncPtrT>::type AsyncCallbackType;
+			if( !detail::PostStatus(iocp_, result, detail::Int2Type<AsyncCallbackType::IS_OVERLAPPED>()) )
+				throw Win32Exception("iocp_.PostStatus");
+		}
+
+
+		template<typename AsyncPtrT>
+		void IODispatcher::Dispatch(AsyncPtrT result)
+		{	
+			if( thread::CallStack<IODispatcher>::Contains(this) )
+				AsyncCallbackBase::Call(result);
+			else
+				Post(result);
+		}
 	}
 }
 
 
-#include "DispatcherImpl.hpp"
 
 #endif

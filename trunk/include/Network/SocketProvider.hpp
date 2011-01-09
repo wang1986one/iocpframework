@@ -27,7 +27,7 @@ namespace async
 			detail::SockInit<> sockInit_;	
 
 		public:
-			explicit SocketProvider(OverlappedDispatcher &);
+			explicit SocketProvider(IODispatcher &);
 			~SocketProvider();
 
 			// non-copyable

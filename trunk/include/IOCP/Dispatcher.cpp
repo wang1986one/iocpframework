@@ -1,9 +1,10 @@
-#include <process.h>
+#include "stdafx.h"
 
 #include "Dispatcher.hpp"
 #include "WinException.hpp"
 #include "../MultiThread/Tls.hpp"
 
+#include "process.h"
 
 namespace async
 {
@@ -11,8 +12,7 @@ namespace async
 	namespace iocp
 	{
 
-		template<typename AsyncT>
-		IODispatcher<AsyncT>::IODispatcher(size_t numThreads/* = 0*/)
+		IODispatcher::IODispatcher(size_t numThreads/* = 0*/)
 		{
 			if( !iocp_.Create(numThreads) )
 				throw Win32Exception("iocp_.Create()");
@@ -39,8 +39,7 @@ namespace async
 			}
 		}
 
-		template<typename AsyncT>
-		IODispatcher<AsyncT>::~IODispatcher()
+		IODispatcher::~IODispatcher()
 		{
 			try
 			{		
@@ -53,51 +52,14 @@ namespace async
 			}
 		}
 
-		template<typename AsyncT>
-		void IODispatcher<AsyncT>::Bind(HANDLE hHandle)
+		void IODispatcher::Bind(HANDLE hHandle)
 		{
 			if( !iocp_.AssociateDevice(hHandle, 0) )
 				throw Win32Exception("iocp_.AssociateDevice");
 		}
 
-		template<typename AsyncT>
-		template<typename AsyncPtrT>
-		void IODispatcher<AsyncT>::Post(AsyncPtrT &result)
-		{
-			_PostImpl(result, detail::Int2Type<AsyncType::IS_OVERLAPPED>());
-		}
 
-		template<typename AsyncT>
-		template<typename AsyncPtrT>
-		void IODispatcher<AsyncT>::_PostImpl(AsyncPtrT &result, detail::Int2Type<FALSE>)
-		{
-			result->AddRef();
-
-			if( 0 == iocp_.PostStatus(reinterpret_cast<ULONG_PTR>(&*result), 0, 0) )
-				throw Win32Exception("iocp_.PostStatus");
-		}
-		template<typename AsyncT>
-		template<typename AsyncPtrT>
-		void IODispatcher<AsyncT>::_PostImpl(AsyncPtrT &result, detail::Int2Type<TRUE>)
-		{
-			result->AddRef();
-
-			if( 0 == iocp_.PostStatus(0, 0, &*result) )
-				throw Win32Exception("iocp_.PostStatus");
-		}
-
-		template<typename AsyncT>
-		template<typename AsyncPtrT>
-		void IODispatcher<AsyncT>::Dispatch(AsyncPtrT &result)
-		{	
-			if( thread::CallStack<IODispatcher<AsyncType>>::Contains(this) )
-				AsyncType::Call(result);
-			else
-				Post(result);
-		}
-
-		template<typename AsyncT>
-		void IODispatcher<AsyncT>::Stop()
+		void IODispatcher::Stop()
 		{
 			// 取消所有线程上的待决的IO操作
 			std::for_each(threads_.begin(), threads_.end(), std::ptr_fun(::CancelIo));
@@ -119,11 +81,9 @@ namespace async
 			threads_.clear();
 		}
 
-
-		template<typename AsyncT>
-		void IODispatcher<AsyncT>::_ThreadIO()
+		void IODispatcher::_ThreadIO()
 		{
-			thread::CallStack<IODispatcher<AsyncT>>::Context ctx(this);
+			thread::CallStack<IODispatcher>::Context ctx(this);
 
 			DWORD dwSize			= 0;
 			ULONG_PTR uKey			= 0;
@@ -144,7 +104,7 @@ namespace async
 				try
 				{
 					// 回调
-					AsyncType::Call(key, pOverlapped, dwSize, err);
+					AsyncCallbackBase::Call(key, pOverlapped, dwSize, err);
 				}
 				catch(const std::exception &e)
 				{
@@ -162,10 +122,9 @@ namespace async
 		}
 
 
-		template<typename AsyncT>
-		size_t IODispatcher<AsyncT>::_ThreadIOImpl(LPVOID pParam)
+		size_t IODispatcher::_ThreadIOImpl(LPVOID pParam)
 		{
-			IODispatcher<AsyncT> *pThis = reinterpret_cast<IODispatcher<AsyncT> *>(pParam);
+			IODispatcher *pThis = reinterpret_cast<IODispatcher *>(pParam);
 
 			pThis->_ThreadIO();
 

@@ -130,11 +130,11 @@ inline SessionPtr CreateSession(const SocketPtr &socket)
 class Server
 {
 private:
-	OverlappedDispatcher &io_;
+	IODispatcher &io_;
 	Tcp::Accpetor acceptor_;
 
 public:
-	Server(OverlappedDispatcher &io, short port)
+	Server(IODispatcher &io, short port)
 		: io_(io)
 		, acceptor_(io_, Tcp::V4(), port, INADDR_ANY)
 	{}

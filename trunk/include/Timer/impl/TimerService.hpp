@@ -159,7 +159,7 @@ namespace async
 							throw std::logic_error("handle out of range");
 
 						const TimersArray::value_type &val = timerArray_[WAIT_OBJECT_0 + res];
-						io_.Post(val.second);
+						io_.Post(val.second.Get());
 					}
 
 					::OutputDebugString(_T("Exit Timer Service Thread\n"));
@@ -169,7 +169,8 @@ namespace async
 				void _Copy(std::vector<HANDLE> &handles, const TimersArray &timers)
 				{
 					const size_t count = timers.size();
-					handles.resize(count);
+					if( count > handles.size() )
+						handles.resize(count);
 
 					for(size_t i = 0; i != count; ++i)
 					{
