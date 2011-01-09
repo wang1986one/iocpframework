@@ -17,15 +17,14 @@ int main(int argc, char* argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 
-	OverlappedDispatcher ioService(GetFitThreadNum());
-	AsyncCallbackDispatcher ioTimer(1);
+	IODispatcher ioService(GetFitThreadNum());
 
 	try
 	{
 		Server server(ioService, 5050);
 		server.Start();
 
-		async::timer::Timer time(ioTimer, 2000, 0);
+		async::timer::Timer time(ioService, 2000, 0);
 		time.BeginWait(std::tr1::bind(&AsyncPrint));
 
 		system("pause");

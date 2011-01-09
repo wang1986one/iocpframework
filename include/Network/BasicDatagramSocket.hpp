@@ -120,11 +120,12 @@ namespace async
 
 			// 异步链接
 			template<typename HandlerT>
-			AsyncResultPtr AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
+			AsyncIOCallback<HandlerT> *AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
 			{
 				return impl_->AsyncConnect(addr, port, handler);
 			}
-			const AsyncResultPtr &AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
+			template<typename AsyncT>
+			const AsyncT &AsyncConnect(const AsyncT &result, const IPAddress &addr, u_short uPort)
 			{
 				return impl_->AsyncConnect(result, addr, uPort);
 			}
@@ -158,13 +159,13 @@ namespace async
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			AsyncResultPtr AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
+			AsyncIOCallback<HandlerT> *AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
 			{
 				return impl_->AsyncSendTo(buffer.data(), buffer.size(), addr, callback);
 			}
 
 			template<typename MutableBufferT, typename HandlerT>
-			AsyncResultPtr AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
+			AsyncIOCallback<HandlerT> *AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
 			{
 				return impl_->AsyncRecvFrom(buffer.data(), buffer.size(), addr, callback);
 			}

@@ -12,12 +12,12 @@ using namespace async::network;
 class Client
 {
 private:
-	OverlappedDispatcher &io_;
+	IODispatcher &io_;
 	Tcp::Socket socket_;
 	std::tr1::array<char, 4096>	buf_;
 
 public:
-	Client(OverlappedDispatcher &io, const std::string &ip, u_short port)
+	Client(IODispatcher &io, const std::string &ip, u_short port)
 		: io_(io)
 		, socket_(io, Tcp::V4())
 	{

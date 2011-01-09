@@ -108,7 +108,7 @@ namespace async
 			}
 
 			template<typename HandlerT>
-			AsyncResultPtr AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const HandlerT &callback)
+			void /*AsyncIOCallback<HandlerT> **/AsyncAccept(const ImplementType &acceptSocket, size_t szOutSide, const HandlerT &callback)
 			{
 				return impl_->AsyncAccept(acceptSocket, szOutSide, callback);
 			}

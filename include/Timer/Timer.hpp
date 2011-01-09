@@ -9,7 +9,7 @@ namespace async
 {
 	namespace timer
 	{
-		typedef impl::BasicTimer<impl::WaitableTimer, async::iocp::AsyncCallbackDispatcher>	Timer;
+		typedef impl::BasicTimer<impl::WaitableTimer, async::iocp::IODispatcher>	Timer;
 
 		typedef std::tr1::shared_ptr<Timer>				TimerPtr;
 	}

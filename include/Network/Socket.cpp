@@ -13,7 +13,7 @@ namespace async
 	namespace network
 	{
 
-		Socket::Socket(OverlappedDispatcher &io)
+		Socket::Socket(AsyncIODispatcherType &io)
 			: socket_(INVALID_SOCKET)
 			, io_(io)
 		{
@@ -223,140 +223,6 @@ namespace async
 				throw Win32Exception("WSARecvFrom");
 
 			return dwSize;
-		}
-
-
-		// 异步调用
-		
-		const AsyncResultPtr &Socket::AsyncConnect(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
-		{
-			result->AddRef();
-
-			_BeginConnectImpl(result, addr, uPort);
-			return result;
-		}
-
-		void Socket::EndConnect(const AsyncResultPtr &asyncResult)
-		{
-			asyncResult->EndAsync(socket_);
-		}
-
-
-		// AsyncDisconnect
-		const AsyncResultPtr &Socket::AsyncDisconnect(const AsyncResultPtr &result, bool bReuseSocket)
-		{
-			result->AddRef();
-
-			_BeginDisconnectImpl(result, bReuseSocket);
-
-			return result;
-		}
-
-		void Socket::EndDisconnect(const AsyncResultPtr &asyncResult)
-		{
-			asyncResult->EndAsync(socket_);
-		}
-
-
-		// AsyncRead
-		const AsyncResultPtr &Socket::AsyncRead(const AsyncResultPtr &result, char *buf, size_t size)
-		{
-			result->AddRef();
-
-			_BeginReadImpl(result, buf, size);
-
-			return result;
-		}
-
-		size_t Socket::EndRead(const AsyncResultPtr &asyncResult)
-		{
-			return asyncResult->EndAsync(socket_);;
-		}
-
-
-		// AsyncWrite
-		const AsyncResultPtr &Socket::AsyncWrite(const AsyncResultPtr &result, const char *buf, size_t size)
-		{
-			result->AddRef();
-
-			_BeginWriteImpl(result, buf, size);
-
-			return result;
-		}
-
-		size_t Socket::EndWrite(const AsyncResultPtr &asyncResult)
-		{
-			return asyncResult->EndAsync(socket_);
-		}
-
-
-		// --------------------------------
-
-		void Socket::_BeginConnectImpl(const AsyncResultPtr &result, const IPAddress &addr, u_short uPort)
-		{
-			sockaddr_in remoteAddr		= {0};
-			remoteAddr.sin_family		= AF_INET;
-			remoteAddr.sin_port			= ::htons(uPort);
-			remoteAddr.sin_addr.s_addr	= ::htonl(addr.Address());
-
-			sockaddr_in localAddr		= {0};
-			localAddr.sin_family		= AF_INET;
-
-			// 很变态，需要先bind
-			::bind(socket_, reinterpret_cast<const sockaddr *>(&localAddr), sizeof(localAddr));
-
-			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, result.Get()) 
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				result->Release();
-				throw Win32Exception("ConnectionEx");
-			}
-		}
-
-		void Socket::_BeginDisconnectImpl(const AsyncResultPtr &result, bool bReuseSocket/* = true*/)
-		{
-			DWORD dwFlags = bReuseSocket ? TF_REUSE_SOCKET : 0;
-
-			if( !SocketProvider::GetSingleton(io_).DisconnectEx(socket_, result.Get(), dwFlags, 0) 
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				result->Release();
-				throw Win32Exception("DisConnectionEx");
-			}
-		}
-
-		void Socket::_BeginReadImpl(const AsyncResultPtr &result, char *buf, size_t size)
-		{
-			WSABUF wsabuf = {0};
-			wsabuf.buf = buf;
-			wsabuf.len = size;
-
-			DWORD dwFlag = 0;
-			DWORD dwSize = 0;
-			
-			if( 0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, result.Get(), NULL)
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				result->Release();
-				throw Win32Exception("WSARecv");
-			}
-		}
-
-		void Socket::_BeginWriteImpl(const AsyncResultPtr &result, const char *buf, size_t size)
-		{
-			WSABUF wsabuf = {0};
-			wsabuf.buf = const_cast<char *>(buf);
-			wsabuf.len = size;
-
-			DWORD dwFlag = 0;
-			DWORD dwSize = 0;
-			
-			if( 0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, result.Get(), NULL)
-				&& ::WSAGetLastError() != WSA_IO_PENDING )
-			{
-				result->Release();
-				throw Win32Exception("WSASend");
-			}
 		}
 
 	}
