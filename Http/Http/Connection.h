@@ -31,7 +31,7 @@ namespace http
 		Reply reply_;
 
 	public:
-		Connection(async::iocp::OverlappedDispatcher &io, ConnectionMgr &mgr, RequestHandler &handler);
+		Connection(async::iocp::IODispatcher &io, ConnectionMgr &mgr, RequestHandler &handler);
 
 	private:
 		Connection(const Connection &);

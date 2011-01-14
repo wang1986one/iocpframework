@@ -16,7 +16,7 @@ namespace http
 	class Server
 	{
 	private:
-		async::iocp::OverlappedDispatcher io_;
+		async::iocp::IODispatcher io_;
 		async::network::Tcp::Accpetor acceptor_;
 	
 		ConnectionMgr connectionMgr_;

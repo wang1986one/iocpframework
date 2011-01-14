@@ -61,9 +61,10 @@ namespace async
 				p->Release();
 			}
 
-			static void Call(AsyncCallbackBasePtr &result)
+			static void Call(const AsyncCallbackBasePtr &result)
 			{
 				result->Invoke(0, ::GetLastError());
+				result->Release();
 			}
 		};
 
@@ -88,7 +89,7 @@ namespace async
 		};
 
 		template<typename HandlerT>
-		inline AsyncCallbackBasePtr MakeAsyncCallback(const HandlerT &handler)
+		inline AsyncCallbackBase *MakeAsyncCallback(const HandlerT &handler)
 		{
 			return new AsyncCallback<HandlerT>(handler);
 		}

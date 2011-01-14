@@ -5,6 +5,7 @@
 #include "Object.hpp"
 #include "IOCP.hpp"
 #include "AsyncResult.hpp"
+#include "../MultiThread/Tls.hpp"
 
 #include <vector>
 
@@ -122,7 +123,7 @@ namespace async
 		template<typename AsyncPtrT>
 		void IODispatcher::Dispatch(AsyncPtrT result)
 		{	
-			if( thread::CallStack<IODispatcher>::Contains(this) )
+			if( async::thread::CallStack<IODispatcher>::Contains(this) )
 				AsyncCallbackBase::Call(result);
 			else
 				Post(result);
