@@ -162,7 +162,7 @@ namespace async
 		struct ObjectFactory< Socket >
 		{
 			typedef async::memory::FixedMemoryPool<true, sizeof(Socket)>	PoolType;
-			typedef ObjectPool< Socket, PoolType >							ObjectPoolType;
+			typedef ObjectPool< PoolType >									ObjectPoolType;
 		};
 	}
 }

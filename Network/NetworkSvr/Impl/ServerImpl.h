@@ -105,7 +105,7 @@ namespace async
 		struct ObjectFactory< Session >
 		{
 			typedef async::memory::FixedMemoryPool<true, sizeof(Session)>	PoolType;
-			typedef ObjectPool< Session, PoolType >							ObjectPoolType;
+			typedef ObjectPool<PoolType >									ObjectPoolType;
 		};
 	}
 }
