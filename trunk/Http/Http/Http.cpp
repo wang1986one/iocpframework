@@ -54,7 +54,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 		http::Server server("127.0.0.1", "5050",
-			"D:/Files/Extent Library/boost_1_39_0/doc/boost-doc-zh");
+			"F:\\Program\\boost\\libs\\");
 
 		console_ctrl_function = std::tr1::bind(&http::Server::Stop, &server);
 		::SetConsoleCtrlHandler(&console_ctrl_handler, TRUE);

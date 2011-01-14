@@ -11,7 +11,7 @@
 namespace http
 {
 	
-	Connection::Connection(async::iocp::OverlappedDispatcher &io, ConnectionMgr &mgr, RequestHandler &handler)
+	Connection::Connection(async::iocp::IODispatcher &io, ConnectionMgr &mgr, RequestHandler &handler)
 		: socket_(io, async::network::Tcp::V4())
 		, connectionMgr_(mgr)
 		, requestHandler_(handler)
