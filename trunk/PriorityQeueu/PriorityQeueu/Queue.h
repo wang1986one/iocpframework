@@ -9,22 +9,24 @@ class HandlerPrority
 {
 	// forward declare
 public:
-	typedef std::tr1::function<void()> Callback;
-
 	struct WrappedHandler;
 
-	WrappedHandler Wrap(size_t priority, const async::iocp::AsyncCallbackFunc &callback);
+	template<typename HandlerT>
+	WrappedHandler Wrap(size_t priority, const HandlerT &callback)
+	{
+		return HandlerPrority::WrappedHandler(*this, priority, callback);
+	}
 
 private:
 	class QueueHandler;
 
 
 private:
-	async::iocp::OverlappedDispatcher &io_;
+	async::iocp::IODispatcher &io_;
 	std::priority_queue<QueueHandler> handlers_;
 
 public:
-	explicit HandlerPrority(async::iocp::OverlappedDispatcher &io)
+	explicit HandlerPrority(async::iocp::IODispatcher &io)
 		: io_(io)
 	{}
 
@@ -46,24 +48,21 @@ void HanlderInvoke(const FuncT &func, HandlerPrority::WrappedHandler *h)
 
 struct HandlerPrority::WrappedHandler
 {
-	//using async::iocp::AsyncResultPtr;
-	//using async::iocp::AsyncResult;
-	//using async::iocp::nothing;
-
 	HandlerPrority &queue_;
 	size_t priority_;
-	async::iocp::AsyncResultPtr result_;
+	async::iocp::AsyncCallbackBasePtr result_;
 
 public:
-	WrappedHandler(HandlerPrority &queue, size_t priority, const async::iocp::AsyncCallbackFunc &callback)
+	template<typename HandlerT>
+	WrappedHandler(HandlerPrority &queue, size_t priority, const HandlerT &callback)
 		: queue_(queue)
 		, priority_(priority)
-		, result_(new async::iocp::AsyncResult(async::iocp::nothing, async::iocp::nothing, async::iocp::nothing, async::iocp::nothing, callback))
+		, result_(async::iocp::MakeAsyncCallback(callback))
 	{}
 
 
 public:
-	const async::iocp::AsyncResultPtr &operator()() const
+	const async::iocp::AsyncCallbackBasePtr &operator()() const
 	{
 		return result_;
 	}
@@ -81,22 +80,15 @@ public:
 };
 
 
-inline HandlerPrority::WrappedHandler HandlerPrority::Wrap(size_t priority, const async::iocp::AsyncCallbackFunc &callback)
-{
-	return HandlerPrority::WrappedHandler(*this, priority, callback);
-}
-
-
-
 class HandlerPrority::QueueHandler
 {
 private:
 	size_t priority_;
-	async::iocp::AsyncResultPtr result_;
-	async::iocp::OverlappedDispatcher &io_;
+	async::iocp::AsyncCallbackBasePtr result_;
+	async::iocp::IODispatcher &io_;
 
 public:
-	QueueHandler(async::iocp::OverlappedDispatcher &io, size_t priority, const async::iocp::AsyncResultPtr &result)
+	QueueHandler(async::iocp::IODispatcher &io, size_t priority, const async::iocp::AsyncCallbackBasePtr &result)
 		: priority_(priority)
 		, result_(result)
 		, io_(io)
@@ -117,7 +109,7 @@ public:
 public:
 	void Excute()
 	{
-		io_.Post(result_);
+		io_.Post(result_.Get());
 	}
 
 	friend bool operator<(const QueueHandler &lhs, const QueueHandler &rhs)

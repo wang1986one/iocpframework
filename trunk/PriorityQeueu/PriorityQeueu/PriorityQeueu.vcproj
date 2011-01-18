@@ -233,14 +233,6 @@
 			<Filter
 				Name="FileSystem"
 				>
-				<File
-					RelativePath="..\..\include\FileSystem\File.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\FileSystem\File.hpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="IOCP"
@@ -254,15 +246,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Callback.hpp"
+					RelativePath="..\..\include\IOCP\Dispatcher.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\IOCP\DispatcherImpl.hpp"
 					>
 				</File>
 				<File
@@ -299,10 +287,6 @@
 				>
 				<File
 					RelativePath="..\..\include\Memory\FixedMemoryPool.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Memory\MemAllocator.hpp"
 					>
 				</File>
 				<File
