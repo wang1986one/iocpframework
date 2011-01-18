@@ -10,8 +10,8 @@ namespace async
 {
 	namespace logger
 	{
-		typedef impl::BasicLogger<impl::LoggerService<async::iocp::AsyncCallbackDispatcher>> Logger;
-		typedef std::tr1::shared_ptr<Logger>		LoggerPtr;
+		typedef impl::BasicLogger< impl::LoggerService<async::iocp::IODispatcher> > Logger;
+		typedef std::tr1::shared_ptr<Logger>										LoggerPtr;
 	}
 }
 

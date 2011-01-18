@@ -47,8 +47,6 @@ namespace async
 				{
 					service_.Log(impl_, msg);
 				}
-
-
 			};
 		}
 	}

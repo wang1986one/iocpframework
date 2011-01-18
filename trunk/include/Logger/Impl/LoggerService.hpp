@@ -78,7 +78,7 @@ namespace async
 				{
 					iocp::AsyncCallbackBasePtr callback(MakeAsyncCallback(std::tr1::bind(&LoggerService::_UseFileImpl, this, file)));
 
-					io_.Dispatch(callback);
+					io_.Dispatch(callback.Get());
 				}
 
 				// ¼ÇÂ¼ÐÅÏ¢
@@ -90,7 +90,7 @@ namespace async
 
 					iocp::AsyncCallbackBasePtr callback(MakeAsyncCallback(std::tr1::bind(&LoggerService::_LogImpl, this, os.str())));
 
-					io_.Dispatch(callback);
+					io_.Dispatch(callback.Get());
 				}
 
 			private:
