@@ -12,7 +12,7 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 	
-	async::iocp::AsyncCallbackDispatcher io(2);
+	async::iocp::IODispatcher io(2);
 
 	try
 	{
