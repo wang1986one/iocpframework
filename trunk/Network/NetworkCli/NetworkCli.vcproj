@@ -410,6 +410,22 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="Multithread"
+				>
+				<File
+					RelativePath="..\..\include\MultiThread\Lock.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\MultiThread\Thread.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\MultiThread\Tls.hpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ClientImpl"
