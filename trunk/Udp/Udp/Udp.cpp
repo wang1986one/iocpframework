@@ -13,7 +13,7 @@ using namespace std::tr1::placeholders;
 class server
 {
 private:
-	async::iocp::OverlappedDispatcher& io_service_;
+	async::iocp::IODispatcher& io_service_;
 	async::network::Udp::Socket socket_;
 	SOCKADDR_IN addr_;
 	u_short port_;
@@ -22,7 +22,7 @@ private:
 	char data_[max_length];
 
 public:
-	server(async::iocp::OverlappedDispatcher& io, short port)
+	server(async::iocp::IODispatcher& io, short port)
 		: io_service_(io)
 		, socket_(io, Udp::V4(), port)
 	{
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 {
 	try
 	{
-		async::iocp::OverlappedDispatcher io;
+		async::iocp::IODispatcher io;
 
 		using namespace std; // For atoi.
 		server s(io, 5050);

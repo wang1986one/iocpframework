@@ -337,7 +337,7 @@ namespace async
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
 
-			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, dwFlag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), asynResult.Get(), NULL)
+			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, dwFlag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), asynResult, NULL)
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
 			{
 				asynResult->Release();
@@ -362,7 +362,7 @@ namespace async
 			DWORD dwSize = 0;
 			int addrLen = sizeof(addr);
 
-			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &dwFlag, reinterpret_cast<sockaddr *>(&addr), &addrLen, asynResult.Get(), NULL)
+			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &dwFlag, reinterpret_cast<sockaddr *>(&addr), &addrLen, asynResult, NULL)
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
 			{
 				asynResult->Release();
