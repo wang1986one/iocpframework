@@ -47,7 +47,7 @@ namespace async
 			value_type *buffer_;// ª∫≥Â«¯÷∏’Î
 			
 		public:
-			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SOCKET_SIZE)
+			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SIZE)
 				: alloc_(bufferPool_)
 				, internal_(true)
 				, capacity_(defaultSize)
@@ -173,7 +173,7 @@ namespace async
 		template<typename T, typename AllocT>
 		typename AutoBufferT<T, AllocT>::allocator_type AutoBufferT<T, AllocT>::bufferPool_;
 
-		typedef AutoBufferT< char, async::memory::MemAllocator< char, MemoryMgr::SocketMemoryPool > > AutoBuffer;
+		typedef AutoBufferT< char, async::memory::ContainerAllocator< char, MemoryMgr::MemoryPool > > AutoBuffer;
 		typedef std::tr1::shared_ptr<AutoBuffer>	AutoBufferPtr;
 
 

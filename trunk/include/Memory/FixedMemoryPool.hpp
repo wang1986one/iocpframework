@@ -18,7 +18,7 @@ namespace async
 		{
 		public:
 			typedef typename LockTypeTraits<__IS_MT>::value_type LockType;
-			typedef thread::CAutoLock<LockType>			AutoLock;
+			typedef thread::AutoLock<LockType>			AutoLock;
 			typedef AllocT								AllocType;
 
 			// 多线程共享时，应该让变量具有volatile修饰，而单线程应该让其尽量优化提高速度
@@ -262,10 +262,6 @@ namespace async
 				m_bufs.clear();
 			}
 		};
-
-
-		typedef FixedMemoryPool<true, 10 * 1024>	MTFixedMemoryPool;
-		typedef FixedMemoryPool<false, 10 * 1024>	STFixedMemoryPool;
 
 	}
 }

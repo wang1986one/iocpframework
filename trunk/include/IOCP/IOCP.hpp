@@ -20,11 +20,10 @@ namespace async
 			HANDLE m_hIOCP;
 
 		public:
-			Iocp(int nMaxConcurrency = -1)
+			Iocp()
 				: m_hIOCP(NULL)
 			{
-				if( nMaxConcurrency != -1 )
-					Create(nMaxConcurrency);
+				Create(-1);
 			}
 			~Iocp()
 			{
