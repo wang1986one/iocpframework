@@ -9,6 +9,7 @@
 
 
 
+
 /*
 	实现分析:
 	该内存池采用HASH-LIST数据结构管理数据,分配一块内存时,如果所要求的内存超过了某个数量就直接调用malloc分配内存, 
@@ -42,12 +43,12 @@ namespace async
 		template<bool __IsMt>
 		struct LockTypeTraits
 		{
-			typedef thread::CAutoCriticalSection	value_type;
+			typedef async::thread::AutoCriticalSection	value_type;
 		};
 		template<>
 		struct LockTypeTraits<false>
 		{
-			typedef thread::CAutoNull				value_type;
+			typedef async::thread::AutoNull				value_type;
 		};
 
 
@@ -121,7 +122,7 @@ namespace async
 		{
 		public:
 			typedef typename LockTypeTraits<__IS_MT>::value_type LockType;
-			typedef thread::CAutoLock<LockType>			AutoLock;
+			typedef thread::AutoLock<LockType>			AutoLock;
 			typedef AllocT								AllocType;
 
 			// 多线程共享时，应该让变量具有volatile修饰，而单线程应该让其尽量优化提高速度
@@ -240,10 +241,6 @@ namespace async
 					AutoLock lock(m_lock);
 
 					// 调整对应的free - list,回收。改变Next指针，将返回的节点放在List开头
-					//InterlockedExchangePointer(&pTemp->pFreeListLink, pFreeListTemp);
-					//InterlockedExchangePointer(pFreeListTemp, &pTemp);
-					
-					
 					pTemp->pFreeListLink = *pFreeListTemp;
 					*pFreeListTemp = pTemp;
 				}

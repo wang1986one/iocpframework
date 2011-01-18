@@ -43,7 +43,7 @@ namespace async
 				TimersArray timerArray_;						// Array of Timer
 
 				async::thread::ThreadImplEx thread_;			// WaitForMutipleObjectEx
-				async::thread::CAutoEvent   update_;	
+				async::thread::AutoEvent   update_;	
 
 				ServiceType &io_;								// Asynchronous Callback service
 
