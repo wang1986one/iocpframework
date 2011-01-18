@@ -5,6 +5,7 @@
 #include "Object.hpp"
 #include "IOCP.hpp"
 #include "AsyncResult.hpp"
+#include "WinException.hpp"
 #include "../MultiThread/Tls.hpp"
 
 #include <vector>
