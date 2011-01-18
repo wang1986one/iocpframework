@@ -13,7 +13,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	try
 	{
-		OverlappedDispatcher io(1);
+		IODispatcher io(1);
 
 		Tcp::Socket sock(io, Tcp::V4());
 		sock.Connect(AF_INET, IPAddress::Parse("192.168.1.103"), 5050);

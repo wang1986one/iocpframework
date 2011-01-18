@@ -48,7 +48,7 @@ DWORD Session(SocketPtr socket)
 	return 0;
 }
 
-DWORD Server(OverlappedDispatcher &io, u_short port)
+DWORD Server(IODispatcher &io, u_short port)
 {
 	try
 	{
@@ -79,7 +79,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	try
 	{
-		OverlappedDispatcher io(0);
+		IODispatcher io(0);
 		Server(io, 5050);
 	}
 	catch(std::exception &e)
