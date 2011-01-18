@@ -11,8 +11,8 @@ namespace http
 
 	class ConnectionMgr
 	{
-		typedef async::thread::CAutoCriticalSection CSLock;
-		typedef async::thread::CAutoLock<CSLock>	AutoLock;
+		typedef async::thread::AutoCriticalSection CSLock;
+		typedef async::thread::AutoLock<CSLock>	AutoLock;
 
 	private:
 		std::set<ConnectionPtr> connections_;
