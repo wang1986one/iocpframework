@@ -20,10 +20,7 @@ namespace async
 			}
 		}
 
-
-
 		
-
 		//---------------------------------------------------------------------------
 		// class AsyncCallbackBase
 		// 非IO异步回调组件
@@ -35,15 +32,15 @@ namespace async
 		struct AsyncCallbackBase
 			: public Object
 		{
-			// 是否利用OVERLAPPED
-			enum { IS_OVERLAPPED = FALSE };	
-
 			// 利用函数指针，避免virtual function
 			typedef void (*CallbackFuncPtr)(AsyncCallbackBase*, u_long, u_long);
 			CallbackFuncPtr callback_;
 
-			AsyncCallbackBase(CallbackFuncPtr callback)
+			// 是否是IO回调
+			bool isIO_;
+			AsyncCallbackBase(CallbackFuncPtr callback, bool ioFlag)
 				: callback_(callback)
+				, isIO_(ioFlag)
 			{}
 
 			void Invoke(u_long size, u_long error)
@@ -51,10 +48,15 @@ namespace async
 				callback_(this, size, error);
 			}
 
+			bool IsIOCallback() const
+			{
+				return isIO_;
+			}
+
 			template<typename KeyT, typename OverlappedT>
 			static void Call(KeyT *key, OverlappedT *overlapped, u_long size, u_long error)
 			{
-				char *tmp = ((char *)overlapped == 0) ? (char *)key : (char *)overlapped - 0x0C;
+				void *tmp = isIO_ ? overlapped : key;
 				AsyncCallbackBasePtr p(static_cast<AsyncCallbackBase*>((void *)tmp));
 				
 				p->Invoke(size, error);
@@ -69,6 +71,11 @@ namespace async
 		};
 
 
+
+		//---------------------------------------------------------------------------
+		// class AsyncCallback
+
+		// 非IO回调
 		template<typename HandlerT>
 		struct AsyncCallback
 			: public AsyncCallbackBase
@@ -76,7 +83,7 @@ namespace async
 			HandlerT handler_;
 
 			explicit AsyncCallback(const HandlerT &handler)
-				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call)
+				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call, false)
 				, handler_(handler)
 			{}
 
@@ -97,20 +104,19 @@ namespace async
 
 		//---------------------------------------------------------------------------
 		// class AsyncIOCallback
-		// 间接层，负责缓冲区、收发者和回调函数
+
+		// IO回调
 
 		template<typename HandlerT>
 		struct AsyncIOCallback
 			: public AsyncCallbackBase
 			, public OVERLAPPED
 		{
-			enum { IS_OVERLAPPED = TRUE };
-
 			HandlerT handler_;
 
 			template<typename HandlerT>
 			explicit AsyncIOCallback(const HandlerT &callback)
-				: AsyncCallbackBase(&AsyncIOCallback<HandlerT>::Call)
+				: AsyncCallbackBase(&AsyncIOCallback<HandlerT>::Call, true)
 				, handler_(callback)
 			{
 				//RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
