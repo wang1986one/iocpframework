@@ -17,7 +17,7 @@ class Session
 {
 private:
 	Tcp::Socket socket_;
-	std::tr1::array<char, 4096> buf_;
+	std::tr1::array<char, 32> buf_;
 
 public:
 	explicit Session(const SocketPtr &sock)
@@ -69,7 +69,7 @@ private:
 				return;
 			}
 
-			std::cout.write(buf_.data(), bytes) << std::endl;
+			//std::cout.write(buf_.data(), bytes) << std::endl;
 
 			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), 
 				std::tr1::bind(&Session::_HandleWrite, shared_from_this()));
@@ -105,7 +105,7 @@ namespace async
 		struct ObjectFactory< Session >
 		{
 			typedef async::memory::FixedMemoryPool<true, sizeof(Session)>	PoolType;
-			typedef ObjectPool<PoolType >									ObjectPoolType;
+			typedef ObjectPool< PoolType >									ObjectPoolType;
 		};
 	}
 }

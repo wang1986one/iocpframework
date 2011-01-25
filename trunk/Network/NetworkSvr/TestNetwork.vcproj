@@ -378,10 +378,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Memory\MemAllocator.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\Memory\MemoryLeak.h"
 					>
 				</File>
