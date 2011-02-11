@@ -1,19 +1,19 @@
-#ifndef __NETWORK_WRITE_HELPER_HPP
-#define __NETWORK_WRITE_HELPER_HPP
+#ifndef __IOCP_WRITE_HELPER_HPP
+#define __IOCP_WRITE_HELPER_HPP
 
 
-#include "../iocp/internal/Condition.hpp"
+#include "internal/Condition.hpp"
 
 
 namespace async
 {
-	namespace network
+	namespace iocp
 	{
 
 		template<typename SyncWriteStreamT, typename ConstBufferT>
 		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer)
 		{
-			return Write(s, buffer, iocp::TransferAll());
+			return Write(s, buffer, TransferAll());
 		}
 
 		// 
@@ -79,7 +79,7 @@ namespace async
 					}
 					
 					// »Øµ÷
-					iocp::HandlerInvoke::Invoke(handler_, transfers_, error);
+					HandlerInvoke::Invoke(handler_, transfers_, error);
 				}
 			};
 		}
@@ -89,7 +89,7 @@ namespace async
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename HandlerT>
 		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const HandlerT &handler)
 		{
-			AsyncWrite(s, buffer, iocp::TransferAll(), handler);
+			AsyncWrite(s, buffer, TransferAll(), handler);
 		}
 
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>

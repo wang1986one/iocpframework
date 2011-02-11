@@ -1,8 +1,8 @@
-#ifndef __NETWORK_READ_HELPER_HPP
-#define __NETWORK_READ_HELPER_HPP
+#ifndef __IOCP_READ_HELPER_HPP
+#define __IOCP_READ_HELPER_HPP
 
 
-#include "../iocp/internal/Condition.hpp"
+#include "internal/Condition.hpp"
 
 
 namespace async
@@ -13,7 +13,7 @@ namespace async
 		template<typename SyncWriteStreamT, typename MutableBufferT>
 		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer)
 		{
-			return Read(s, buffer, iocp::TransferAll());
+			return Read(s, buffer, TransferAll());
 		}
 
 		// 
@@ -79,7 +79,7 @@ namespace async
 					}
 					
 					// »Øµ÷
-					iocp::HandlerInvoke::Invoke(handler_, transfers_, error);
+					HandlerInvoke::Invoke(handler_, transfers_, error);
 				}
 			};
 		}
@@ -89,7 +89,7 @@ namespace async
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename HandlerT>
 		void AsyncRead(SyncWriteStreamT &s, MutableBufferT &buffer, const HandlerT &handler)
 		{
-			AsyncRead(s, buffer, iocp::TransferAll(), handler);
+			AsyncRead(s, buffer, TransferAll(), handler);
 		}
 
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename ComplateConditionT, typename HandlerT>
