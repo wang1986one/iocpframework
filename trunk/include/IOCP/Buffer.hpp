@@ -183,6 +183,11 @@ namespace async
 
 		// -------------------- Buffer Helper Function -----------------------------
 
+		inline AutoBufferPtr MakeBuffer()
+		{
+			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(), &ObjectDeallocate<AutoBuffer>);
+		}
+
 		inline AutoBufferPtr MakeBuffer(size_t sz)
 		{
 			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(sz), &ObjectDeallocate<AutoBuffer>);
