@@ -138,6 +138,11 @@ namespace async
 				return size;
 			}
 
+			OVERLAPPED *Get()
+			{
+				return static_cast<OVERLAPPED *>(this);
+			}
+
 		public:
 			static void Call(AsyncCallbackBase *param, u_long size, u_long error)
 			{

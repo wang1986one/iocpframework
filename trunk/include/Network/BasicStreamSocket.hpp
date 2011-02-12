@@ -31,8 +31,6 @@ namespace async
 			BasicStreamSocket(AsyncIODispatcherType &io, const ProtocolType &protocol)
 				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
 			{}
-			~BasicStreamSocket()
-			{}
 
 		public:
 			// œ‘ æªÒ»°

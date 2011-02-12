@@ -22,15 +22,10 @@ namespace async
 		public:
 			Iocp()
 				: m_hIOCP(NULL)
-			{
-				Create(-1);
-			}
+			{}
 			~Iocp()
 			{
-				if( m_hIOCP != NULL )
-				{
-					assert(::CloseHandle(m_hIOCP));
-				}
+				Close();
 			}
 
 		public:
@@ -39,15 +34,16 @@ namespace async
 				return m_hIOCP != NULL;
 			}
 
-			bool Close()
+			void Close()
 			{
-				BOOL bRes = ::CloseHandle(m_hIOCP);
-				m_hIOCP = NULL;
-
-				return bRes == TRUE;
+				if( m_hIOCP != NULL )
+				{
+					BOOL bRes = ::CloseHandle(m_hIOCP);
+					m_hIOCP = NULL;
+				}
 			}
 
-			bool Create(int nMaxConcurrency = 0)
+			bool Create(size_t nMaxConcurrency)
 			{
 				m_hIOCP = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, nMaxConcurrency);
 
@@ -58,15 +54,9 @@ namespace async
 
 			bool AssociateDevice(HANDLE hDevice, ULONG_PTR ulCompKey)
 			{
-				BOOL bOk = (::CreateIoCompletionPort(hDevice, m_hIOCP, ulCompKey, 0) == m_hIOCP);
+				assert(m_hIOCP != NULL);
 
-				assert(bOk);
-				return bOk == TRUE;
-			}
-
-			bool AssociateSocket(SOCKET hSocket, ULONG_PTR ulComKey)
-			{
-				return AssociateDevice(reinterpret_cast<HANDLE>(hSocket), ulComKey);
+				return ::CreateIoCompletionPort(hDevice, m_hIOCP, ulCompKey, 0) == m_hIOCP;
 			}
 
 			bool PostStatus(ULONG_PTR ulCompKey, DWORD dwNumBytes = 0, OVERLAPPED *pOver = NULL)
@@ -81,7 +71,12 @@ namespace async
 				return TRUE == ::GetQueuedCompletionStatus(m_hIOCP, pdwNumBytes, pCompKey, pOver, dwMilliseconds);
 			}
 
-			operator HANDLE() const
+			operator HANDLE()
+			{
+				return m_hIOCP;
+			}
+
+			operator const HANDLE() const
 			{
 				return m_hIOCP;
 			}

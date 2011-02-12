@@ -66,6 +66,11 @@ namespace async
 			// 刷新
 			bool Flush();
 			
+			//	取消
+			bool Cancel();
+
+			// 设置文件大小
+			void SetFileSize();
 
 			// 不需设置回调接口,同步函数
 		public:
@@ -75,17 +80,17 @@ namespace async
 			// 异步调用接口
 		public:
 			template<typename HandlerT>
-			const iocp::AsyncIOCallback<HandlerT> &AsyncRead(void *buf, size_t len, const LARGE_INTEGER &offset, const HandlerT &handler);
+			iocp::AsyncIOCallback<HandlerT> *AsyncRead(void *buf, size_t len, const u_int64 &offset, const HandlerT &handler);
 
 			template<typename HandlerT>
-			const iocp::AsyncIOCallback<HandlerT> &AsyncWrite(const void *buf, size_t len, const LARGE_INTEGER &offset, const HandlerT &handler);
+			iocp::AsyncIOCallback<HandlerT> *AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const HandlerT &handler);
 
 		private:
 			template<typename AsyncT>
-			void _AsyncReadImpl(const AsyncT &result, void *buf, size_t len, const LARGE_INTEGER &offset);
+			void _AsyncReadImpl(const AsyncT &result, void *buf, size_t len, const u_int64 &offset);
 
 			template<typename AsyncT>
-			void _AsyncWriteImpl(const AsyncT &result, const void *buf, size_t len, const LARGE_INTEGER &offset);
+			void _AsyncWriteImpl(const AsyncT &result, const void *buf, size_t len, const u_int64 &offset);
 		};
 	}
 
@@ -117,15 +122,14 @@ namespace async
 			return FilePtr(ObjectAlloc<File>(io, file), &ObjectDeallocate<File>);
 		}
 
-		inline FilePtr MakeFile(File::AsyncIODispatcherType &io, int family, int type, int protocol)
+		inline FilePtr MakeFile(File::AsyncIODispatcherType &io, LPCTSTR path, DWORD access, DWORD shared, DWORD create, DWORD flag, LPSECURITY_ATTRIBUTES attribute = NULL, HANDLE templateMode = NULL)
 		{
-			return FilePtr(ObjectAlloc<File>(io, family, type, protocol), &ObjectDeallocate<File>);
+			return FilePtr(ObjectAlloc<File>(io, path, access, shared, create, flag, attribute, templateMode), &ObjectDeallocate<File>);
 		}
 
 
-
 		template<typename HandlerT>
-		const iocp::AsyncIOCallback<HandlerT> &File::AsyncRead(void *buf, size_t len, const LARGE_INTEGER &offset, const HandlerT &handler)
+		iocp::AsyncIOCallback<HandlerT> *File::AsyncRead(void *buf, size_t len, const u_int64 &offset, const HandlerT &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
@@ -138,7 +142,7 @@ namespace async
 		}
 
 		template<typename HandlerT>
-		const iocp::AsyncIOCallback<HandlerT> &File::AsyncWrite(const void *buf, size_t len, const LARGE_INTEGER &offset, const HandlerT &handler)
+		iocp::AsyncIOCallback<HandlerT> *File::AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const HandlerT &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
@@ -151,13 +155,25 @@ namespace async
 		}
 
 
+		namespace detail
+		{
+			inline DWORD HIDWORD(const u_int64 &src)
+			{
+				return (src >> 32) & 0xffffffff;
+			}
+
+			inline DWORD LODWORD(const u_int64 &src)
+			{
+				return src & 0xffffffff;
+			}
+		}
 
 		// --------------------------------
 		template<typename AsyncT>
-		void File::_AsyncReadImpl(const AsyncT &result, void *buf, size_t len, const LARGE_INTEGER &offset)
+		void File::_AsyncReadImpl(const AsyncT &result, void *buf, size_t len, const u_int64 &offset)
 		{
-			result->Offset		= offset.LowPart;
-			result->OffsetHigh	= offset.HighPart;
+			result->Offset		= detail::LODWORD(offset);
+			result->OffsetHigh	= detail::HIDWORD(offset);
 
 			DWORD bytesRead = 0;
 			BOOL bSuc = ::ReadFile(file_, buf, len, &bytesRead, result);
@@ -171,10 +187,10 @@ namespace async
 		}
 
 		template<typename AsyncT>
-		void File::_AsyncWriteImpl(const AsyncT &result, const void *buf, size_t len, const LARGE_INTEGER &offset)
+		void File::_AsyncWriteImpl(const AsyncT &result, const void *buf, size_t len, const u_int64 &offset)
 		{
-			result->Offset		= offset.LowPart;
-			result->OffsetHigh	= offset.HighPart;
+			result->Offset		= detail::LODWORD(offset);
+			result->OffsetHigh	= detail::HIDWORD(offset);
 
 			DWORD bytesRead = 0;
 			BOOL bSuc = ::WriteFile(file_, buf, len, &bytesRead, result);

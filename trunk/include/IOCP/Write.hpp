@@ -10,10 +10,17 @@ namespace async
 	namespace iocp
 	{
 
+		// 
 		template<typename SyncWriteStreamT, typename ConstBufferT>
 		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer)
 		{
 			return Write(s, buffer, TransferAll());
+		}
+
+		template<typename SyncWriteStreamT, typename ConstBufferT>
+		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const u_int64 &offset)
+		{
+			return Write(s, buffer, offset, TransferAll());
 		}
 
 		// 
@@ -21,15 +28,32 @@ namespace async
 		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const CompleteConditionT &condition)
 		{
 			size_t transfers = 0;
-			size_t totalTransfer = condition(transfers);
-			size_t bufSize = buffer.size();
+			const size_t bufSize = buffer.size();
 
-			while( transfers <= totalTransfer )
+			while( transfers <= condition(transfers) )
 			{
 				if( transfers >= bufSize )
 					break;
 
 				size_t ret = s.Write(buffer + transfers);	
+				transfers += ret;
+			}
+
+			return transfers;
+		}
+
+		template<typename SyncWriteStreamT, typename ConstBufferT, typename CompleteConditionT>
+		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const u_int64 &offset, const CompleteConditionT &condition)
+		{
+			size_t transfers = 0;
+			const size_t bufSize = buffer.size();
+
+			while( transfers <= condition(transfers) )
+			{
+				if( transfers >= bufSize )
+					break;
+
+				size_t ret = s.Write(buffer + transfers, offset);	
 				transfers += ret;
 			}
 
@@ -50,7 +74,7 @@ namespace async
 				ConstBufferT buffer_;
 				CompletionConditionT condition_;
 				size_t transfers_;
-				size_t total_;
+				const size_t total_;
 				WriteHandlerT handler_;
 
 			public:
@@ -82,16 +106,69 @@ namespace async
 					HandlerInvoke::Invoke(handler_, transfers_, error);
 				}
 			};
+
+			template<typename AsyncWriteStreamT, typename ConstBufferT, typename CompletionConditionT, typename WriteHandlerT>
+			class WriteOffsetHandler
+			{
+				typedef WriteOffsetHandler<AsyncWriteStreamT, ConstBufferT, CompletionConditionT, WriteHandlerT>	ThisType;
+
+			private:
+				AsyncWriteStreamT &stream_;
+				ConstBufferT buffer_;
+				CompletionConditionT condition_;
+				const u_int64 offset_;
+				size_t transfers_;
+				const size_t total_;
+				WriteHandlerT handler_;
+
+			public:
+				WriteOffsetHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, const u_int64 &offset, const CompletionConditionT &condition, size_t transfer, const WriteHandlerT &handler)
+					: stream_(stream)
+					, buffer_(buffer_)
+					, offset_(offset)
+					, condition_(condition)
+					, transfers_(transfer)
+					, total_(buffer.size())
+					, handler_(handler)
+				{}
+
+				void operator()(u_long size, u_long error)
+				{
+					transfers_ += size;
+
+					if( transfers_ < total_ && size != 0 && error == 0 )
+					{
+						if( transfers_ < condition_() )
+						{
+							stream_.AsyncWrite(buffer_ + size, offset_,
+								ThisType(stream_, buffer_ + size, offset_, condition_, transfers_, handler_));
+
+							return;
+						}
+					}
+
+					// 回调
+					HandlerInvoke::Invoke(handler_, transfers_, error);
+				}
+			};
 		}
 
-		// 异步读取指定的数据
+		// 异步写入指定的数据
 
+		//
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename HandlerT>
 		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const HandlerT &handler)
 		{
 			AsyncWrite(s, buffer, TransferAll(), handler);
 		}
 
+		template<typename SyncWriteStreamT, typename ConstBufferT, typename HandlerT>
+		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const u_int64 &offset, const HandlerT &handler)
+		{
+			AsyncWrite(s, buffer, offset, TransferAll(), handler);
+		}
+
+		// 
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>
 		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const ComplateConditionT &condition, const HandlerT &handler)
 		{
@@ -100,6 +177,13 @@ namespace async
 			s.AsyncWrite(buffer, HookWriteHandler(s, buffer, condition, 0, handler));
 		}
 
+		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>
+		void AsyncWrite(SyncWriteStreamT &s, const ConstBufferT &buffer, const u_int64 &offset, const ComplateConditionT &condition, const HandlerT &handler)
+		{
+			typedef detail::WriteOffsetHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
+
+			s.AsyncWrite(buffer, offset, HookWriteHandler(s, buffer, offset, condition, 0, handler));
+		}
 
 	}
 }
