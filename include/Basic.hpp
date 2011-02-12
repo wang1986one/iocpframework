@@ -23,4 +23,9 @@
 
 #include <cassert>
 
+
+typedef long long				int64;
+typedef unsigned long long		u_int64;
+
+
 #endif

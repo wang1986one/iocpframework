@@ -219,10 +219,6 @@
 			Name="impl"
 			>
 			<File
-				RelativePath=".\Impl\FileImpl.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Impl\FileImpl.h"
 				>
 			</File>
@@ -238,11 +234,11 @@
 				Name="IOCP"
 				>
 				<File
-					RelativePath="..\include\IOCP\Buffer.hpp"
+					RelativePath="..\include\IOCP\AsyncResult.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Callback.hpp"
+					RelativePath="..\include\IOCP\Buffer.hpp"
 					>
 				</File>
 				<File
@@ -270,7 +266,23 @@
 					>
 				</File>
 				<File
+					RelativePath="..\include\IOCP\ObjectFactory.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\IOCP\Pointer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\Read.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\ReadWriteBuffer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\IOCP\ReadWriteBuffer.hpp"
 					>
 				</File>
 				<File
@@ -281,12 +293,24 @@
 					RelativePath="..\include\IOCP\WinException.hpp"
 					>
 				</File>
+				<File
+					RelativePath="..\include\IOCP\Write.hpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Network"
 				>
 				<File
+					RelativePath="..\include\Network\Accept.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\Network\BasicAcceptor.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Network\BasicDatagramSocket.hpp"
 					>
 				</File>
 				<File
@@ -333,10 +357,18 @@
 					RelativePath="..\include\Network\TCP.hpp"
 					>
 				</File>
+				<File
+					RelativePath="..\include\Network\UDP.hpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="FileSystem"
 				>
+				<File
+					RelativePath="..\include\FileSystem\BasicFile.hpp"
+					>
+				</File>
 				<File
 					RelativePath="..\include\FileSystem\File.cpp"
 					>
@@ -351,10 +383,6 @@
 				>
 				<File
 					RelativePath="..\include\Memory\FixedMemoryPool.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Memory\MemAllocator.hpp"
 					>
 				</File>
 				<File
@@ -377,50 +405,6 @@
 					RelativePath="..\include\MultiThread\Lock.hpp"
 					>
 				</File>
-			</Filter>
-			<Filter
-				Name="Timer"
-				>
-				<File
-					RelativePath="..\include\Timer\Timer.hpp"
-					>
-				</File>
-				<Filter
-					Name="impl"
-					>
-					<File
-						RelativePath="..\include\Timer\impl\BasicTimer.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\Timer\impl\TimerImpl.hpp"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="Logger"
-				>
-				<File
-					RelativePath="..\include\Logger\Logger.hpp"
-					>
-				</File>
-				<Filter
-					Name="impl"
-					>
-					<File
-						RelativePath="..\include\Logger\Impl\BasicLogger.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\Logger\Impl\LoggerImpl.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\Logger\Impl\LoggerService.hpp"
-						>
-					</File>
-				</Filter>
 			</Filter>
 		</Filter>
 		<File

@@ -25,22 +25,20 @@ namespace async
 
 		public:
 			explicit BasicDatagramSocket(AsyncIODispatcherType &io)
-				: impl_(new Socket(io))
+				: impl_(MakeSocket(io))
 			{}
 			explicit BasicDatagramSocket(const ImplementType &impl)
 				: impl_(impl)
 			{}
 
 			BasicDatagramSocket(AsyncIODispatcherType &io, const ProtocolType &protocol)
-				: impl_(new Socket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
+				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
 			{}
 			BasicDatagramSocket(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port)
-				: impl_(new Socket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
+				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
 			{
 				impl_->Bind(protocol.Family(), port, INADDR_ANY);
 			}
-			~BasicDatagramSocket()
-			{}
 
 		public:
 			// œ‘ æªÒ»°
