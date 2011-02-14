@@ -32,15 +32,16 @@ namespace async
 		struct AsyncCallbackBase
 			: public Object
 		{
+			enum { IS_OVERLAPPED = FALSE };
+
 			// 利用函数指针，避免virtual function
 			typedef void (*CallbackFuncPtr)(AsyncCallbackBase*, u_long, u_long);
+			
 			CallbackFuncPtr callback_;
-
+			
 			// 是否是IO回调
-			bool isIO_;
-			AsyncCallbackBase(CallbackFuncPtr callback, bool ioFlag)
+			AsyncCallbackBase(CallbackFuncPtr callback)
 				: callback_(callback)
-				, isIO_(ioFlag)
 			{}
 
 			void Invoke(u_long size, u_long error)
@@ -48,16 +49,11 @@ namespace async
 				callback_(this, size, error);
 			}
 
-			bool IsIOCallback() const
-			{
-				return isIO_;
-			}
-
 			template<typename KeyT, typename OverlappedT>
 			static void Call(KeyT *key, OverlappedT *overlapped, u_long size, u_long error)
 			{
-				void *tmp = isIO_ ? overlapped : key;
-				AsyncCallbackBasePtr p(static_cast<AsyncCallbackBase*>((void *)tmp));
+				void *tmp = overlapped ? overlapped : reinterpret_cast<OverlappedT *>(key);
+				AsyncCallbackBasePtr p(static_cast<AsyncCallbackBase*>(tmp));
 				
 				p->Invoke(size, error);
 				p->Release();
@@ -70,8 +66,6 @@ namespace async
 			}
 		};
 
-
-
 		//---------------------------------------------------------------------------
 		// class AsyncCallback
 
@@ -81,9 +75,10 @@ namespace async
 			: public AsyncCallbackBase
 		{
 			HandlerT handler_;
+			enum { IS_OVERLAPPED = FALSE };
 
 			explicit AsyncCallback(const HandlerT &handler)
-				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call, false)
+				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call)
 				, handler_(handler)
 			{}
 
@@ -113,10 +108,11 @@ namespace async
 			, public OVERLAPPED
 		{
 			HandlerT handler_;
+			enum { IS_OVERLAPPED = TRUE };
 
 			template<typename HandlerT>
 			explicit AsyncIOCallback(const HandlerT &callback)
-				: AsyncCallbackBase(&AsyncIOCallback<HandlerT>::Call, true)
+				: AsyncCallbackBase(&AsyncIOCallback<HandlerT>::Call)
 				, handler_(callback)
 			{
 				//RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));

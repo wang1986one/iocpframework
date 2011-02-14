@@ -13,6 +13,18 @@ namespace async
 	namespace memory
 	{
 
+		namespace detail
+		{
+			template< typename PoolT >
+			inline PoolT &DefaultPool()
+			{
+				static PoolT pool;
+				return pool;
+			}
+		}
+
+		// class ContainerAllocator
+
 		template< typename T, typename MemoryPoolT >
 		class ContainerAllocator
 		{
@@ -38,6 +50,9 @@ namespace async
 			MemoryPoolType &pool_;
 
 		public:
+			ContainerAllocator()
+				: pool_(detail::DefaultPool<MemoryPoolType>())
+			{}
 			explicit ContainerAllocator(MemoryPoolType &pool)
 				: pool_(pool)
 			{}

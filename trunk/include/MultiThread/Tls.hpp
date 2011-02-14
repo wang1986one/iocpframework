@@ -30,12 +30,12 @@ namespace async
 				::TlsFree(tssKey_);
 			}
 
-		private:
-			TssPtr(const TssPtr &);
-			TssPtr &operator=(const TssPtr &);
-
 		public:
-			operator T*() const
+			operator T*()
+			{
+				return static_cast<T *>(::TlsGetValue(tssKey_));
+			}
+			T *operator->()
 			{
 				return static_cast<T *>(::TlsGetValue(tssKey_));
 			}
