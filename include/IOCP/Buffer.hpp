@@ -33,37 +33,35 @@ namespace async
 			typedef const T&	const_reference;
 
 			// 内存分配类型
-			typedef typename AllocT::allocator_type allocator_type;
+			typedef AllocT		allocator_type;
 
 		private:
-			// 类属内存池
-			static allocator_type bufferPool_;
-			AllocT alloc_;		// 分配器
+			allocator_type alloc_;		// 分配器
 
-			bool internal_;		// 是否外部提供缓冲区
-			size_t capacity_;	// 已分配缓冲区大小
-			size_t bufferSize_;	// 已使用缓冲区大小
+			bool internal_;				// 是否外部提供缓冲区
+			size_t capacity_;			// 已分配缓冲区大小
+			size_t bufferSize_;			// 已使用缓冲区大小
 
-			value_type *buffer_;// 缓冲区指针
+			value_type *buffer_;		// 缓冲区指针
 			
 		public:
-			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SIZE)
-				: alloc_(bufferPool_)
+			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SIZE, allocator_type alloc = allocator_type())
+				: alloc_(alloc)
 				, internal_(true)
 				, capacity_(defaultSize)
 				, bufferSize_(0)
 				, buffer_(_Allocate(defaultSize))
 			{}
-			AutoBufferT(pointer pStr, size_t nSize)
-				: alloc_(bufferPool_)
+			AutoBufferT(pointer pStr, size_t nSize, allocator_type alloc = allocator_type())
+				: alloc_(alloc)
 				, internal_(false)
 				, capacity_(nSize)
 				, bufferSize_(nSize)
 				, buffer_(pStr)
 			{
 			}
-			AutoBufferT(pointer beg, pointer end)
-				: alloc_(bufferPool_)
+			AutoBufferT(pointer beg, pointer end, allocator_type alloc = allocator_type())
+				: alloc_(alloc)
 				, internal_(false)
 				, capacity_(std::distance(beg, end))
 				, bufferSize_(capacity_)
@@ -170,11 +168,9 @@ namespace async
 			}
 		};
 
-		template<typename T, typename AllocT>
-		typename AutoBufferT<T, AllocT>::allocator_type AutoBufferT<T, AllocT>::bufferPool_;
-
-		typedef AutoBufferT< char, async::memory::ContainerAllocator< char, MemoryMgr::MemoryPool > > AutoBuffer;
-		typedef std::tr1::shared_ptr<AutoBuffer>	AutoBufferPtr;
+		typedef async::memory::ContainerAllocator< char, MemoryMgr::MemoryPool > AutoBufferAllocator;
+		typedef AutoBufferT< char, AutoBufferAllocator >	AutoBuffer;
+		typedef std::tr1::shared_ptr<AutoBuffer>			AutoBufferPtr;
 
 
 
@@ -183,20 +179,18 @@ namespace async
 
 		// -------------------- Buffer Helper Function -----------------------------
 
-		inline AutoBufferPtr MakeBuffer()
-		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(), &ObjectDeallocate<AutoBuffer>);
-		}
-
 		inline AutoBufferPtr MakeBuffer(size_t sz)
 		{
 			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(sz), &ObjectDeallocate<AutoBuffer>);
 		}
 
+		template<typename AllocatorT>
 		inline AutoBufferPtr MakeBuffer(char *buf, size_t sz)
 		{
 			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(buf, sz), &ObjectDeallocate<AutoBuffer>);
 		}
+
+		template<typename AllocatorT>
 		inline AutoBufferPtr MakeBuffer(const char *buf, size_t sz)
 		{
 			return MakeBuffer(const_cast<char *>(buf), sz);

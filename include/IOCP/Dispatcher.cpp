@@ -12,7 +12,9 @@ namespace async
 	namespace iocp
 	{
 
-		IODispatcher::IODispatcher(size_t numThreads/* = 0*/)
+		IODispatcher::IODispatcher(size_t numThreads/* = 0*/, const InitCallback &init/* = 0*/, const UninitCallback &unint/* = 0*/)
+			: initCallback_(init)
+			, unInitCallback_(unint)
 		{
 			if( !iocp_.Create(numThreads) )
 				throw Win32Exception("iocp_.Create()");
@@ -51,6 +53,12 @@ namespace async
 				std::cerr << "Unknown error!" << std::endl;
 			}
 		}
+
+		/*void IODispatcher::Register(const InitCallback &init, const UninitCallback &unint)
+		{
+			initCallback_	= init;
+			unInitCallback_ = unint;
+		}*/
 
 		void IODispatcher::Bind(HANDLE hHandle)
 		{
@@ -126,7 +134,13 @@ namespace async
 		{
 			IODispatcher *pThis = reinterpret_cast<IODispatcher *>(pParam);
 
+			if( pThis->initCallback_ != 0 )
+				pThis->initCallback_();
+
 			pThis->_ThreadIO();
+
+			if( pThis->unInitCallback_ != 0 )
+				pThis->unInitCallback_();
 
 			::OutputDebugStringW(L"OVERLAPPED Thread Exit\n");
 			return 0;

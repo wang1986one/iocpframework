@@ -63,20 +63,28 @@ namespace async
 		{
 		public:
 			// 线程容器类型
-			typedef std::vector<HANDLE>		Threads;
-			typedef Threads::iterator		ThreadsIter;
+			typedef std::vector<HANDLE>			Threads;
+			typedef Threads::const_iterator		ThreadsIter;
+			typedef std::tr1::function<void()>	InitCallback;
+			typedef std::tr1::function<void()>	UninitCallback;
 
 		private:
 			// iocp Handle
 			Iocp iocp_;
 			// 线程容器
 			std::vector<HANDLE>	threads_;
+			// 线程创建后初始化操作
+			InitCallback initCallback_;
+			// 线程退出时结束操作
+			UninitCallback unInitCallback_;
 
 		public:
-			explicit IODispatcher(size_t numThreads = GetFitThreadNum());
+			explicit IODispatcher(size_t numThreads = GetFitThreadNum(), const InitCallback &init = 0, const UninitCallback &unint = 0);
 			~IODispatcher();
 
 		public:
+			// 设置初始化及结束操作
+			//void Register(const InitCallback &init, const UninitCallback &unint);
 			// 绑定设备到完成端口
 			void Bind(HANDLE);
 			// 向完成端口投递请求
