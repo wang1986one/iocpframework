@@ -186,13 +186,11 @@ namespace async
 			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(sz), &ObjectDeallocate<AutoBuffer>);
 		}
 
-		template<typename AllocatorT>
 		inline AutoBufferPtr MakeBuffer(char *buf, size_t sz)
 		{
 			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(buf, sz), &ObjectDeallocate<AutoBuffer>);
 		}
 
-		template<typename AllocatorT>
 		inline AutoBufferPtr MakeBuffer(const char *buf, size_t sz)
 		{
 			return MakeBuffer(const_cast<char *>(buf), sz);
