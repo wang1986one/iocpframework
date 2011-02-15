@@ -32,15 +32,12 @@ namespace async
 		struct AsyncCallbackBase
 			: public Object
 		{
-			enum { IS_OVERLAPPED = FALSE };
-
 			// 利用函数指针，避免virtual function
 			typedef void (*CallbackFuncPtr)(AsyncCallbackBase*, u_long, u_long);
-			
 			CallbackFuncPtr callback_;
-			
+
 			// 是否是IO回调
-			AsyncCallbackBase(CallbackFuncPtr callback)
+			AsyncCallbackBase(CallbackFuncPtr callback, bool ioFlag)
 				: callback_(callback)
 			{}
 
@@ -75,10 +72,9 @@ namespace async
 			: public AsyncCallbackBase
 		{
 			HandlerT handler_;
-			enum { IS_OVERLAPPED = FALSE };
 
 			explicit AsyncCallback(const HandlerT &handler)
-				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call)
+				: AsyncCallbackBase(&AsyncCallback<HandlerT>::Call, false)
 				, handler_(handler)
 			{}
 
@@ -108,11 +104,10 @@ namespace async
 			, public OVERLAPPED
 		{
 			HandlerT handler_;
-			enum { IS_OVERLAPPED = TRUE };
 
 			template<typename HandlerT>
 			explicit AsyncIOCallback(const HandlerT &callback)
-				: AsyncCallbackBase(&AsyncIOCallback<HandlerT>::Call)
+				: AsyncCallbackBase(&AsyncIOCallback<HandlerT>::Call, true)
 				, handler_(callback)
 			{
 				//RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
