@@ -8,6 +8,8 @@
 #include <string>
 
 #include "ObjectFactory.hpp"
+#include "ReadWriteBuffer.hpp"
+
 
 #pragma warning(disable: 4996) // È¥µô
 
@@ -169,8 +171,8 @@ namespace async
 		};
 
 		typedef async::memory::ContainerAllocator< char, MemoryMgr::MemoryPool > AutoBufferAllocator;
-		typedef AutoBufferT< char, AutoBufferAllocator >	AutoBuffer;
-		typedef std::tr1::shared_ptr<AutoBuffer>			AutoBufferPtr;
+		typedef AutoBufferT< char, AutoBufferAllocator >		AutoBuffer;
+		typedef std::tr1::shared_ptr<AutoBuffer>				AutoBufferPtr;
 
 
 
@@ -242,6 +244,33 @@ namespace async
 		inline AutoBufferPtr MakeBuffer(const std::string &arr)
 		{
 			return MakeBuffer(const_cast<std::string &>(arr));
+		}
+
+
+		// --------------------------
+		template< typename ValueT, typename AllocatorT >
+		inline MutableBuffer Buffer(AutoBufferT<ValueT, AllocatorT>* const buf)
+		{
+			return MutableBuffer(buf->data(), buf->size());
+		}
+
+		template< typename ValueT, typename AllocatorT >
+		inline MutableBuffer Buffer(AutoBufferT<ValueT, AllocatorT> &buf)
+		{
+			return MutableBuffer(buf.data(), buf.size());
+		}
+
+		// ----------------------------
+		template< typename ValueT, typename AllocatorT >
+		inline ConstBuffer Buffer(const AutoBufferT<ValueT, AllocatorT> *const buf)
+		{
+			return ConstBuffer(buf->data(), buf->size());
+		}
+
+		template< typename ValueT, typename AllocatorT >
+		inline ConstBuffer Buffer(const AutoBufferT<ValueT, AllocatorT> &buf)
+		{
+			return ConstBuffer(buf.data(), buf.size());
 		}
 
 

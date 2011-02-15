@@ -256,18 +256,7 @@ namespace async
 			return MutableBuffer(&data[0], data.size() * sizeof(PodT) < maxSize ? data.size() * sizeof(PodT) : maxSize);
 		}
 
-		template<typename AutoBufferT>
-		inline MutableBuffer Buffer(AutoBufferT *buf)
-		{
-			return MutableBuffer(buf->data(), buf->size());
-		}
-
-		template<typename AutoBufferT>
-		inline MutableBuffer Buffer(AutoBufferT &buf)
-		{
-			return MutableBuffer(buf.data(), buf.size());
-		}
-
+		
 		
 		// ------------------------------------------------------
 		// ConstBuffer helper
@@ -285,6 +274,7 @@ namespace async
 			return ConstBuffer(data, sz);
 		}
 
+		// ------------------------------
 		template<typename PodT, size_t _N>
 		inline ConstBuffer Buffer(const PodT (&data)[_N])
 		{
@@ -296,6 +286,7 @@ namespace async
 			return ConstBuffer(data,  _N * sizeof(PodT) < maxSize ? _N * sizeof(PodT) : maxSize);
 		}
 
+		// -------------------------------
 		template<typename PodT, size_t _N>
 		inline ConstBuffer Buffer(const std::tr1::array<PodT, _N> &data)
 		{
@@ -307,6 +298,7 @@ namespace async
 			return ConstBuffer(data.data(), _N * sizeof(PodT) < maxSize ? _N * sizeof(PodT) : maxSize);
 		}
 
+		// -------------------------------
 		template<typename PodT>
 		inline ConstBuffer Buffer(const std::vector<PodT> &data)
 		{
@@ -318,6 +310,7 @@ namespace async
 			return ConstBuffer(&data[0], data.size() * sizeof(PodT) < maxSize ? data.size() * sizeof(PodT) : maxSize);
 		}
 
+		// -----------------------------
 		inline ConstBuffer Buffer(const std::string &data)
 		{
 			return ConstBuffer(data.data(), data.size());
@@ -327,17 +320,7 @@ namespace async
 			return ConstBuffer(data.data(), data.size() < maxSize ? data.size() : maxSize);
 		}
 
-		template<typename AutoBufferT>
-		inline ConstBuffer Buffer(const AutoBufferT *const buf)
-		{
-			return ConstBuffer(buf->data(), buf->size());
-		}
-
-		template<typename AutoBufferT>
-		inline ConstBuffer Buffer(const AutoBufferT &buf)
-		{
-			return ConstBuffer(buf.data(), buf.size());
-		}
+		
 	}
 }
 
