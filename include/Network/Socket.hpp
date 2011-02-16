@@ -108,35 +108,31 @@ namespace async
 
 			// 异步连接需要先绑定端口
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback);
-			template<typename HandlerT>
-			const AsyncIOCallback<HandlerT> &AsyncConnect(const AsyncIOCallback<HandlerT> &result, const IPAddress &addr, u_short uPort);
+			AsyncIOCallback *AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback);
+			AsyncIOCallback &AsyncConnect(AsyncIOCallback &result, const IPAddress &addr, u_short uPort);
 
 			// 异步断开连接
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncDisconnect(const HandlerT &callback, bool bReuseSocket);
-			template<typename HandlerT>
-			const AsyncIOCallback<HandlerT> &AsyncDisconnect(const AsyncIOCallback<HandlerT> &result, bool bReuseSocket);
+			AsyncIOCallback *AsyncDisconnect(const HandlerT &callback, bool bReuseSocket);
+			AsyncIOCallback &AsyncDisconnect(AsyncIOCallback &result, bool bReuseSocket);
 
 			// 异步TCP读取
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncRead(char *buf, size_t size, const HandlerT &callback);
-			template<typename HandlerT>
-			const AsyncIOCallback<HandlerT> &AsyncRead(const AsyncIOCallback<HandlerT> &result, char *buf, size_t size);
+			AsyncIOCallback *AsyncRead(char *buf, size_t size, const HandlerT &callback);
+			AsyncIOCallback &AsyncRead(AsyncIOCallback &result, char *buf, size_t size);
 
 			// 异步TCP写入
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncWrite(const char *buf, size_t size, const HandlerT &callback);
-			template<typename HandlerT>
-			const AsyncIOCallback<HandlerT> &AsyncWrite(const AsyncIOCallback<HandlerT> &result, const char *buf, size_t size);
+			AsyncIOCallback *AsyncWrite(const char *buf, size_t size, const HandlerT &callback);
+			AsyncIOCallback &AsyncWrite(AsyncIOCallback &result, const char *buf, size_t size);
 
 			// 异步UDP读取
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const HandlerT &callback);
+			AsyncIOCallback *AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const HandlerT &callback);
 
 			// 异步UDP读入
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const HandlerT &callback);
+			AsyncIOCallback *AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const HandlerT &callback);
 
 		private:
 			template<typename AsyncT>
@@ -254,7 +250,7 @@ namespace async
 
 			typedef detail::AcceptorHandle<HandlerT> HookAcceptor;
 			iocp::AutoBufferPtr acceptBuffer(MakeBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
-			AsyncIOCallback<HookAcceptor> *asyncResult = MakeAsyncIOCallback(HookAcceptor(*this, remoteSocket, acceptBuffer, callback));
+			AsyncIOCallback *asyncResult = MakeAsyncIOCallback(HookAcceptor(*this, remoteSocket, acceptBuffer, callback));
 			asyncResult->AddRef();
 
 			// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
@@ -274,12 +270,12 @@ namespace async
 
 		// 异步连接服务
 		template<typename HandlerT>
-		AsyncIOCallback<HandlerT> *Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback)
+		AsyncIOCallback *Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const HandlerT &callback)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
 
-			AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(callback));
+			AsyncIOCallback *asynResult(MakeAsyncIOCallback(callback));
 			asynResult->AddRef();
 
 			_BeginConnectImpl(asynResult, addr, uPort);
@@ -289,9 +285,9 @@ namespace async
 
 		// 异步关闭连接
 		template<typename HandlerT>
-		AsyncIOCallback<HandlerT> *Socket::AsyncDisconnect(const HandlerT &callback, bool bReuseSocket/* = true*/)
+		AsyncIOCallback *Socket::AsyncDisconnect(const HandlerT &callback, bool bReuseSocket/* = true*/)
 		{
-			AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(callback));
+			AsyncIOCallback *asynResult(MakeAsyncIOCallback(callback));
 			asynResult->AddRef();
 
 			_BeginDisconnectImpl(asynResult, bReuseSocket);
@@ -301,9 +297,9 @@ namespace async
 
 		// 异步接接收数据
 		template<typename HandlerT>
-		AsyncIOCallback<HandlerT> *Socket::AsyncRead(char *buf, size_t size, const HandlerT &callback)
+		AsyncIOCallback *Socket::AsyncRead(char *buf, size_t size, const HandlerT &callback)
 		{
-			AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(callback));
+			AsyncIOCallback *asynResult(MakeAsyncIOCallback(callback));
 			asynResult->AddRef();
 
 			_BeginReadImpl(asynResult, buf, size);
@@ -313,9 +309,9 @@ namespace async
 
 		// 异步发送数据
 		template<typename HandlerT>
-		AsyncIOCallback<HandlerT> *Socket::AsyncWrite(const char *buf, size_t size, const HandlerT &callback)
+		AsyncIOCallback *Socket::AsyncWrite(const char *buf, size_t size, const HandlerT &callback)
 		{
-			AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(callback));
+			AsyncIOCallback *asynResult(MakeAsyncIOCallback(callback));
 			asynResult->AddRef();
 
 			_BeginWriteImpl(asynResult, buf, size);
@@ -325,9 +321,9 @@ namespace async
 
 		// 异步UDP写出
 		template<typename HandlerT>
-		AsyncIOCallback<HandlerT> *Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const HandlerT &callback)
+		AsyncIOCallback *Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const HandlerT &callback)
 		{
-			AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(callback));
+			AsyncIOCallback *asynResult(MakeAsyncIOCallback(callback));
 			asynResult->AddRef();
 
 			WSABUF wsabuf = {0};
@@ -349,9 +345,9 @@ namespace async
 
 		// 异步UDP读入
 		template<typename HandlerT>
-		AsyncIOCallback<HandlerT> *Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const HandlerT &callback)
+		AsyncIOCallback *Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const HandlerT &callback)
 		{
-			AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(callback));
+			AsyncIOCallback *asynResult(MakeAsyncIOCallback(callback));
 			asynResult->AddRef();
 
 			WSABUF wsabuf = {0};
@@ -372,52 +368,6 @@ namespace async
 			return asynResult;
 		}
 
-
-		// 异步调用
-		template<typename HandlerT>
-		const AsyncIOCallback<HandlerT> &Socket::AsyncConnect(const AsyncIOCallback<HandlerT> &result, const IPAddress &addr, u_short uPort)
-		{
-			result->AddRef();
-
-			_BeginConnectImpl(result, addr, uPort);
-			return result;
-		}
-
-
-		// AsyncDisconnect
-		template<typename HandlerT>
-		const AsyncIOCallback<HandlerT> &Socket::AsyncDisconnect(const AsyncIOCallback<HandlerT> &result, bool bReuseSocket)
-		{
-			result->AddRef();
-
-			_BeginDisconnectImpl(result, bReuseSocket);
-
-			return result;
-		}
-
-
-		// AsyncRead
-		template<typename HandlerT>
-		const AsyncIOCallback<HandlerT> &Socket::AsyncRead(const AsyncIOCallback<HandlerT> &result, char *buf, size_t size)
-		{
-			result->AddRef();
-
-			_BeginReadImpl(result, buf, size);
-
-			return result;
-		}
-
-
-		// AsyncWrite
-		template<typename HandlerT>
-		const AsyncIOCallback<HandlerT> &Socket::AsyncWrite(const AsyncIOCallback<HandlerT> &result, const char *buf, size_t size)
-		{
-			result->AddRef();
-
-			_BeginWriteImpl(result, buf, size);
-
-			return result;
-		}
 
 
 		// --------------------------------

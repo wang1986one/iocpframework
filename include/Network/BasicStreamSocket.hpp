@@ -115,24 +115,23 @@ namespace async
 			 
 			// 异步链接
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
+			AsyncIOCallback *AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
 			{
 				return impl_->AsyncConnect(addr, port, handler);
 			}
 			template<typename AsyncT>
-			const AsyncT &AsyncConnect(const AsyncT &result, const IPAddress &addr, u_short uPort)
+			AsyncT &AsyncConnect(AsyncT &result, const IPAddress &addr, u_short uPort)
 			{
 				return impl_->AsyncConnect(result, addr, uPort);
 			}
 
 			// 异步断开链接
 			template<typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncDisconnect(const HandlerT &handler, bool reuse = true)
+			AsyncIOCallback *AsyncDisconnect(const HandlerT &handler, bool reuse = true)
 			{
 				return impl_->AsyncDisconnect(handler, reuse);
 			}
-			template<typename HandlerT>
-			const AsyncIOCallback<HandlerT> &AsyncDisconnect(const AsyncIOCallback<HandlerT> &result, bool reuse = true)
+			const AsyncIOCallback &AsyncDisconnect(const AsyncIOCallback &result, bool reuse = true)
 			{
 				return impl_->AsyncDisconnect(result, reuse);
 			}
@@ -151,13 +150,13 @@ namespace async
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
+			AsyncIOCallback *AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
 			{
 				return impl_->AsyncWrite(buffer.data(), buffer.size(), callback);
 			}
 
-			template<typename HandlerT, typename ConstBufferT>
-			const AsyncIOCallback<HandlerT> &AsyncWrite(const AsyncIOCallback<HandlerT> &result, const ConstBufferT &buffer)
+			template<typename ConstBufferT>
+			AsyncIOCallback &AsyncWrite(AsyncIOCallback &result, const ConstBufferT &buffer)
 			{
 				return impl_->AsyncWrite(result, buffer.data(), buffer.size());
 			}
@@ -177,13 +176,13 @@ namespace async
 
 			// 异步接收数据
 			template<typename MutableBufferT, typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncRead(MutableBufferT &buffer, const HandlerT &callback)
+			AsyncIOCallback *AsyncRead(MutableBufferT &buffer, const HandlerT &callback)
 			{
 				return impl_->AsyncRead(buffer.data(), buffer.size(), callback);
 			}
 
-			template<typename HandlerT, typename MutableBufferT>
-			const AsyncIOCallback<HandlerT> &AsyncRead(const AsyncIOCallback<HandlerT> &result, MutableBufferT &buffer)
+			template<typename MutableBufferT>
+			AsyncIOCallback &AsyncRead(AsyncIOCallback &result, MutableBufferT &buffer)
 			{
 				return impl_->AsyncRead(result, buffer.data(), buffer.size());
 			}
