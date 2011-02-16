@@ -21,19 +21,35 @@ public:
 		: io_(io)
 		, socket_(io, Tcp::V4())
 	{
-		socket_.AsyncConnect(IPAddress::Parse(ip), port, 
-			std::tr1::bind(&Client::_OnConnect, this));
+		try
+		{
+			socket_.AsyncConnect(IPAddress::Parse(ip), port, 
+				std::tr1::bind(&Client::_OnConnect, this, _Size, _Error));
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
 	}
 
 
 private:
-	void _OnConnect()
+	void _OnConnect(u_long bytes, u_long error)
 	{
+		if( error != 0 )
+			return;
+
 		static char msg[] = "I am a new client";
 
-		using namespace std::tr1::placeholders;
-		AsyncWrite(socket_, Buffer(msg), TransferAll(), 
-			std::tr1::bind(&Client::_HandleWrite, this, _1, _2));
+		try
+		{
+			AsyncWrite(socket_, Buffer(msg), TransferAll(), 
+				std::tr1::bind(&Client::_HandleWrite, this, _Size, _Error));
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
 	}
 
 	void _HandleRead(u_long bytes, u_long error)
@@ -49,9 +65,9 @@ private:
 			std::cout.write(buf_.data(), bytes) << std::endl;
 
 			::Sleep(2000);
-			using namespace std::tr1::placeholders;
+
 			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), 
-				std::tr1::bind(&Client::_HandleWrite, this, _1, _2));
+				std::tr1::bind(&Client::_HandleWrite, this, _Size, _Error));
 		}
 		catch(const std::exception &e)
 		{
@@ -70,9 +86,8 @@ private:
 				return;
 			}
 
-			using namespace std::tr1::placeholders;
 			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1),
-				std::tr1::bind(&Client::_HandleRead, this, _1, _2));
+				std::tr1::bind(&Client::_HandleRead, this, _Size, _Error));
 
 		}
 		catch(std::exception &e)

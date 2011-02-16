@@ -19,7 +19,6 @@ namespace async
 {
 	namespace network
 	{
-
 		// --------------------------------------------------
 		// class Tcp
 

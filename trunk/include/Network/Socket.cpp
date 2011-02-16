@@ -225,6 +225,47 @@ namespace async
 			return dwSize;
 		}
 
+
+		// Òì²½µ÷ÓÃ
+		AsyncIOCallback &Socket::AsyncConnect(AsyncIOCallback &result, const IPAddress &addr, u_short uPort)
+		{
+			result.AddRef();
+
+			_BeginConnectImpl(&result, addr, uPort);
+			return result;
+		}
+
+
+		// AsyncDisconnect
+		AsyncIOCallback &Socket::AsyncDisconnect(AsyncIOCallback &result, bool bReuseSocket)
+		{
+			result.AddRef();
+
+			_BeginDisconnectImpl(&result, bReuseSocket);
+
+			return result;
+		}
+
+
+		// AsyncRead
+		AsyncIOCallback &Socket::AsyncRead(AsyncIOCallback &result, char *buf, size_t size)
+		{
+			result.AddRef();
+
+			_BeginReadImpl(&result, buf, size);
+
+			return result;
+		}
+
+		// AsyncWrite
+		AsyncIOCallback &Socket::AsyncWrite(AsyncIOCallback &result, const char *buf, size_t size)
+		{
+			result.AddRef();
+
+			_BeginWriteImpl(&result, buf, size);
+
+			return result;
+		}
 	}
 
 }

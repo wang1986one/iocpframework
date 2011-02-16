@@ -172,6 +172,7 @@ private:
 
 	void _StopServer()
 	{
+		acceptor_.Cancel();
 		acceptor_.Close();
 	}
 

@@ -50,6 +50,30 @@ namespace async
 		}
 		
 
+		// -------------------------------
+		// new delete base class
+
+		template< typename ImplT >
+		struct NewDeleteBase
+		{
+			static void *operator new(size_t size)
+			{
+				assert(sizeof(ImplT) == size);
+
+				return ObjectFactory<ImplT>::ObjectPoolType::GetMemoryPool().Allocate(size);
+			}
+			static void operator delete(void *ptr, size_t size)
+			{
+				assert(sizeof(ImplT) == size);
+
+				if( ptr == NULL )
+					return;
+
+				return ObjectFactory<ImplT>::ObjectPoolType::GetMemoryPool().Deallocate(ptr, size);
+			}
+		};
+
+
 
 		// ƒ⁄¥Ê…Í«Î Õ∑≈
 		template<typename T>

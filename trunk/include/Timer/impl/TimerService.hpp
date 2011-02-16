@@ -84,9 +84,9 @@ namespace async
 				TimerPointer AddTimer(long period, long due, const HandlerT &handler)
 				{
 					TimerPointer timer(new TimerType(period, due));
-					iocp::AsyncCallbackBasePtr callback(new async::iocp::AsyncCallback<HandlerT>(handler));
+					iocp::AsyncCallbackBasePtr callback(new async::iocp::AsyncCallback(handler));
 					timerArray_.push_back(std::make_pair(timer, callback));
-
+ 
 					// 设置更新事件信号
 					update_.SetEvent();
 
