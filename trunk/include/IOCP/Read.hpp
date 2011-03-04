@@ -10,11 +10,19 @@ namespace async
 	namespace iocp
 	{
 
+		typedef std::tr1::function<void()>	Callback;
+
 		//
 		template<typename SyncWriteStreamT, typename MutableBufferT>
 		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer)
 		{
-			return Read(s, buffer, TransferAll());
+			return Read(s, buffer, TransferAll(), 0);
+		}
+
+		template<typename SyncWriteStreamT, typename MutableBufferT>
+		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const Callback &callback)
+		{
+			return Read(s, buffer, TransferAll(), callback);
 		}
 
 		template<typename SyncWriteStreamT, typename MutableBufferT>
@@ -27,6 +35,12 @@ namespace async
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename CompleteConditionT>
 		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, CompleteConditionT &condition)
 		{
+			Read(s, buffer, condition, 0);
+		}
+
+		template<typename SyncWriteStreamT, typename MutableBufferT, typename CompleteConditionT>
+		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, CompleteConditionT &condition, const Callback &callback)
+		{
 			size_t transfers = 0;
 			const size_t bufSize = buffer.size();
 
@@ -35,8 +49,12 @@ namespace async
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Read(buffer + transfers);	
+				size_t ret = s.Read(buffer + transfers);
+
 				transfers += ret;
+
+				if( callback != 0 )
+					callback();
 			}
 
 			return transfers;

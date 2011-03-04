@@ -158,7 +158,6 @@ namespace async
 				throw std::logic_error("Buffer allocate size is zero");
 
 			DWORD dwSize = 0;
-
 			if( 0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &flag, 0, 0) )
 				throw Win32Exception("WSARecv");
 

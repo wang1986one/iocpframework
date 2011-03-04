@@ -370,6 +370,10 @@ namespace async
 		typedef Integer<SOL_SOCKET, SO_SNDLOWAT>	SendLowWaterMark;
 		typedef Integer<SOL_SOCKET, SO_RCVBUF>		RecvBufSize;
 		typedef Integer<SOL_SOCKET, SO_RCVLOWAT>	RecvLowWwaterMark;
+
+		typedef Integer<SOL_SOCKET, SO_SNDTIMEO>	SendTimeOut;
+		typedef Integer<SOL_SOCKET, SO_RCVTIMEO>	RecvTimeOut;
+
 		//typedef Integer<SOL_SOCKET, SO_LINGER>		Linger;
 		typedef Integer<SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT> UpdateAcceptContext;
 
