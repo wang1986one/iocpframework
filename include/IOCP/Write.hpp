@@ -10,11 +10,19 @@ namespace async
 	namespace iocp
 	{
 
+		typedef std::tr1::function<void()> Callback;
+
 		// 
 		template<typename SyncWriteStreamT, typename ConstBufferT>
 		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer)
 		{
-			return Write(s, buffer, TransferAll());
+			return Write(s, buffer, TransferAll(), 0);
+		}
+
+		template<typename SyncWriteStreamT, typename ConstBufferT>
+		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const Callback &callback)
+		{
+			return Write(s, buffer, TransferAll(), callback);
 		}
 
 		template<typename SyncWriteStreamT, typename ConstBufferT>
@@ -27,16 +35,25 @@ namespace async
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename CompleteConditionT>
 		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const CompleteConditionT &condition)
 		{
+			return Write(s, buffer, condition, 0);
+		}
+
+		template<typename SyncWriteStreamT, typename ConstBufferT, typename CompleteConditionT>
+		size_t Write(SyncWriteStreamT &s, const ConstBufferT &buffer, const CompleteConditionT &condition, const Callback &callback)
+		{
 			size_t transfers = 0;
 			const size_t bufSize = buffer.size();
 
-			while( transfers <= condition(transfers) )
+			while( transfers < condition(transfers) )
 			{
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Write(buffer + transfers);	
+				size_t ret = s.Write(buffer + transfers);
 				transfers += ret;
+
+				if( callback != 0 )
+					callback();
 			}
 
 			return transfers;

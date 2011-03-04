@@ -1,7 +1,7 @@
 #ifndef __IOCP_INTERNAL_CONDITION_HPP
 #define __IOCP_INTERNAL_CONDITION_HPP
 
-
+#include <limits>
 
 namespace async
 {
@@ -11,7 +11,7 @@ namespace async
 		namespace detail
 		{
 			// 默认单次传输字节大小
-			enum { DEFAULT_MAX_TRANSFER = 64 * 1024 };
+			//enum { DEFAULT_MAX_TRANSFER =  };
 
 
 			// ----------------------------------------------------
@@ -24,7 +24,7 @@ namespace async
 
 				result_type operator()(size_t min = 0) const
 				{
-					return DEFAULT_MAX_TRANSFER;
+					return std::numeric_limits<result_type>::max();
 				}
 			};
 
