@@ -87,8 +87,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		try
 		{
 			{
-				async::timer::Timer timer(io, 2000, 0);
-				timer.BeginWait(std::tr1::bind(&AsyncWait, std::tr1::ref(timer)));
+				//async::timer::Timer timer(io, 2000, 0);
+				//timer.BeginWait(std::tr1::bind(&AsyncWait, std::tr1::ref(timer)));
 
 				async::timer::Timer timer2(io, 4000, 0, std::tr1::bind(&AsyncWait2));
 				timer2.BeginWait();

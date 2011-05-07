@@ -80,10 +80,10 @@ namespace async
 			// 异步调用接口
 		public:
 			template<typename HandlerT>
-			iocp::AsyncIOCallback<HandlerT> *AsyncRead(void *buf, size_t len, const u_int64 &offset, const HandlerT &handler);
+			iocp::AsyncIOCallback *AsyncRead(void *buf, size_t len, const u_int64 &offset, const HandlerT &handler);
 
 			template<typename HandlerT>
-			iocp::AsyncIOCallback<HandlerT> *AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const HandlerT &handler);
+			iocp::AsyncIOCallback *AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const HandlerT &handler);
 
 		private:
 			template<typename AsyncT>
@@ -129,12 +129,12 @@ namespace async
 
 
 		template<typename HandlerT>
-		iocp::AsyncIOCallback<HandlerT> *File::AsyncRead(void *buf, size_t len, const u_int64 &offset, const HandlerT &handler)
+		iocp::AsyncIOCallback *File::AsyncRead(void *buf, size_t len, const u_int64 &offset, const HandlerT &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			iocp::AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(handler));
+			iocp::AsyncIOCallback *asynResult(MakeAsyncIOCallback(handler));
 			asynResult->AddRef();
 
 			_AsyncReadImpl(asynResult, buf, len, offset);
@@ -142,12 +142,12 @@ namespace async
 		}
 
 		template<typename HandlerT>
-		iocp::AsyncIOCallback<HandlerT> *File::AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const HandlerT &handler)
+		iocp::AsyncIOCallback *File::AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const HandlerT &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			iocp::AsyncIOCallback<HandlerT> *asynResult(MakeAsyncIOCallback(handler));
+			iocp::AsyncIOCallback *asynResult(MakeAsyncIOCallback(handler));
 			asynResult->AddRef();
 
 			_AsyncWriteImpl(asynResult, buf, len, offset);

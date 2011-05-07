@@ -32,21 +32,16 @@ namespace async
 		struct AsyncCallbackBase
 			: public Object
 		{
+			// 是否是IO回调
 			enum { IS_OVERLAPPED = FALSE };
 
-			// 利用函数指针，避免virtual function
-			typedef void (*CallbackFuncPtr)(AsyncCallbackBase*, u_long, u_long);
-			CallbackFuncPtr callback_;
-
-			// 是否是IO回调
-			AsyncCallbackBase(CallbackFuncPtr callback)
-				: callback_(callback)
+			
+			AsyncCallbackBase()
+			{}
+			virtual ~AsyncCallbackBase()
 			{}
 
-			void Invoke(u_long size, u_long error)
-			{
-				callback_(this, size, error);
-			}
+			virtual void Invoke(u_long size, u_long error) = 0;
 
 			template<typename KeyT, typename OverlappedT>
 			static void Call(KeyT *key, OverlappedT *overlapped, u_long size, u_long error)
@@ -82,21 +77,19 @@ namespace async
 			CallbackType handler_;
 
 			explicit AsyncCallback(const CallbackType &handler)
-				: AsyncCallbackBase(&AsyncCallback::Call)
-				, handler_(handler)
+				: handler_(handler)
 			{}
 
 		private:
-			static void Call(AsyncCallbackBase *param, u_long size, u_long error)
+			virtual void Invoke(u_long size, u_long error)
 			{
-				AsyncCallback *pThis = static_cast<AsyncCallback *>(param);
-				pThis->handler_(size, error);
+				handler_(size, error);
 			}
 		};
 
-		inline AsyncCallbackBase *MakeAsyncCallback(const CallbackType &handler)
+		inline AsyncCallbackBasePtr MakeAsyncCallback(const CallbackType &handler)
 		{
-			return new AsyncCallback(handler);
+			return AsyncCallbackBasePtr(new AsyncCallback(handler));
 		}
 
 
@@ -113,15 +106,14 @@ namespace async
 			CallbackType handler_;
 
 			explicit AsyncIOCallback(const CallbackType &callback)
-				: AsyncCallbackBase(&AsyncIOCallback::Call)
-				, handler_(callback)
+				: handler_(callback)
 			{
-				//RtlZeroMemory((OVERLAPPED *)this, sizeof(OVERLAPPED));
-				OVERLAPPED::Internal	= 0;
+				memset((OVERLAPPED *)this, 0, sizeof(OVERLAPPED));
+				/*OVERLAPPED::Internal	= 0;
 				OVERLAPPED::InternalHigh= 0;
 				OVERLAPPED::Offset		= 0;
 				OVERLAPPED::OffsetHigh	= 0;
-				OVERLAPPED::hEvent		= 0;
+				OVERLAPPED::hEvent		= 0;*/
 			}
 
 			template<typename HandleT>
@@ -141,14 +133,10 @@ namespace async
 			}
 
 		public:
-			static void Call(AsyncCallbackBase *param, u_long size, u_long error)
+			virtual void Invoke(u_long size, u_long error)
 			{
-				AsyncIOCallback *pThis = static_cast<AsyncIOCallback *>(param);
-				pThis->handler_(size, error);
+				handler_(size, error);
 			}
-
-		private:
-			AsyncIOCallback();
 		};
 
 		inline AsyncIOCallback *MakeAsyncIOCallback(const CallbackType &handler)

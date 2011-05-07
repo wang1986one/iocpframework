@@ -50,6 +50,10 @@ namespace async
 					break;
 
 				size_t ret = s.Read(buffer + transfers);
+				if( ret == 0 )
+				{
+					s.Close();
+				}
 
 				transfers += ret;
 
@@ -72,6 +76,11 @@ namespace async
 					break;
 
 				size_t ret = s.Read(buffer + transfers, offset);	
+				if( ret == 0 )
+				{
+					s.Close();
+				}
+
 				transfers += ret;
 			}
 

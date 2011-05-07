@@ -18,7 +18,7 @@ namespace async
 		{
 			
 			// alterable IO
-			void WINAPI APCFunc(ULONG_PTR pParam)
+			inline void WINAPI APCFunc(ULONG_PTR pParam)
 			{
 				// do nothing
 			}
@@ -35,15 +35,17 @@ namespace async
 				typedef ServiceT						ServiceType;
 
 			private:
-				typedef std::vector<std::pair<TimerPointer, iocp::AsyncCallbackBasePtr>>		TimersArray;
-				typedef typename TimersArray::iterator	TimerArrayIter;
-				
+				typedef std::map<TimerPointer, iocp::AsyncCallbackBasePtr>	Timers;
+				typedef typename Timers::iterator				TimersIter;
+				typedef async::thread::AutoCriticalSection		Mutex;
+				typedef async::thread::AutoLock<Mutex>			Lock;
 
 			private:
-				TimersArray timerArray_;						// Array of Timer
+				Timers timers_;									// Timers
 
 				async::thread::ThreadImplEx thread_;			// WaitForMutipleObjectEx
 				async::thread::AutoEvent   update_;	
+				Mutex mutex_;
 
 				ServiceType &io_;								// Asynchronous Callback service
 
@@ -85,7 +87,11 @@ namespace async
 				{
 					TimerPointer timer(new TimerType(period, due));
 					iocp::AsyncCallbackBasePtr callback(new async::iocp::AsyncCallback(handler));
-					timerArray_.push_back(std::make_pair(timer, callback));
+					
+					{
+						Lock lock(mutex_);
+						timers_.insert(std::make_pair(timer, callback));
+					}
  
 					// 设置更新事件信号
 					update_.SetEvent();
@@ -108,10 +114,15 @@ namespace async
 							return val.first == timer_;
 						}
 					};
-					TimerArrayIter iter = std::find_if(timerArray_.begin(), timerArray_.end(), FindTimer(timer));
 
-					if( iter != timerArray_.end() )
-						timerArray_.erase(iter);
+					{
+						Lock lock(mutex_);
+						TimersIter iter = timers_.find(timer);
+
+						if( iter != timers_.end() )
+							timers_.erase(iter);
+					}
+					
 
 					// 设置更新事件信号
 					update_.SetEvent();
@@ -127,7 +138,7 @@ namespace async
 						// 如果有变化，则重置
 						if( WAIT_OBJECT_0 == ::WaitForSingleObject(update_, 0) )
 						{
-							_Copy(handles, timerArray_);
+							_Copy(handles);
 						}
 						
 						// 防止刚启动时没有timer生成
@@ -136,7 +147,7 @@ namespace async
 							if( WAIT_IO_COMPLETION == ::WaitForSingleObjectEx(update_, INFINITE, TRUE) )
 								break;
 							else
-								_Copy(handles, timerArray_);
+								_Copy(handles);
 						}
 
 						// 等待Timer到点
@@ -155,26 +166,28 @@ namespace async
 							update_.SetEvent();
 							continue;
 						}
-						else if( res + WAIT_OBJECT_0 > timerArray_.size() )
+						else if( res + WAIT_OBJECT_0 > timers_.size() )
 							throw std::logic_error("handle out of range");
 
-						const TimersArray::value_type &val = timerArray_[WAIT_OBJECT_0 + res];
-						io_.Post(val.second.Get());
+						Lock lock(mutex_);
+						TimersIter iter = timers_.begin();
+						std::advance(iter, WAIT_OBJECT_0 + res);
+						
+						io_.Post(iter->second.Get());
 					}
 
 					::OutputDebugString(_T("Exit Timer Service Thread\n"));
 					return 0;
 				}
 
-				void _Copy(std::vector<HANDLE> &handles, const TimersArray &timers)
+				void _Copy(std::vector<HANDLE> &handles)
 				{
-					const size_t count = timers.size();
-					if( count > handles.size() )
-						handles.resize(count);
+					Lock lock(mutex_);
+					handles.clear();
 
-					for(size_t i = 0; i != count; ++i)
+					for(TimersIter iter = timers_.begin(); iter != timers_.end(); ++iter)
 					{
-						handles[i] = *(timers[i].first);
+						handles.push_back(*(iter->first));
 					}
 				}
 			};

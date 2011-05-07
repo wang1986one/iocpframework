@@ -50,6 +50,12 @@ namespace async
 					break;
 
 				size_t ret = s.Write(buffer + transfers);
+				if( ret == 0 )
+				{
+					s.Close();
+				}
+
+
 				transfers += ret;
 
 				if( callback != 0 )
@@ -70,7 +76,12 @@ namespace async
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Write(buffer + transfers, offset);	
+				size_t ret = s.Write(buffer + transfers, offset);
+				if( ret == 0 )
+				{
+					s.Close();
+				}
+
 				transfers += ret;
 			}
 
