@@ -318,10 +318,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Network\Read.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\Network\Socket.cpp"
 					>
 				</File>
@@ -353,10 +349,6 @@
 					RelativePath="..\..\include\Network\UDP.hpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\include\Network\Write.hpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Filesystem"
@@ -367,10 +359,6 @@
 				>
 				<File
 					RelativePath="..\..\include\Memory\FixedMemoryPool.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Memory\MemAllocator.hpp"
 					>
 				</File>
 				<File

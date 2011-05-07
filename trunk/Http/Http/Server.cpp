@@ -26,7 +26,7 @@ namespace http
 
 	void Server::Stop()
 	{
-		io_.Dispatch(async::iocp::MakeAsyncCallback(std::tr1::bind(&Server::_HandleStop, this)));
+		io_.Dispatch(async::iocp::MakeAsyncCallback(std::tr1::bind(&Server::_HandleStop, this)).Get());
 	}
 
 	void Server::_HandleAccept(u_long error, const async::network::SocketPtr &remoteSocket)

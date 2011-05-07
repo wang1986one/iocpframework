@@ -30,6 +30,11 @@ namespace async
 				long due_;
 
 			public:
+				explicit BasicTimer(ServiceType &io)
+					: service_(TimerServiceType::GetInstance(io))
+					, period_(0)
+					, due_(0)
+				{}
 				// 不接受回调函数，且注册一个Timer
 				// period为时间间隔
 				BasicTimer(ServiceType &io, long period, long due)
@@ -59,12 +64,17 @@ namespace async
 				// delay 延迟时间
 				void SetTimer(long period, long delay = 0)
 				{
-					timer_->SetTimer(period, delay);
+					period_ = period;
+					due_	= delay;
+
+					assert(timer_);
+					timer_->SetTimer(period_, due_);
 				}
 
 				// 取消Timer
 				void Cancel()
 				{
+					assert(timer_);
 					timer_->Cancel();
 				}
 
@@ -77,6 +87,7 @@ namespace async
 				// 异步等待
 				void BeginWait()
 				{
+					assert(timer_);
 					timer_->AsyncWait();
 				}
 
