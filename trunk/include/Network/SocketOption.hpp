@@ -365,6 +365,7 @@ namespace async
 		typedef Boolean<SOL_SOCKET, SO_DONTROUTE>	DontRoute;
 		typedef Boolean<SOL_SOCKET, SO_KEEPALIVE>	KeepAlive;
 		typedef Boolean<SOL_SOCKET, SO_REUSEADDR>	ReuseAddr;
+		typedef Boolean<IPPROTO_TCP, TCP_NODELAY>	NoDelay;
 
 		typedef Integer<SOL_SOCKET, SO_SNDBUF>		SendBufSize;
 		typedef Integer<SOL_SOCKET, SO_SNDLOWAT>	SendLowWaterMark;

@@ -35,7 +35,8 @@ namespace async
 				typedef ServiceT						ServiceType;
 
 			private:
-				typedef std::map<TimerPointer, iocp::AsyncCallbackBasePtr>	Timers;
+				typedef std::tr1::function<void()>		TimerCallback;
+				typedef std::map<TimerPointer, TimerCallback>	Timers;
 				typedef typename Timers::iterator				TimersIter;
 				typedef async::thread::AutoCriticalSection		Mutex;
 				typedef async::thread::AutoLock<Mutex>			Lock;
@@ -86,11 +87,10 @@ namespace async
 				TimerPointer AddTimer(long period, long due, const HandlerT &handler)
 				{
 					TimerPointer timer(new TimerType(period, due));
-					iocp::AsyncCallbackBasePtr callback(new async::iocp::AsyncCallback(handler));
 					
 					{
 						Lock lock(mutex_);
-						timers_.insert(std::make_pair(timer, callback));
+						timers_.insert(std::make_pair(timer, handler));
 					}
  
 					// 设置更新事件信号
@@ -109,7 +109,7 @@ namespace async
 							: timer_(timer)
 						{}
 
-						bool operator()(const std::pair<TimerPointer, iocp::AsyncCallbackBasePtr> &val) const
+						bool operator()(const std::pair<TimerPointer, TimerCallback> &val) const
 						{
 							return val.first == timer_;
 						}
@@ -173,7 +173,7 @@ namespace async
 						TimersIter iter = timers_.begin();
 						std::advance(iter, WAIT_OBJECT_0 + res);
 						
-						io_.Post(iter->second.Get());
+						io_.Post(iter->second);
 					}
 
 					::OutputDebugString(_T("Exit Timer Service Thread\n"));
