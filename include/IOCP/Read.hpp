@@ -75,11 +75,7 @@ namespace async
 				if( transfers >= bufSize )
 					break;
 
-				size_t ret = s.Read(buffer + transfers, offset);	
-				if( ret == 0 )
-				{
-					s.Close();
-				}
+				size_t ret = s.Read(buffer + transfers, offset);
 
 				transfers += ret;
 			}
