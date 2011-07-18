@@ -83,7 +83,7 @@ namespace async
 		{
 			AsyncCallbackBasePtr async(MakeAsyncCallback(handler));
 
-			if( !iocp_.PostStatus(0, 0, reinterpret_cast<OVERLAPPED *>(async.Get())) )
+			if( !iocp_.PostStatus(0, 0, static_cast<OVERLAPPED *>(async.Get())) )
 				throw Win32Exception("iocp_.PostStatus");
 
 			async.Release();
@@ -96,6 +96,8 @@ namespace async
 			{
 				AsyncCallbackBasePtr async(MakeAsyncCallback(handler));
 				AsyncCallbackBase::Call(async);
+
+				async.Release();
 			}
 			else
 				Post(handler);

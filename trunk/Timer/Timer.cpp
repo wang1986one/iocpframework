@@ -75,12 +75,6 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
-	// ≤‚ ‘ƒ⁄¥Ê…Í«Î Õ∑≈
-	async::iocp::DefaultDebug::RegisterCallback(std::tr1::bind(&DebugAllocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2),
-		std::tr1::bind(&DebugDeallocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
-
-
-	
 	{
 		async::iocp::IODispatcher io;
 		
