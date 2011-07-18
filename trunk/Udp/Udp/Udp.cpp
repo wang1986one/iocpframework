@@ -10,7 +10,7 @@ using namespace async::network;
 
 using namespace std::tr1::placeholders;
 
-class server
+class Server
 {
 private:
 	async::iocp::IODispatcher& io_service_;
@@ -22,7 +22,7 @@ private:
 	char data_[max_length];
 
 public:
-	server(async::iocp::IODispatcher& io, short port)
+	Server(async::iocp::IODispatcher& io, short port)
 		: io_service_(io)
 		, socket_(io, Udp::V4(), port)
 	{
@@ -30,7 +30,7 @@ public:
 		{
 			socket_.AsyncRecvFrom(
 				async::network::Buffer(data_, max_length), addr_,
-				std::tr1::bind(&server::handle_receive_from, this,
+				std::tr1::bind(&Server::handle_receive_from, this,
 				_1, _2));
 		}
 		catch(std::exception &e)
@@ -39,23 +39,30 @@ public:
 		}
 
 	}
+	~Server()
+	{
+		Close();
+	}
 
 	void handle_receive_from(size_t bytes_recvd, u_long error)
 	{
+		if( error != 0 )
+			return;
+
 		try
 		{
 			if (!error && bytes_recvd > 0)
 			{
 				socket_.AsyncSendTo(
 					Buffer(data_, bytes_recvd), addr_,
-					std::tr1::bind(&server::handle_send_to, this,
+					std::tr1::bind(&Server::handle_send_to, this,
 					_1, _2));
 			}
 			else
 			{
 				socket_.AsyncRecvFrom(
 					async::network::Buffer(data_, max_length), addr_,
-					std::tr1::bind(&server::handle_receive_from, this,
+					std::tr1::bind(&Server::handle_receive_from, this,
 					_1, _2));
 			}
 		}
@@ -71,7 +78,7 @@ public:
 		{
 			socket_.AsyncRecvFrom(
 				async::network::Buffer(data_, max_length), addr_,
-				std::tr1::bind(&server::handle_receive_from, this,
+				std::tr1::bind(&Server::handle_receive_from, this,
 				_1, _2));
 		}
 		catch(std::exception &e)
@@ -80,6 +87,11 @@ public:
 		}
 	}
 
+	void Close()
+	{
+		socket_.Cancel();
+		socket_.Close();
+	}
 
 };
 
@@ -90,7 +102,7 @@ int main(int argc, char* argv[])
 		async::iocp::IODispatcher io;
 
 		using namespace std; // For atoi.
-		server s(io, 5050);
+		Server s(io, 5050);
 
 		system("pause");
 	}
