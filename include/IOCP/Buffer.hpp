@@ -181,12 +181,12 @@ namespace async
 
 		inline AutoBufferPtr MakeBuffer(size_t sz)
 		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(sz), &ObjectDeallocate<AutoBuffer>);
+			return AutoBufferPtr(ObjectAllocate<AutoBuffer>(sz), &ObjectDeallocate<AutoBuffer>);
 		}
 
 		inline AutoBufferPtr MakeBuffer(char *buf, size_t sz)
 		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(buf, sz), &ObjectDeallocate<AutoBuffer>);
+			return AutoBufferPtr(ObjectAllocate<AutoBuffer>(buf, sz), &ObjectDeallocate<AutoBuffer>);
 		}
 
 		inline AutoBufferPtr MakeBuffer(const char *buf, size_t sz)
@@ -199,7 +199,7 @@ namespace async
 		template<size_t _N>
 		inline AutoBufferPtr MakeBuffer(char (&arr)[_N])
 		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(arr, _N), &ObjectDeallocate<AutoBuffer>);
+			return AutoBufferPtr(ObjectAllocate<AutoBuffer>(arr, _N), &ObjectDeallocate<AutoBuffer>);
 		}
 		template<size_t _N>
 		inline AutoBufferPtr MakeBuffer(const char (&arr)[_N])
@@ -212,7 +212,7 @@ namespace async
 		template<size_t _N>
 		inline AutoBufferPtr MakeBuffer(std::tr1::array<char, _N> &arr)
 		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(arr.data(), _N), &ObjectDeallocate<AutoBuffer>);
+			return AutoBufferPtr(ObjectAllocate<AutoBuffer>(arr.data(), _N), &ObjectDeallocate<AutoBuffer>);
 		}
 		template<size_t _N>
 		inline AutoBufferPtr MakeBuffer(const std::tr1::array<char, _N> &arr)
@@ -224,7 +224,7 @@ namespace async
 
 		inline AutoBufferPtr MakeBuffer(std::vector<char> &arr)
 		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(&arr[0], arr.size()), &ObjectDeallocate<AutoBuffer>);
+			return AutoBufferPtr(ObjectAllocate<AutoBuffer>(&arr[0], arr.size()), &ObjectDeallocate<AutoBuffer>);
 		}
 		inline AutoBufferPtr MakeBuffer(const std::vector<char> &arr)
 		{
@@ -235,7 +235,7 @@ namespace async
 
 		inline AutoBufferPtr MakeBuffer(std::string &arr)
 		{
-			return AutoBufferPtr(ObjectAlloc<AutoBuffer>(&*arr.begin(), arr.length()), &ObjectDeallocate<AutoBuffer>);
+			return AutoBufferPtr(ObjectAllocate<AutoBuffer>(&*arr.begin(), arr.length()), &ObjectDeallocate<AutoBuffer>);
 		}
 		inline AutoBufferPtr MakeBuffer(const std::string &arr)
 		{

@@ -54,11 +54,6 @@ namespace async
 			}
 		}
 
-		/*void IODispatcher::Register(const InitCallback &init, const UninitCallback &unint)
-		{
-			initCallback_	= init;
-			unInitCallback_ = unint;
-		}*/
 
 		void IODispatcher::Bind(HANDLE hHandle)
 		{

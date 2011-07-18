@@ -54,58 +54,52 @@ namespace async
 		#endif 
 
 
-		//-------------------------------------------------------------------
-		// class Object
-		// 引用计数和new delete基类
+		////-------------------------------------------------------------------
+		//// class Object
+		//// 引用计数和new delete基类
 
-		class Object
-		{
-		private:
-			volatile LONG m_nRefCount;
+		//class Object
+		//{
+		//private:
+		//	volatile LONG m_nRefCount;
 
-		public:
-			Object()
-				: m_nRefCount(0)
-			{}
-			virtual ~Object(){}
+		//public:
+		//	Object()
+		//		: m_nRefCount(0)
+		//	{}
+		//	virtual ~Object(){}
 
-		public:
-			void Object::AddRef()
-			{
-				InterlockedIncrement(&m_nRefCount);
-			}
+		//public:
+		//	void Object::AddRef()
+		//	{
+		//		InterlockedIncrement(&m_nRefCount);
+		//	}
 
-			void Object::Release()
-			{
-				if( InterlockedDecrement(&m_nRefCount) == 0 ) 
-				{
-					delete this;
-				}
-			}
+		//	void Object::Release()
+		//	{
+		//		if( InterlockedDecrement(&m_nRefCount) == 0 ) 
+		//		{
+		//			delete this;
+		//		}
+		//	}
 
-		public:
-			static void *operator new(size_t size)
-			{
-				DefaultDebug::Alloc(size);
+		//public:
+		//	static void *operator new(size_t size)
+		//	{
+		//		DefaultDebug::Alloc(size);
 
-				return MemoryMgr::GetMemory().allocate(size);
-			}
-			static void operator delete(void *ptr, size_t size)
-			{
-				DefaultDebug::Dealloc(size);
+		//		return MemoryMgr::GetMemory().allocate(size);
+		//	}
+		//	static void operator delete(void *ptr, size_t size)
+		//	{
+		//		DefaultDebug::Dealloc(size);
 
-				if( ptr == NULL )
-					return;
+		//		if( ptr == NULL )
+		//			return;
 
-				return  MemoryMgr::GetMemory().deallocate((char *)ptr, size);
-			}
-		};
-
-
-		typedef pointer<Object>	ObjectPtr;
-
-		// VC 属性扩展，保证类的静态成员变量在头文件中链接正常
-		__declspec(selectany) ObjectPtr nothing(new Object);
+		//		return  MemoryMgr::GetMemory().deallocate((char *)ptr, size);
+		//	}
+		//};
 	}
 
 

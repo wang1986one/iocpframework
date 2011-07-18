@@ -35,7 +35,7 @@ namespace async
 				typedef ServiceT						ServiceType;
 
 			private:
-				typedef std::tr1::function<void()>		TimerCallback;
+				typedef iocp::CallbackType				TimerCallback;
 				typedef std::map<TimerPointer, TimerCallback>	Timers;
 				typedef typename Timers::iterator				TimersIter;
 				typedef async::thread::AutoCriticalSection		Mutex;
@@ -83,8 +83,7 @@ namespace async
 
 			public:
 				// 增加一个Timer
-				template<typename HandlerT>
-				TimerPointer AddTimer(long period, long due, const HandlerT &handler)
+				TimerPointer AddTimer(long period, long due, const TimerCallback &handler)
 				{
 					TimerPointer timer(new TimerType(period, due));
 					

@@ -4,6 +4,7 @@
 #include "SocketOption.hpp"
 
 #include "../IOCP/WinException.hpp"
+#include "Accept.hpp"
 
 
 namespace async
@@ -225,45 +226,145 @@ namespace async
 		}
 
 
-		// 异步调用
-		AsyncIOCallback &Socket::AsyncConnect(AsyncIOCallback &result, const IPAddress &addr, u_short uPort)
-		{
-			result.AddRef();
+		// 异步接收远程连接
+		//void Socket::AsyncAccept(const SocketPtr &remoteSocket, size_t szOutSize, const iocp::CallbackType &callback)
+		//{
+		//	if( !IsOpen() ) 
+		//		throw std::logic_error("Socket not open");
 
-			_BeginConnectImpl(&result, addr, uPort);
-			return result;
+		//	if( !remoteSocket->IsOpen() )
+		//		throw std::logic_error("Remote socket not open");
+
+		//	typedef detail::AcceptorHandle<iocp::CallbackType> HookAcceptor;
+		//	iocp::AutoBufferPtr acceptBuffer(MakeBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
+		//	AsyncCallbackBasePtr asyncResult = MakeAsyncCallback(HookAcceptor(*this, remoteSocket, acceptBuffer, callback));
+
+		//	// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
+		//	// 如果为0，则立即返回。若大于0，则接受数据后再返回
+		//	DWORD dwRecvBytes = 0;
+		//	if( !SocketProvider::GetSingleton(io_).AcceptEx(socket_, remoteSocket->socket_, acceptBuffer->data(), szOutSize,
+		//		sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &dwRecvBytes, asyncResult.Get()) 
+		//		&& ::WSAGetLastError() != ERROR_IO_PENDING )
+		//		throw Win32Exception("AcceptEx");
+		//	
+		//	asyncResult.Release();
+		//}
+
+		// 异步连接服务
+		void Socket::AsyncConnect(const IPAddress &addr, u_short uPort, const iocp::CallbackType &callback)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("Socket not open");
+
+			sockaddr_in localAddr		= {0};
+			localAddr.sin_family		= AF_INET;
+
+			// 很变态，需要先bind
+			::bind(socket_, reinterpret_cast<const sockaddr *>(&localAddr), sizeof(localAddr));
+
+			sockaddr_in remoteAddr		= {0};
+			remoteAddr.sin_family		= AF_INET;
+			remoteAddr.sin_port			= ::htons(uPort);
+			remoteAddr.sin_addr.s_addr	= ::htonl(addr.Address());
+
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+
+			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, asynResult.Get()) 
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+				throw Win32Exception("ConnectionEx");
+			
+			asynResult.Release();
 		}
 
-
-		// AsyncDisconnect
-		AsyncIOCallback &Socket::AsyncDisconnect(AsyncIOCallback &result, bool bReuseSocket)
+		// 异步关闭连接
+		void Socket::AsyncDisconnect(const iocp::CallbackType &callback, bool bReuseSocket/* = true*/)
 		{
-			result.AddRef();
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
 
-			_BeginDisconnectImpl(&result, bReuseSocket);
+			DWORD dwFlags = bReuseSocket ? TF_REUSE_SOCKET : 0;
 
-			return result;
+			if( !SocketProvider::GetSingleton(io_).DisconnectEx(socket_, asynResult.Get(), dwFlags, 0) 
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+				throw Win32Exception("DisConnectionEx");
+
+			asynResult.Release();
 		}
 
-
-		// AsyncRead
-		AsyncIOCallback &Socket::AsyncRead(AsyncIOCallback &result, char *buf, size_t size)
+		// 异步接接收数据
+		void Socket::AsyncRead(char *buf, size_t size, const iocp::CallbackType &callback)
 		{
-			result.AddRef();
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
 
-			_BeginReadImpl(&result, buf, size);
+			WSABUF wsabuf = {0};
+			wsabuf.buf = buf;
+			wsabuf.len = size;
 
-			return result;
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+
+			if( 0 != ::WSARecv(socket_, &wsabuf, 1, &dwSize, &dwFlag, asynResult.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+				throw Win32Exception("WSARecv");
+
+			asynResult.Release();
 		}
 
-		// AsyncWrite
-		AsyncIOCallback &Socket::AsyncWrite(AsyncIOCallback &result, const char *buf, size_t size)
+		// 异步发送数据
+		void Socket::AsyncWrite(const char *buf, size_t size, const iocp::CallbackType &callback)
 		{
-			result.AddRef();
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
 
-			_BeginWriteImpl(&result, buf, size);
+			WSABUF wsabuf = {0};
+			wsabuf.buf = const_cast<char *>(buf);
+			wsabuf.len = size;
 
-			return result;
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+
+			if( 0 != ::WSASend(socket_, &wsabuf, 1, &dwSize, dwFlag, asynResult.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+				throw Win32Exception("WSASend");
+
+			asynResult.Release();
+		}
+
+		// 异步UDP写出
+		void Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const iocp::CallbackType &callback)
+		{
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = const_cast<char *>(buf);
+			wsabuf.len = size;
+
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+
+			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, dwFlag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), asynResult.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+				throw Win32Exception("WSASendTo");
+			
+			asynResult.Release();
+		}	
+
+		// 异步UDP读入
+		void Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const iocp::CallbackType &callback)
+		{
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+
+			WSABUF wsabuf = {0};
+			wsabuf.buf = buf;
+			wsabuf.len = size;
+
+			DWORD dwFlag = 0;
+			DWORD dwSize = 0;
+			int addrLen = sizeof(addr);
+
+			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &dwFlag, reinterpret_cast<sockaddr *>(&addr), &addrLen, asynResult.Get(), NULL)
+				&& ::WSAGetLastError() != WSA_IO_PENDING )
+				throw Win32Exception("WSARecvFrom");
+			
+			asynResult.Release();
 		}
 	}
 
