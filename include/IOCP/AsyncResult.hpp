@@ -35,7 +35,7 @@ namespace async
 			template<typename KeyT, typename OverlappedT>
 			static void Call(KeyT *key, OverlappedT *overlapped, u_long size, u_long error)
 			{
-				AsyncCallbackBasePtr p((AsyncCallbackBase*)(overlapped));
+				AsyncCallbackBasePtr p(static_cast<AsyncCallbackBase *>(overlapped));
 				
 				p->Invoke(size, error);
 			}
