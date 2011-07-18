@@ -151,7 +151,7 @@ namespace async
 			template<typename ConstBufferT>
 			size_t Write(const ConstBufferT &buffer)
 			{
-				return Write(buffer.data(), buffer.size(), 0);
+				return Write(buffer, 0);
 			}
 			template<typename ConstBufferT>
 			size_t Write(const ConstBufferT &buffer, DWORD flag)
@@ -179,7 +179,7 @@ namespace async
 			template<typename MutableBufferT>
 			size_t Read(MutableBufferT &buffer)
 			{
-				return Read(buffer.data(), buffer.size(), 0);
+				return Read(buffer, 0);
 			}
 			template<typename MutableBufferT>
 			size_t Read(MutableBufferT &buffer, u_long flag)
