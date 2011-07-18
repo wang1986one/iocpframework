@@ -246,14 +246,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Object.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\IOCP\Object.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\IOCP\ObjectFactory.hpp"
 					>
 				</File>
@@ -314,10 +306,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Network\Read.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\Network\Socket.cpp"
 					>
 				</File>
@@ -347,10 +335,6 @@
 				</File>
 				<File
 					RelativePath="..\..\include\Network\UDP.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\Write.hpp"
 					>
 				</File>
 			</Filter>

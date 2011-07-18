@@ -157,13 +157,13 @@ namespace async
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			AsyncCallback *AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
+			void AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
 			{
 				return impl_->AsyncSendTo(buffer.data(), buffer.size(), addr, callback);
 			}
 
 			template<typename MutableBufferT, typename HandlerT>
-			AsyncCallback *AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
+			void AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
 			{
 				return impl_->AsyncRecvFrom(buffer.data(), buffer.size(), addr, callback);
 			}
