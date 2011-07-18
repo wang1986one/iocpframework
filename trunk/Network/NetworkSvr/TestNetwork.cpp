@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-
 #include "impl/ServerImpl.h"
 #include "../../include/Timer/Timer.hpp"
 
@@ -27,10 +26,11 @@ int main(int argc, char* argv[])
 		Server server(ioService, 5050);
 		server.Start();
 
-		async::timer::Timer time(ioService, 2000, 0);
-		time.BeginWait(std::tr1::bind(&AsyncPrint));
+		//async::timer::Timer time(ioService, 2000, 0);
+		//time.BeginWait(std::tr1::bind(&AsyncPrint));
 
 		system("pause");
+		server.Stop();
 	}
 	catch(std::exception &e)
 	{

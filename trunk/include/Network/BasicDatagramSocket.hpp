@@ -118,7 +118,7 @@ namespace async
 
 			// 异步链接
 			template<typename HandlerT>
-			AsyncIOCallback *AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
+			AsyncCallback *AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
 			{
 				return impl_->AsyncConnect(addr, port, handler);
 			}
@@ -157,13 +157,13 @@ namespace async
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			AsyncIOCallback *AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
+			AsyncCallback *AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
 			{
 				return impl_->AsyncSendTo(buffer.data(), buffer.size(), addr, callback);
 			}
 
 			template<typename MutableBufferT, typename HandlerT>
-			AsyncIOCallback *AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
+			AsyncCallback *AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
 			{
 				return impl_->AsyncRecvFrom(buffer.data(), buffer.size(), addr, callback);
 			}

@@ -19,6 +19,9 @@ private:
 	Tcp::Socket socket_;
 	std::tr1::array<char, 32> buf_;
 
+	async::iocp::CallbackType readCallback_;
+	async::iocp::CallbackType writeCallback_;
+
 public:
 	explicit Session(const SocketPtr &sock)
 		: socket_(sock)
@@ -42,9 +45,10 @@ public:
 	{
 		try
 		{		
-			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1),
-				std::tr1::bind(&Session::_HandleRead, shared_from_this(), 
-				std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+			readCallback_	= std::tr1::bind(&Session::_HandleRead, shared_from_this(), _Size, _Error);
+			writeCallback_	= std::tr1::bind(&Session::_HandleWrite, shared_from_this(), _Size, _Error);
+
+			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1), readCallback_);
 
 		}
 		catch(std::exception &e)
@@ -56,6 +60,9 @@ public:
 	void Stop()
 	{
 		socket_.Close();
+
+		readCallback_	= 0;
+		writeCallback_	= 0;
 	}
 
 private:
@@ -69,10 +76,9 @@ private:
 				return;
 			}
 
-			//std::cout.write(buf_.data(), bytes) << std::endl;
+			std::cout.write(buf_.data(), bytes) << std::endl;
 
-			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), 
-				std::tr1::bind(&Session::_HandleWrite, shared_from_this()));
+			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), writeCallback_);
 		}
 		catch(const std::exception &e)
 		{
@@ -80,9 +86,16 @@ private:
 		}
 	}
 
-	void _HandleWrite()
+	void _HandleWrite(u_long bytes, u_long error)
 	{
-		Start();
+		try
+		{		
+			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1), readCallback_);
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
 	}
 
 	void _DisConnect()
@@ -121,7 +134,7 @@ struct NoneDeletor
 
 inline SessionPtr CreateSession(const SocketPtr &socket)
 {
-	return SessionPtr(ObjectAlloc<Session>(socket), &ObjectDeallocate<Session>);
+	return SessionPtr(ObjectAllocate<Session>(socket), &ObjectDeallocate<Session>);
 	//return SessionPtr(new Session(io, socket));
 }
 
@@ -141,7 +154,7 @@ public:
 
 	~Server()
 	{
-		_StopServer();
+		//_StopServer();
 	}
 
 public:
@@ -160,9 +173,8 @@ private:
 	{		
 		try
 		{
-			SocketPtr acceptSock(MakeSocket(io_, Tcp::V4().Family(), Tcp::V4().Type(), Tcp::V4().Protocol()));
-			acceptor_.AsyncAccept(acceptSock, 0, 
-				std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
+			acceptor_.AsyncAccept(0, 
+				std::tr1::bind(&Server::_OnAccept, this, std::tr1::placeholders::_1, std::tr1::placeholders::_2/*std::tr1::cref(acceptSock)*/));
 		} 
 		catch(const std::exception &e)
 		{
@@ -172,7 +184,6 @@ private:
 
 	void _StopServer()
 	{
-		acceptor_.Cancel();
 		acceptor_.Close();
 	}
 

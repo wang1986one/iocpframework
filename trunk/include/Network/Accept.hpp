@@ -26,13 +26,14 @@ namespace async
 					, handler_(handler)
 				{}
 
+			public:
 				void operator()(u_long size, u_long error)
 				{
 					// ¸´ÖÆListen socketÊôÐÔ
 					UpdateAcceptContext context(acceptor_);
 					remoteSocket_->SetOption(context);
 
-					handler_(error, std::tr1::cref(remoteSocket_), size);
+					handler_(/*size, */error, std::tr1::cref(remoteSocket_));
 				}
 			};
 		}
