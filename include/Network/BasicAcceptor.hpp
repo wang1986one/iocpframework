@@ -21,24 +21,19 @@ namespace async
 
 		private:
 			ImplementType impl_;
-			iocp::CallbackType callback_;
 
 		public:
-			explicit BasicAcceptor(AsyncIODispatcherType &io, const iocp::CallbackType &callback = 0)
+			explicit BasicAcceptor(AsyncIODispatcherType &io)
 				: impl_(MakeSocket(io))
-				, callback_(callback)
 			{}
-			explicit BasicAcceptor(const ImplementType &impl, const iocp::CallbackType &callback = 0)
+			explicit BasicAcceptor(const ImplementType &impl)
 				: impl_(impl)
-				, callback_(callback)
 			{}
-			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, const iocp::CallbackType &callback = 0)
+			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol)
 				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
-				, callback_(callback)
 			{}
-			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr = INADDR_ANY, bool reuseAddr = true, const iocp::CallbackType &callback = 0)
+			BasicAcceptor(AsyncIODispatcherType &io, const ProtocolType &protocol, u_short port, const IPAddress &addr = INADDR_ANY, bool reuseAddr = true)
 				: impl_(MakeSocket(io, protocol.Family(), protocol.Type(), protocol.Protocol()))
-				, callback_(callback)
 			{
 				if( reuseAddr )
 					impl_->SetOption(ReuseAddr(true));
@@ -110,11 +105,6 @@ namespace async
 			ImplementType Accept()
 			{
 				return impl_->Accept();
-			}
-
-			void AsyncAccept(size_t szOutSide)
-			{
-				return impl_->AsyncAccept(szOutSide, callback_);
 			}
 
 			template < typename HandlerT >
