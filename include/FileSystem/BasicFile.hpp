@@ -55,7 +55,7 @@ namespace async
 			{
 				return impl_;
 			}
-			operator const ImplementType() const
+			operator const ImplementType&() const
 			{
 				return impl_;
 			}
@@ -107,13 +107,13 @@ namespace async
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
+			void AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
 			{
 				return impl_->AsyncWrite(buffer.data(), buffer.size(), 0, callback);
 			}
 
 			template<typename ConstBufferT, typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncWrite(const ConstBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
+			void AsyncWrite(const ConstBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
 			{
 				return impl_->AsyncWrite(buffer.data(), buffer.size(), offset, callback);
 			}
@@ -134,14 +134,14 @@ namespace async
 
 			// 异步接收数据
 			template<typename MutableBufferT, typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncRead(MutableBufferT &buffer, const HandlerT &callback)
+			void AsyncRead(MutableBufferT &buffer, const HandlerT &callback)
 			{
 				return impl_->AsyncRead(buffer.data(), buffer.size(), 0, callback);
 			}
 
 			// 异步接收数据
 			template<typename MutableBufferT, typename HandlerT>
-			AsyncIOCallback<HandlerT> *AsyncRead(MutableBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
+			void AsyncRead(MutableBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
 			{
 				return impl_->AsyncRead(buffer.data(), buffer.size(), offset, callback);
 			}

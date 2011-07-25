@@ -10,7 +10,11 @@ namespace async
 	namespace iocp
 	{
 
-		typedef std::tr1::function<void()>	Callback;
+		namespace detail
+		{
+			typedef std::tr1::function<void()>	ReadCallback;
+		}
+		
 
 		//
 		template<typename SyncWriteStreamT, typename MutableBufferT>
@@ -20,7 +24,7 @@ namespace async
 		}
 
 		template<typename SyncWriteStreamT, typename MutableBufferT>
-		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const Callback &callback)
+		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const detail::ReadCallback &callback)
 		{
 			return Read(s, buffer, TransferAll(), callback);
 		}
@@ -39,7 +43,7 @@ namespace async
 		}
 
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename CompleteConditionT>
-		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, CompleteConditionT &condition, const Callback &callback)
+		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, CompleteConditionT &condition, const detail::ReadCallback &callback)
 		{
 			size_t transfers = 0;
 			const size_t bufSize = buffer.size();
@@ -125,8 +129,8 @@ namespace async
 						}
 					}
 					
-					// 回调
-					HandlerInvoke::Invoke(handler_, transfers_, error);
+					// 回调	
+					handler_(transfers_, error);
 				}
 			};
 
@@ -171,7 +175,7 @@ namespace async
 					}
 
 					// 回调
-					HandlerInvoke::Invoke(handler_, transfers_, error);
+					handler_(transfers_, error);
 				}
 			};
 		}

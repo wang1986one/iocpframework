@@ -131,7 +131,7 @@ namespace async
 					}
 					
 					// 回调
-					HandlerInvoke::Invoke(handler_, transfers_, error);
+					handler_(transfers_, error);
 				}
 			};
 
@@ -176,7 +176,7 @@ namespace async
 					}
 
 					// 回调
-					HandlerInvoke::Invoke(handler_, transfers_, error);
+					handler_(transfers_, error);
 				}
 			};
 		}
