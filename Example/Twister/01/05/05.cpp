@@ -30,7 +30,8 @@ public:
 
 	void _OnAccept(u_long err, const network::SocketPtr &newSock)
 	{
-		newSock->Shutdown(SD_BOTH);
+		if( err != 0 )
+			return;
 
 		char msg[] = "No User";
 		network::ConstBuffer buf(msg, _countof(msg));
@@ -40,7 +41,7 @@ public:
 
 	void _OnWrite(u_long err)
 	{
-		assert(err != 0);
+		assert(err == 0);
 	}
 };
 
