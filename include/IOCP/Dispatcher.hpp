@@ -2,7 +2,6 @@
 #define __IOCP_DISPATCHER_HPP
 
 
-#include "Object.hpp"
 #include "IOCP.hpp"
 #include "AsyncResult.hpp"
 #include "WinException.hpp"
