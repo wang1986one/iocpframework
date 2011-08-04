@@ -1,7 +1,8 @@
 #ifndef __IOCP_ASYNC_RESULT_HPP
 #define __IOCP_ASYNC_RESULT_HPP
 
-
+#include "Pointer.hpp"
+#include <functional>
 
 namespace async
 {
