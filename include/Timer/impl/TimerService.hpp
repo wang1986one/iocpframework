@@ -23,6 +23,24 @@ namespace async
 				// do nothing
 			}
 
+			namespace detail
+			{
+				template < typename T >
+				struct FindTimer
+				{
+					const T &timer_;
+
+					FindTimer(const T &timer)
+						: timer_(timer)
+					{}
+
+					template < typename CallbackT >
+					bool operator()(const std::pair<T, CallbackT> &val) const
+					{
+						return val.first == timer_;
+					}
+				};
+			}
 			// ------------------------------------------------
 			// class TimerService
 
@@ -98,22 +116,19 @@ namespace async
 					return timer;
 				}
 
+				void SetTimer(const TimerPointer &timer, const TimerCallback &handler)
+				{
+					Lock lock(mutex_);
+					TimersIter iter = timers_.find(timer);
+
+					if( iter == timers_.end() )
+						return;
+
+					iter->second = handler;
+				}
+
 				void EraseTimer(const TimerPointer &timer)
 				{
-					struct FindTimer
-					{
-						const TimerPointer &timer_;
-
-						FindTimer(const TimerPointer &timer)
-							: timer_(timer)
-						{}
-
-						bool operator()(const std::pair<TimerPointer, TimerCallback> &val) const
-						{
-							return val.first == timer_;
-						}
-					};
-
 					{
 						Lock lock(mutex_);
 						TimersIter iter = timers_.find(timer);
@@ -166,7 +181,7 @@ namespace async
 							continue;
 						}
 						else if( res + WAIT_OBJECT_0 > timers_.size() )
-							throw std::logic_error("handle out of range");
+							throw std::out_of_range("handle out of range");
 
 						Lock lock(mutex_);
 						TimersIter iter = timers_.begin();

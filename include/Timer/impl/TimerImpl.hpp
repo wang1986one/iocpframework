@@ -71,6 +71,8 @@ namespace async
 					LARGE_INTEGER dueTime = {0};
 					dueTime.QuadPart = -(delay * 10000000);
 
+					period_ = period;
+					due_ = delay;
 
 					if( !::SetWaitableTimer(timer_, &dueTime, period, NULL, NULL, TRUE) )
 						throw async::iocp::Win32Exception("SetWaitableTimer");
