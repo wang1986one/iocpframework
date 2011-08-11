@@ -26,21 +26,12 @@ namespace async
 			private:
 				TimerServiceType &service_;		// service
 				TimerPointer timer_;			// Timer指针
-				long period_;
-				long due_;
 
 			public:
 				explicit BasicTimer(ServiceType &io)
 					: service_(TimerServiceType::GetInstance(io))
-					, period_(0)
-					, due_(0)
-				{}
-				// 不接受回调函数，且注册一个Timer
-				// period为时间间隔
-				BasicTimer(ServiceType &io, long period, long due)
-					: service_(TimerServiceType::GetInstance(io))
-					, period_(period)
-					, due_(due)
+					, timer_(service_.AddTimer(0, 0, 0))
+	
 				{}
 				// 接受回调函数，且注册一个Timer
 				template<typename HandlerT>
@@ -64,11 +55,8 @@ namespace async
 				// delay 延迟时间
 				void SetTimer(long period, long delay = 0)
 				{
-					period_ = period;
-					due_	= delay;
-
 					assert(timer_);
-					timer_->SetTimer(period_, due_);
+					timer_->SetTimer(period, delay);
 				}
 
 				// 取消Timer
@@ -79,22 +67,30 @@ namespace async
 				}
 
 				// 同步等待
-				/*void Wait()
+				void SyncWait()
 				{
 					timer_->SyncWait();
-				}*/
+				}
+				template<typename HandlerT>
+				void SyncWait(const HandlerT &handler, long period, long delay = 0)
+				{
+					SetTimer(period, delay);
+					service_.SetTimer(timer_, handler);
+					timer_->SyncWait();
+				}
 
 				// 异步等待
-				void BeginWait()
+				void AsyncWait()
 				{
 					assert(timer_);
 					timer_->AsyncWait();
 				}
 
 				template<typename HandlerT>
-				void BeginWait(const HandlerT &handler)
+				void AsyncWait(const HandlerT &handler, long period, long delay = 0)
 				{
-					timer_ = service_.AddTimer(period_, due_, handler);
+					SetTimer(period, delay);
+					service_.SetTimer(timer_, handler);
 					timer_->AsyncWait();
 				}
 				

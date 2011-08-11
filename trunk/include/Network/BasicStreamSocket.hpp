@@ -117,7 +117,7 @@ namespace async
 			template < typename HandlerT >
 			void AsyncConnect(const IPAddress &addr, u_short port, const HandlerT &handler)
 			{
-				return AsyncConnect(addr, port);
+				return impl_->AsyncConnect(addr, port, handler);
 			}
 			
 

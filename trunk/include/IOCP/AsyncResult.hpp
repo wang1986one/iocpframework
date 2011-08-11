@@ -69,7 +69,8 @@ namespace async
 		public:
 			virtual void Invoke(u_long size, u_long error)
 			{
-				handler_(size, error);
+				if( handler_ != 0 )
+					handler_(size, error);
 			}
 
 		private:
