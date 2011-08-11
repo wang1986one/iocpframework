@@ -219,106 +219,106 @@
 			Name="include"
 			>
 			<File
-				RelativePath="..\include\Basic.hpp"
+				RelativePath="..\..\include\Basic.hpp"
 				>
 			</File>
 			<Filter
 				Name="IOCP"
 				>
 				<File
-					RelativePath="..\include\IOCP\AsyncResult.hpp"
+					RelativePath="..\..\include\IOCP\AsyncResult.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Buffer.hpp"
+					RelativePath="..\..\include\IOCP\AsyncResult.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Dispatcher.cpp"
+					RelativePath="..\..\include\IOCP\Buffer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Dispatcher.hpp"
+					RelativePath="..\..\include\IOCP\Dispatcher.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\IOCP.hpp"
+					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\MemoryMgr.hpp"
+					RelativePath="..\..\include\IOCP\IOCP.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\ObjectFactory.hpp"
+					RelativePath="..\..\include\IOCP\MemoryMgr.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\Pointer.hpp"
+					RelativePath="..\..\include\IOCP\Object.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\ReadWriteBuffer.cpp"
+					RelativePath="..\..\include\IOCP\Object.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\ReadWriteBuffer.hpp"
+					RelativePath="..\..\include\IOCP\ObjectFactory.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\WinException.cpp"
+					RelativePath="..\..\include\IOCP\Pointer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\IOCP\WinException.hpp"
+					RelativePath="..\..\include\IOCP\Read.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\ReadWriteBuffer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\ReadWriteBuffer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\WinException.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\WinException.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\IOCP\Write.hpp"
 					>
 				</File>
 				<Filter
 					Name="internal"
 					>
 					<File
-						RelativePath="..\include\IOCP\internal\Condition.hpp"
+						RelativePath="..\..\include\IOCP\internal\Condition.hpp"
 						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
-				Name="FileSystem"
-				>
-			</Filter>
-			<Filter
-				Name="Memory"
-				>
-				<File
-					RelativePath="..\include\Memory\FixedMemoryPool.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Memory\MemAllocator.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Memory\MemoryLeak.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Memory\SGIMallocPool.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Memory\SGIMemoryPool.hpp"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="MultiThread"
 				>
 				<File
-					RelativePath="..\include\MultiThread\Lock.hpp"
+					RelativePath="..\..\include\MultiThread\Lock.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\MultiThread\Thread.hpp"
+					RelativePath="..\..\include\MultiThread\Thread.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\MultiThread\ThreadPool.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\MultiThread\Tls.hpp"
 					>
 				</File>
 			</Filter>
@@ -326,22 +326,22 @@
 				Name="Timer"
 				>
 				<File
-					RelativePath="..\include\Timer\Timer.hpp"
+					RelativePath="..\..\include\Timer\Timer.hpp"
 					>
 				</File>
 				<Filter
 					Name="impl"
 					>
 					<File
-						RelativePath="..\include\Timer\impl\BasicTimer.hpp"
+						RelativePath="..\..\include\Timer\impl\BasicTimer.hpp"
 						>
 					</File>
 					<File
-						RelativePath="..\include\Timer\impl\TimerImpl.hpp"
+						RelativePath="..\..\include\Timer\impl\TimerImpl.hpp"
 						>
 					</File>
 					<File
-						RelativePath="..\include\Timer\impl\TimerService.hpp"
+						RelativePath="..\..\include\Timer\impl\TimerService.hpp"
 						>
 					</File>
 				</Filter>

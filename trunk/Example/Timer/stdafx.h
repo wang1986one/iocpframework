@@ -11,5 +11,7 @@
 #include <tchar.h>
 
 
-
 #include <iostream>
+
+
+#include "../../include/Timer/Timer.hpp"

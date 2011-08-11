@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "../include/Timer/Timer.hpp"
+
 
 
 
@@ -57,19 +57,10 @@ void AsyncWait4()
 	std::cout << "AsyncWait4" << std::endl;
 }
 
-
-// Debug Memory Info
-void DebugAllocSize(LONG allocCount, size_t size)
+void SyncWait5()
 {
-	std::cout << "Alloc " << allocCount << ": " << size << std::endl;
+	std::cout << "SyncWait5" << std::endl;
 }
-
-void DebugDeallocSize(LONG deallocCount, size_t size)
-{
-	std::cout << "Dealloc " << deallocCount << ": " << size << std::endl;
-}
-
-
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -82,24 +73,29 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			{
 				//async::timer::Timer timer(io, 2000, 0);
-				//timer.BeginWait(std::tr1::bind(&AsyncWait, std::tr1::ref(timer)));
+				//timer.AsyncWait(std::tr1::bind(&AsyncWait, std::tr1::ref(timer)));
 
 				async::timer::Timer timer2(io, 4000, 0, std::tr1::bind(&AsyncWait2));
-				timer2.BeginWait();
+				timer2.AsyncWait();
 
 				system("pause");
 			}
 			
 
 			{
-				async::timer::TimerPtr timer3(new async::timer::Timer(io, 2000, 0));
-				timer3->BeginWait(std::tr1::bind(&AsyncWait3, std::tr1::ref(timer3)));
+				async::timer::TimerPtr timer3(new async::timer::Timer(io));
+				timer3->AsyncWait(std::tr1::bind(&AsyncWait3, std::tr1::ref(timer3)), 2000);
 			
 				system("pause");
 			}
 
-			async::timer::Timer timer4(io, 500, 0);
-			timer4.BeginWait(std::tr1::bind(&AsyncWait4));
+			{
+				async::timer::Timer timer4(io);
+				timer4.SyncWait(std::tr1::bind(&SyncWait5), 5000, 0);
+			}
+
+			async::timer::Timer timer4(io);
+			timer4.AsyncWait(std::tr1::bind(&AsyncWait4), 500, 0);
 
 			system("pause");
 		}
