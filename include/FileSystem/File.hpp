@@ -34,7 +34,6 @@ namespace async
 
 		public:
 			explicit File(AsyncIODispatcherType &);
-			File(AsyncIODispatcherType &, HANDLE);
 			File(AsyncIODispatcherType &, LPCTSTR, DWORD, DWORD, DWORD, DWORD, LPSECURITY_ATTRIBUTES = NULL, HANDLE = NULL);
 			~File();
 
@@ -74,13 +73,13 @@ namespace async
 
 			// 不需设置回调接口,同步函数
 		public:
-			size_t Read(const void *buf, size_t len, const LARGE_INTEGER &offset);
+			size_t Read(void *buf, size_t len, const LARGE_INTEGER &offset);
 			size_t Write(const void *buf, size_t len, const LARGE_INTEGER &offset);
 
 			// 异步调用接口
 		public:
-			void AsyncRead(void *buf, size_t len, const u_int64 &offset, const CallbackType &handler);
-			void AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const CallbackType &handler);
+			void AsyncRead(void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler);
+			void AsyncWrite(const void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler);
 		};
 	}
 
@@ -105,11 +104,6 @@ namespace async
 		inline FilePtr MakeFile(File::AsyncIODispatcherType &io)
 		{
 			return FilePtr(ObjectAllocate<File>(io), &ObjectDeallocate<File>);
-		}
-
-		inline FilePtr MakeFile(File::AsyncIODispatcherType &io, HANDLE file)
-		{
-			return FilePtr(ObjectAllocate<File>(io, file), &ObjectDeallocate<File>);
 		}
 
 		inline FilePtr MakeFile(File::AsyncIODispatcherType &io, LPCTSTR path, DWORD access, DWORD shared, DWORD create, DWORD flag, LPSECURITY_ATTRIBUTES attribute = NULL, HANDLE templateMode = NULL)

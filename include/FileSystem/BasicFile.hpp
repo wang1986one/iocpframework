@@ -31,10 +31,6 @@ namespace async
 			explicit BasicFile(const ImplementType &impl)
 				: impl_(impl)
 			{}
-			BasicFile(AsyncIODispatcherType &impl, HANDLE file)
-				: impl_(MakeFile(impl, file))
-			{}
-
 			BasicFile(AsyncIODispatcherType &io, LPCTSTR path, DWORD access, DWORD sharedMode, DWORD createMode, DWORD flag, LPSECURITY_ATTRIBUTES attribute = NULL, HANDLE templateMode = NULL)
 				: impl_(MakeFile(io, path, access, sharedMode, createMode, flag, attribute, templateMode))
 			{}
@@ -100,7 +96,7 @@ namespace async
 			}
 
 			template<typename ConstBufferT>
-			size_t Write(const ConstBufferT &buffer, const u_int64 &offset)
+			size_t Write(const ConstBufferT &buffer, const LARGE_INTEGER &offset)
 			{
 				return impl_->Write(buffer.data(), buffer.size(), offset);
 			}
@@ -113,7 +109,7 @@ namespace async
 			}
 
 			template<typename ConstBufferT, typename HandlerT>
-			void AsyncWrite(const ConstBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
+			void AsyncWrite(const ConstBufferT &buffer, const LARGE_INTEGER &offset, const HandlerT &callback)
 			{
 				return impl_->AsyncWrite(buffer.data(), buffer.size(), offset, callback);
 			}
@@ -127,7 +123,7 @@ namespace async
 			}
 
 			template<typename MutableBufferT>
-			size_t Read(MutableBufferT &buffer, const u_int64 &offset)
+			size_t Read(MutableBufferT &buffer, const LARGE_INTEGER &offset)
 			{
 				return impl_->Read(buffer.data(), buffer.size(), offset);
 			}
@@ -141,7 +137,7 @@ namespace async
 
 			// 异步接收数据
 			template<typename MutableBufferT, typename HandlerT>
-			void AsyncRead(MutableBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
+			void AsyncRead(MutableBufferT &buffer, const LARGE_INTEGER &offset, const HandlerT &callback)
 			{
 				return impl_->AsyncRead(buffer.data(), buffer.size(), offset, callback);
 			}

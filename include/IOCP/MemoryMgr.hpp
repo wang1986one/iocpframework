@@ -1,11 +1,11 @@
 #ifndef __IOCP_MEMORY_MANAGER_HPP
 #define __IOCP_MEMORY_MANAGER_HPP
 
-#include "../Memory/SGIMemoryPool.hpp"
-#include "../Memory/FixedMemoryPool.hpp"
-#include "../Memory/ContainerAllocator.hpp"
+#include "../../MemoryPool/SGIMemoryPool.hpp"
+#include "../../MemoryPool/FixedMemoryPool.hpp"
+#include "../../Allocator/ContainerAllocator.hpp"
 
-//#include "../Memory/MemoryLeak.h"
+//#include "../../MemoryPool/MemoryLeak.h"
 
 namespace async
 {
@@ -23,7 +23,7 @@ namespace async
 		public:
 			// 小对象使用--Socket,File, Object...
 			typedef async::memory::SGIMTMemoryPool SmallObjectMemoryPool;
-			typedef async::memory::ContainerAllocator<char, SmallObjectMemoryPool>	AllocType;
+			typedef async::allocator::ContainerAllocator<char, SmallObjectMemoryPool>	AllocType;
 
 
 			//  Socket和File内存池

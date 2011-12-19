@@ -29,8 +29,8 @@ namespace async
 			return Read(s, buffer, TransferAll(), callback);
 		}
 
-		template<typename SyncWriteStreamT, typename MutableBufferT>
-		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const u_int64 &offset)
+		template<typename SyncWriteStreamT, typename MutableBufferT, typename OffsetT>
+		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const OffsetT &offset)
 		{
 			return Read(s, buffer, offset, TransferAll());
 		}
@@ -68,8 +68,8 @@ namespace async
 			return transfers;
 		}
 
-		template<typename SyncWriteStreamT, typename MutableBufferT, typename CompleteConditionT>
-		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const u_int64 &offset, CompleteConditionT &condition)
+		template<typename SyncWriteStreamT, typename MutableBufferT, typename OffsetT, typename CompleteConditionT>
+		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, const OffsetT &offset, CompleteConditionT &condition)
 		{
 			size_t transfers = 0;
 			const size_t bufSize = buffer.size();
@@ -134,22 +134,22 @@ namespace async
 				}
 			};
 
-			template<typename AsyncWriteStreamT, typename MutableBufferT, typename CompletionConditionT, typename ReadHandlerT>
+			template<typename AsyncWriteStreamT, typename MutableBufferT, typename OffsetT, typename CompletionConditionT, typename ReadHandlerT>
 			class ReadOffsetHandler
 			{
-				typedef ReadOffsetHandler<AsyncWriteStreamT, MutableBufferT, CompletionConditionT, ReadHandlerT>	ThisType;
+				typedef ReadOffsetHandler<AsyncWriteStreamT, MutableBufferT, OffsetT, CompletionConditionT, ReadHandlerT>	ThisType;
 
 			private:
 				AsyncWriteStreamT &stream_;
 				MutableBufferT buffer_;
 				CompletionConditionT condition_;
-				const u_int64 offset_;
+				const OffsetT offset_;
 				size_t transfers_;
 				const size_t total_;
 				ReadHandlerT handler_;
 
 			public:
-				ReadOffsetHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const u_int64 &offset, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
+				ReadOffsetHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const OffsetT &offset, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer)
 					, condition_(condition)
@@ -190,7 +190,7 @@ namespace async
 		}
 
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename HandlerT>
-		void AsyncRead(SyncWriteStreamT &s, MutableBufferT &buffer, const u_int64 &offset, const HandlerT &handler)
+		void AsyncRead(SyncWriteStreamT &s, MutableBufferT &buffer, const LARGE_INTEGER &offset, const HandlerT &handler)
 		{
 			AsyncRead(s, buffer, offset, TransferAll(), handler);
 		}
@@ -204,10 +204,10 @@ namespace async
 			s.AsyncRead(buffer, HookReadHandler(s, buffer, condition, 0, handler));
 		}
 	
-		template<typename SyncWriteStreamT, typename MutableBufferT, typename ComplateConditionT, typename HandlerT>
-		void AsyncRead(SyncWriteStreamT &s, MutableBufferT &buffer, const u_int64 &offset, const ComplateConditionT &condition, const HandlerT &handler)
+		template<typename SyncWriteStreamT, typename MutableBufferT, typename OffsetT, typename ComplateConditionT, typename HandlerT>
+		void AsyncRead(SyncWriteStreamT &s, MutableBufferT &buffer, const OffsetT &offset, const ComplateConditionT &condition, const HandlerT &handler)
 		{
-			typedef detail::ReadOffsetHandler<SyncWriteStreamT, MutableBufferT, ComplateConditionT, HandlerT> HookReadHandler;
+			typedef detail::ReadOffsetHandler<SyncWriteStreamT, MutableBufferT, OffsetT, ComplateConditionT, HandlerT> HookReadHandler;
 
 			s.AsyncRead(buffer, offset, HookReadHandler(s, buffer, offset, condition, 0, handler));
 		}
