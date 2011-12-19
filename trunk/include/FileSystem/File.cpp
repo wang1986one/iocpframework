@@ -8,32 +8,12 @@ namespace  async
 	namespace filesystem
 	{
 
-		namespace detail
-		{
-			inline DWORD HIDWORD(const u_int64 &src)
-			{
-				return (src >> 32) & 0xffffffff;
-			}
-
-			inline DWORD LODWORD(const u_int64 &src)
-			{
-				return src & 0xffffffff;
-			}
-		}
-
 
 		File::File(AsyncIODispatcherType &io)
 			: file_(INVALID_HANDLE_VALUE)
 			, io_(io)
 		{}
 
-		File::File(AsyncIODispatcherType &io, HANDLE file)
-			: file_(file)
-			, io_(io)
-		{
-			// 绑定到IOCP
-			io_.Bind(file_);
-		}
 
 		File::File(AsyncIODispatcherType &io, LPCTSTR lpszFilePath, DWORD dwAccess, DWORD dwShareMode, 
 			DWORD dwCreatePosition, DWORD dwFlag, LPSECURITY_ATTRIBUTES lpAttributes/* = NULL*/, HANDLE hTemplate/* = NULL*/)
@@ -59,8 +39,12 @@ namespace  async
 			// 不触发文件对象 Vista
 			//::SetFileCompletionNotificationModes(file_, FILE_SKIP_EVENT_ON_HANDLE);
 
-			// 绑定到IOCP
-			io_.Bind(file_);
+			if( dwFlag & FILE_FLAG_NO_BUFFERING ||
+				dwFlag & FILE_FLAG_OVERLAPPED )
+			{
+				// 绑定到IOCP
+				io_.Bind(file_);
+			}
 		}
 
 
@@ -91,15 +75,47 @@ namespace  async
 		}
 
 
-		void File::AsyncRead(void *buf, size_t len, const u_int64 &offset, const CallbackType &handler)
+		size_t File::Read(void *buf, size_t len, const LARGE_INTEGER &offset)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("File not open");
+
+			if( !::SetFilePointerEx(file_, offset, 0, FILE_BEGIN) )
+				throw iocp::Win32Exception("SetFilePointerEx");
+
+			DWORD read = 0;
+			if( !::ReadFile(file_, buf, len, &read, 0) )
+				throw iocp::Win32Exception("ReadFile");
+
+			return read;
+		}
+
+		size_t File::Write(const void *buf, size_t len, const LARGE_INTEGER &offset)
+		{
+			if( !IsOpen() )
+				throw std::logic_error("File not open");
+
+			if( !::SetFilePointerEx(file_, offset, 0, FILE_BEGIN) )
+				throw iocp::Win32Exception("SetFilePointerEx");
+
+			DWORD read = 0;
+			if( !::WriteFile(file_, buf, len, &read, 0) )
+				throw iocp::Win32Exception("ReadFile");
+
+			return read;
+
+			return 0;
+		}
+
+		void File::AsyncRead(void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
 			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler));
 
-			asynResult->Offset		= detail::LODWORD(offset);
-			asynResult->OffsetHigh	= detail::HIDWORD(offset);
+			asynResult->Offset		= offset.LowPart;
+			asynResult->OffsetHigh	= offset.HighPart;
 
 			DWORD bytesRead = 0;
 			BOOL bSuc = ::ReadFile(file_, buf, len, &bytesRead, asynResult.Get());
@@ -109,15 +125,15 @@ namespace  async
 			asynResult.Release();
 		}
 
-		void File::AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const CallbackType &handler)
+		void File::AsyncWrite(const void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
 			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler));
 
-			asynResult->Offset		= detail::LODWORD(offset);
-			asynResult->OffsetHigh	= detail::HIDWORD(offset);
+			asynResult->Offset		= offset.LowPart;
+			asynResult->OffsetHigh	= offset.HighPart;
 
 			DWORD bytesRead = 0;
 			BOOL bSuc = ::WriteFile(file_, buf, len, &bytesRead, asynResult.Get());

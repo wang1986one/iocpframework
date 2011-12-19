@@ -1,6 +1,7 @@
 #ifndef __IOCP_ASYNC_RESULT_HPP
 #define __IOCP_ASYNC_RESULT_HPP
 
+#include "../Basic.hpp"
 #include "Pointer.hpp"
 #include <functional>
 
@@ -9,8 +10,6 @@ namespace async
 	namespace iocp
 	{
 
-
-		
 		//---------------------------------------------------------------------------
 		// class AsyncCallbackBase
 

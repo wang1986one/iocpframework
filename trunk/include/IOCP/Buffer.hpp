@@ -45,14 +45,14 @@ namespace async
 			value_type *buffer_;		// ª∫≥Â«¯÷∏’Î
 			
 		public:
-			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SIZE, allocator_type alloc = allocator_type())
+			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SIZE, const allocator_type &alloc = allocator_type())
 				: alloc_(alloc)
 				, internal_(true)
 				, capacity_(defaultSize)
 				, bufferSize_(0)
 				, buffer_(_Allocate(defaultSize))
 			{}
-			AutoBufferT(pointer pStr, size_t nSize, allocator_type alloc = allocator_type())
+			AutoBufferT(pointer pStr, size_t nSize, const allocator_type &alloc = allocator_type())
 				: alloc_(alloc)
 				, internal_(false)
 				, capacity_(nSize)
@@ -60,7 +60,7 @@ namespace async
 				, buffer_(pStr)
 			{
 			}
-			AutoBufferT(pointer beg, pointer end, allocator_type alloc = allocator_type())
+			AutoBufferT(const_pointer beg, const_pointer end, const allocator_type &alloc = allocator_type())
 				: alloc_(alloc)
 				, internal_(false)
 				, capacity_(std::distance(beg, end))
@@ -168,7 +168,7 @@ namespace async
 			}
 		};
 
-		typedef async::memory::ContainerAllocator< char, MemoryMgr::MemoryPool > AutoBufferAllocator;
+		typedef async::allocator::ContainerAllocator< char, MemoryMgr::MemoryPool > AutoBufferAllocator;
 		typedef AutoBufferT< char, AutoBufferAllocator >	AutoBuffer;
 		typedef std::tr1::shared_ptr<AutoBuffer>			AutoBufferPtr;
 
