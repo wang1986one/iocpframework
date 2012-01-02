@@ -226,185 +226,129 @@
 		<Filter
 			Name="include"
 			>
-			<File
-				RelativePath="..\..\include\Basic.hpp"
-				>
-			</File>
 			<Filter
-				Name="iocp"
+				Name="IOCP"
 				>
 				<File
-					RelativePath="..\..\include\IOCP\AsyncResult.hpp"
+					RelativePath="..\..\..\..\include\IOCP\AsyncResult.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Buffer.hpp"
+					RelativePath="..\..\..\..\include\IOCP\AsyncResult.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Dispatcher.cpp"
+					RelativePath="..\..\..\..\include\IOCP\Buffer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Dispatcher.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\IOCP.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\MemoryMgr.hpp"
+					RelativePath="..\..\..\..\include\IOCP\IOCP.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Object.cpp"
+					RelativePath="..\..\..\..\include\IOCP\ObjectFactory.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Object.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Pointer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\ObjectFactory.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Read.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Pointer.hpp"
+					RelativePath="..\..\..\..\include\IOCP\ReadWriteBuffer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\ReadWriteBuffer.cpp"
+					RelativePath="..\..\..\..\include\IOCP\ReadWriteBuffer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\ReadWriteBuffer.hpp"
+					RelativePath="..\..\..\..\include\IOCP\WinException.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\WinException.cpp"
+					RelativePath="..\..\..\..\include\IOCP\WinException.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\WinException.hpp"
-					>
-				</File>
-				<Filter
-					Name="internal"
-					>
-					<File
-						RelativePath="..\..\include\IOCP\internal\Condition.hpp"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="network"
-				>
-				<File
-					RelativePath="..\..\include\Network\Accept.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\BasicAcceptor.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\BasicDatagramSocket.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\BasicStreamSocket.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\IPAddress.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\IPAddress.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\Socket.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\Socket.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\SocketOption.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\SocketProvider.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\SocketProvider.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\SockInit.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\TCP.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\Network\UDP.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Write.hpp"
 					>
 				</File>
 			</Filter>
 			<Filter
-				Name="Filesystem"
-				>
-			</Filter>
-			<Filter
-				Name="Memory"
+				Name="Network"
 				>
 				<File
-					RelativePath="..\..\include\Memory\FixedMemoryPool.hpp"
+					RelativePath="..\..\..\..\include\Network\Accept.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Memory\MemoryLeak.h"
+					RelativePath="..\..\..\..\include\Network\BasicAcceptor.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Memory\SGIMallocPool.hpp"
+					RelativePath="..\..\..\..\include\Network\BasicDatagramSocket.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\Memory\SGIMemoryPool.hpp"
+					RelativePath="..\..\..\..\include\Network\BasicStreamSocket.hpp"
 					>
 				</File>
-			</Filter>
-			<Filter
-				Name="Timer"
-				>
 				<File
-					RelativePath="..\..\include\Timer\Timer.hpp"
+					RelativePath="..\..\..\..\include\Network\BufferHelper.hpp"
 					>
 				</File>
-				<Filter
-					Name="impl"
+				<File
+					RelativePath="..\..\..\..\include\Network\IPAddress.cpp"
 					>
-					<File
-						RelativePath="..\..\include\Timer\impl\BasicTimer.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\Timer\impl\TimerImpl.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\Timer\impl\TimerService.hpp"
-						>
-					</File>
-				</Filter>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\IPAddress.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\Socket.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\Socket.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\SocketOption.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\SocketProvider.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\SocketProvider.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\SockInit.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\TCP.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\Network\UDP.hpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 	</Files>
