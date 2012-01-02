@@ -69,9 +69,15 @@ namespace  async
 			return ::CancelIo(file_) == TRUE;
 		}
 
-		void File::SetFileSize()
+		void File::SetFileSize(unsigned long long size)
 		{
-			
+			LARGE_INTEGER offset = {0};
+			offset.QuadPart = size;
+			if( !::SetFilePointerEx(file_, offset, 0, FILE_BEGIN) )
+				throw iocp::Win32Exception("SetFilePointerEx");
+
+			if( !::SetEndOfFile(file_) )
+				throw iocp::Win32Exception("SetEndOfFile");
 		}
 
 
@@ -112,7 +118,7 @@ namespace  async
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler, &handler));
 
 			asynResult->Offset		= offset.LowPart;
 			asynResult->OffsetHigh	= offset.HighPart;
@@ -130,7 +136,7 @@ namespace  async
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler, &handler));
 
 			asynResult->Offset		= offset.LowPart;
 			asynResult->OffsetHigh	= offset.HighPart;

@@ -27,8 +27,6 @@ namespace async
 		public:
 			typedef BasicAcceptor<Tcp>			Accpetor;
 			typedef BasicStreamSocket<Tcp>		Socket;
-			
-
 
 		private:
 			int family_;

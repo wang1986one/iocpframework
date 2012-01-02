@@ -11,10 +11,11 @@ namespace async
 	namespace iocp
 	{
 
-		template< typename T >
+		template< typename T, typename RelaseFuncT >
 		class Pointer
 		{
 		private:
+			RelaseFuncT release_;
 			T *obj_;
 
 		public:
@@ -58,7 +59,7 @@ namespace async
 			{
 				if( obj_ )
 				{
-					ObjectDeallocate(obj_);
+					release_(obj_);
 					obj_ = 0;
 				}
 			}

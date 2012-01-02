@@ -3,7 +3,9 @@
 
 #include "../IOCP/Dispatcher.hpp"
 #include "../IOCP/Buffer.hpp"
-
+#include "../IOCP/Read.hpp"
+#include "../IOCP/Write.hpp"
+#include "../IOCP/ReadWriteBuffer.hpp"
 
 
 namespace async
@@ -69,7 +71,7 @@ namespace async
 			bool Cancel();
 
 			// 设置文件大小
-			void SetFileSize();
+			void SetFileSize(unsigned long long size);
 
 			// 不需设置回调接口,同步函数
 		public:
@@ -87,14 +89,14 @@ namespace async
 
 	namespace iocp
 	{
-		typedef async::filesystem::File File;
+		typedef filesystem::File File;
 
 		// File 工厂
 		template<>
 		struct ObjectFactory< File >
 		{
-			typedef async::memory::FixedMemoryPool<true, sizeof(File)>		PoolType;
-			typedef ObjectPool< PoolType >									ObjectPoolType;
+			typedef memory::FixedMemoryPool<true, sizeof(File)>		PoolType;
+			typedef ObjectPool< PoolType >							ObjectPoolType;
 		};
 	}
 

@@ -3,7 +3,11 @@
 
 #include "../Basic.hpp"
 #include "Pointer.hpp"
+#include "ObjectFactory.hpp"
+#include "../../MultiThread/Tls.hpp"
 #include <functional>
+#include <type_traits>
+
 
 namespace async
 {
@@ -12,9 +16,23 @@ namespace async
 
 		//---------------------------------------------------------------------------
 		// class AsyncCallbackBase
+	
+		template < typename T >
+		struct IOAsyncCallback;
 
 		struct AsyncCallbackBase;
-		typedef Pointer<AsyncCallbackBase>	AsyncCallbackBasePtr;
+		typedef Pointer< AsyncCallbackBase, IOAsyncCallback<AsyncCallbackBase> > AsyncCallbackBasePtr;
+
+		struct AsyncCallback;
+
+		template < typename T >
+		struct IOAsyncCallback
+		{
+			void operator()(T *p, ...)
+			{
+				ObjectDeallocate<AsyncCallback>(reinterpret_cast<AsyncCallback *>(p));
+			}
+		};
 
 
 		struct AsyncCallbackBase
@@ -30,14 +48,14 @@ namespace async
 
 			}
 
-			virtual void Invoke(u_long size, u_long error) = 0;
+			virtual void Invoke(AsyncCallbackBase *p, u_long size, u_long error) = 0;
 
 			template<typename KeyT, typename OverlappedT>
 			static void Call(KeyT *key, OverlappedT *overlapped, u_long size, u_long error)
 			{
-				AsyncCallbackBasePtr p(static_cast<AsyncCallbackBase *>(overlapped));
+				AsyncCallbackBase *p(static_cast<AsyncCallbackBase *>(overlapped));
 				
-				p->Invoke(size, error);
+				p->Invoke(p, size, error);
 			}
 		};
 
@@ -66,21 +84,66 @@ namespace async
 			}
 
 		public:
-			virtual void Invoke(u_long size, u_long error)
+			virtual void Invoke(AsyncCallbackBase *p, u_long size, u_long error)
 			{
 				if( handler_ != 0 )
 					handler_(size, error);
+
+				AsyncCallbackBasePtr ptr(p);
 			}
 
 		private:
 			AsyncCallback();
 		};
 
-		inline AsyncCallbackBase *MakeAsyncCallback(const CallbackType &handler)
+		
+
+		struct TlsMemoryPool
+		{
+			typedef std::tr1::aligned_storage<
+				sizeof(AsyncCallback),
+				std::tr1::alignment_of<AsyncCallback>::value 
+			>::type StorageBuffer;
+
+			StorageBuffer buf_;
+
+			static void *Allocate(size_t n)
+			{
+	
+				return 0;//reinterpret_cast<AsyncCallback *>(&Pool.buf_);//::operator new(n);
+			}
+
+			static void Deallocate(void *p, size_t n)
+			{
+				//::operator delete(p);
+			}
+		};
+
+		
+	
+		// 每个类型的内存的声请释放
+		template< >
+		struct ObjectFactory<AsyncCallback>
+		{
+			typedef memory::FixedMemoryPool<true, sizeof(AsyncCallback)>	PoolType;
+			typedef ObjectPool<PoolType>									ObjectPoolType;
+		};
+
+
+		typedef std::tr1::aligned_storage<
+			sizeof(AsyncCallback),
+			std::tr1::alignment_of<AsyncCallback>::value 
+		>::type StorageBuffer;
+		
+		
+		//
+
+		inline AsyncCallbackBase *MakeAsyncCallback(const CallbackType &handler, ...)
 		{
 			return ObjectAllocate<AsyncCallback>(handler);
 		}
 
+		
 	}
 }
 

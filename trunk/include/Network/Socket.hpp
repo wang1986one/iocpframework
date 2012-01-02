@@ -63,6 +63,10 @@ namespace async
 			template<typename InT, typename OutT>
 			DWORD IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize);
 
+			// ioctrlsocket
+			template< typename IOCtrlT >
+			bool IOControl(IOCtrlT &ioCtrl);
+
 			// setsocketopt
 			template<typename SocketOptionT>
 			bool SetOption(const SocketOptionT &option);
@@ -97,8 +101,8 @@ namespace async
 			size_t Read(char *buf, size_t size, DWORD flag);
 			size_t Write(const char *buffer, size_t size, DWORD flag);
 
-			size_t SendTo(const char *buffer, size_t sz,  const SOCKADDR_IN &addr, DWORD flag);
-			size_t RecvFrom(char *buffer, size_t sz, SOCKADDR_IN &addr, DWORD flag);
+			size_t SendTo(const char *buffer, size_t sz, const SOCKADDR_IN *addr, DWORD flag);
+			size_t RecvFrom(char *buffer, size_t sz, SOCKADDR_IN *addr, DWORD flag);
 
 			// 异步调用接口
 		public:
@@ -118,10 +122,10 @@ namespace async
 			void AsyncWrite(const char *buf, size_t size, const iocp::CallbackType &callback);
 
 			// 异步UDP读取
-			void AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const iocp::CallbackType &callback);
+			void AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN *addr, const iocp::CallbackType &callback);
 
 			// 异步UDP读入
-			void AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const iocp::CallbackType &callback);
+			void AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN *addr, const iocp::CallbackType &callback);
 		};
 	}
 }
@@ -172,6 +176,15 @@ namespace async
 			return socket_ != INVALID_SOCKET;
 		}
 
+		template< typename IOCtrlT >
+		inline bool Socket::IOControl(IOCtrlT &ioCtrl)
+		{
+			if( !IsOpen() )
+				return false;
+
+			return SOCKET_ERROR == ::ioctlsocket(socket_, ioCtrl.name(), ioCtrl.data());
+		}
+
 		template<typename InT, typename OutT>
 		inline DWORD Socket::IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize)
 		{
@@ -188,13 +201,6 @@ namespace async
 		{
 			if( !IsOpen() )
 				return false;
-
-			/*if( option.level() == SOL_SOCKET && option.name() == SO_LINGER )
-			{
-			const ::linger *lingerData = reinterpret_cast<const ::linger *>(option.data());
-			if( lingerData->l_onoff != 0 && lingerData->l_linger != 0 )
-
-			}*/
 
 			return SOCKET_ERROR != ::setsockopt(socket_, option.level(), option.name(), option.data(), option.size());
 		}
@@ -227,7 +233,7 @@ namespace async
 			iocp::AutoBufferPtr acceptBuffer(MakeBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
 
 			typedef detail::AcceptorHandle<HandlerT> HookAcceptor;
-			AsyncCallbackBasePtr asyncResult(MakeAsyncCallback(HookAcceptor(*this, remoteSocket, acceptBuffer, callback)));
+			AsyncCallbackBasePtr asyncResult(MakeAsyncCallback(HookAcceptor(*this, remoteSocket, acceptBuffer, callback), &callback));
 
 			// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
 			// 如果为0，则立即返回。若大于0，则接受数据后再返回
