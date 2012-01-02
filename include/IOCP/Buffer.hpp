@@ -17,6 +17,8 @@ namespace async
 
 	namespace iocp
 	{
+		
+		enum { DEFAULT_SIZE = 8 * 1024 };
 
 		//-------------------------------------------------------------------
 		// class BufferT
@@ -45,7 +47,7 @@ namespace async
 			value_type *buffer_;		// ª∫≥Â«¯÷∏’Î
 			
 		public:
-			explicit AutoBufferT(size_t defaultSize = MemoryMgr::DEFAULT_SIZE, const allocator_type &alloc = allocator_type())
+			explicit AutoBufferT(size_t defaultSize = DEFAULT_SIZE, const allocator_type &alloc = allocator_type())
 				: alloc_(alloc)
 				, internal_(true)
 				, capacity_(defaultSize)
@@ -168,7 +170,9 @@ namespace async
 			}
 		};
 
-		typedef async::allocator::ContainerAllocator< char, MemoryMgr::MemoryPool > AutoBufferAllocator;
+		typedef async::memory::SGIMemoryPool<true, DEFAULT_SIZE>		MemoryPool;
+
+		typedef async::allocator::ContainerAllocator< char, MemoryPool > AutoBufferAllocator;
 		typedef AutoBufferT< char, AutoBufferAllocator >	AutoBuffer;
 		typedef std::tr1::shared_ptr<AutoBuffer>			AutoBufferPtr;
 

@@ -39,7 +39,7 @@ namespace async
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename CompleteConditionT>
 		size_t Read(SyncWriteStreamT &s, MutableBufferT &buffer, CompleteConditionT &condition)
 		{
-			Read(s, buffer, condition, 0);
+			return Read(s, buffer, condition, 0);
 		}
 
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename CompleteConditionT>

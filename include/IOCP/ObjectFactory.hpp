@@ -1,7 +1,9 @@
 #ifndef __IOCP_OBJECT_FACTORY_HPP
 #define __IOCP_OBJECT_FACTORY_HPP
 
-#include "MemoryMgr.hpp"
+#include "../../MemoryPool/SGIMemoryPool.hpp"
+#include "../../MemoryPool/FixedMemoryPool.hpp"
+#include "../../Allocator/ContainerAllocator.hpp"
 #include <memory>
 
 
@@ -43,9 +45,9 @@ namespace async
 			}
 
 			template< typename T >
-			inline T *CreateBuffer()
+			inline T *CreateBuffer(size_t len = sizeof(T))
 			{
-				return static_cast<T *>(ObjectFactory<T>::ObjectPoolType::GetMemoryPool().Allocate(sizeof(T)));
+				return static_cast<T *>(ObjectFactory<T>::ObjectPoolType::GetMemoryPool().Allocate(len));
 			}
 		}
 		

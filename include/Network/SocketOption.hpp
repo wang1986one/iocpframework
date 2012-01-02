@@ -21,10 +21,7 @@ namespace async
 			int value_;
 
 		public:
-			Boolean()
-				: value_(0)
-			{}
-			explicit Boolean(bool val)
+			explicit Boolean(bool val = true)
 				: value_(val ? 1 : 0)
 			{}
 			Boolean &operator=(const Boolean &rhs)
@@ -179,20 +176,20 @@ namespace async
 		// 如果超出延时，则未发送和接受的数据都会丢弃，同时重设对方的连接
 		// 也可以通过设置SO_DONTLINGER来设置
 
-		template<int _Level, int _Name>
-		class Linger
+		template< >
+		class Integer<SOL_SOCKET, SO_LINGER>
 		{
 		private:
 			::linger value_;
 
 
 		public:
-			Linger()
+			Integer()
 			{
 				value_.l_linger = 0;	// option on/off
 				value_.l_onoff	= 0;	// linger time
 			}
-			Linger(bool bOn, int nTime)
+			Integer(bool bOn, int nTime)
 			{
 				enabled(bOn);
 				timeout(nTime);
@@ -223,13 +220,13 @@ namespace async
 			// 获取Socket leval选项值
 			int level() const
 			{
-				return _Level;
+				return SOL_SOCKET;
 			}
 
 			// 获取Socket name
 			int name() const
 			{
-				return _Name;
+				return SO_LINGER;
 			}	
 
 			// 获取Socket值
@@ -264,69 +261,24 @@ namespace async
 
 		typedef u_long IoctlArgType;
 
-		// ---------------------------------------------------
-		// class NonBlockingIO
-
-		class NonBlockingIO
+		template < size_t _CMD >
+		class IOCtrl
 		{
 		private:
 			IoctlArgType value_;
 
 		public:
-			NonBlockingIO()
+			IOCtrl()
 				: value_(0)
 			{}
-			NonBlockingIO(bool value)
+			IOCtrl(bool value)
 				: value_(value ? 1 : 0)
 			{}
 
 		public:
 			int name() const
 			{
-				return FIONBIO;
-			}
-
-			void set(bool value)
-			{
-				value_ = value ? 1 : 0;
-			}
-			bool get() const
-			{
-				return value_ != 0;
-			}
-
-			IoctlArgType *data()
-			{
-				return &value_;
-			}
-
-			const IoctlArgType *data() const
-			{
-				return &value_;
-			}
-		};
-
-
-		// ---------------------------------------------------
-		// class BytesReadable
-
-		class BytesReadable
-		{
-		private:
-			IoctlArgType value_;
-
-		public:
-			BytesReadable()
-				: value_(0)
-			{}
-			BytesReadable(bool value)
-				: value_(value ? 1 : 0)
-			{}
-
-		public:
-			int name() const
-			{
-				return FIONREAD;
+				return _CMD;
 			}
 
 			void set(size_t value)
@@ -361,8 +313,10 @@ namespace async
 		*/
 
 		typedef Boolean<SOL_SOCKET, SO_BROADCAST>	Broadcast;
+		typedef Boolean<SOL_SOCKET, SO_CONDITIONAL_ACCEPT> ConditionalAccept;
 		typedef Boolean<SOL_SOCKET, SO_DEBUG>		Debug;
 		typedef Boolean<SOL_SOCKET, SO_DONTROUTE>	DontRoute;
+		typedef Boolean<SOL_SOCKET, SO_DONTLINGER>	DontLinger;
 		typedef Boolean<SOL_SOCKET, SO_KEEPALIVE>	KeepAlive;
 		typedef Boolean<SOL_SOCKET, SO_REUSEADDR>	ReuseAddr;
 		typedef Boolean<IPPROTO_TCP, TCP_NODELAY>	NoDelay;
@@ -371,16 +325,14 @@ namespace async
 		typedef Integer<SOL_SOCKET, SO_SNDLOWAT>	SendLowWaterMark;
 		typedef Integer<SOL_SOCKET, SO_RCVBUF>		RecvBufSize;
 		typedef Integer<SOL_SOCKET, SO_RCVLOWAT>	RecvLowWwaterMark;
-
 		typedef Integer<SOL_SOCKET, SO_SNDTIMEO>	SendTimeOut;
 		typedef Integer<SOL_SOCKET, SO_RCVTIMEO>	RecvTimeOut;
-
-		//typedef Integer<SOL_SOCKET, SO_LINGER>		Linger;
 		typedef Integer<SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT> UpdateAcceptContext;
+		typedef Integer<SOL_SOCKET, SO_LINGER>		Linger;
 
 
-		typedef NonBlockingIO						NonBlockingIO;
-		typedef BytesReadable						BytesReadable;
+		typedef IOCtrl<FIONBIO>						NonBlockingIO;
+		typedef IOCtrl<FIONREAD>					BytesReadable;
 	}
 }
 

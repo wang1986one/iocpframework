@@ -185,7 +185,7 @@ namespace async
 		}
 
 
-		size_t Socket::SendTo(const char *buffer, size_t sz,  const SOCKADDR_IN &addr, DWORD flag)
+		size_t Socket::SendTo(const char *buffer, size_t sz, const SOCKADDR_IN *addr, DWORD flag)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
@@ -198,13 +198,13 @@ namespace async
 				throw std::logic_error("Buffer size is zero");
 
 			DWORD dwSize = 0;
-			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, flag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), 0, 0) )
+			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, flag, reinterpret_cast<const sockaddr *>(addr), addr == 0 ? 0 : sizeof(*addr), 0, 0) )
 				throw Win32Exception("WSASendTo");
 
 			return dwSize;
 		}
 
-		size_t Socket::RecvFrom(char *buffer, size_t size, SOCKADDR_IN &addr, DWORD flag)
+		size_t Socket::RecvFrom(char *buffer, size_t size, SOCKADDR_IN *addr, DWORD flag)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
@@ -217,9 +217,9 @@ namespace async
 				throw std::logic_error("Buffer allocate size is zero");
 
 			DWORD dwSize = 0;
-			int addrLen = sizeof(addr);
+			int addrLen = sizeof(*addr);
 
-			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &flag, reinterpret_cast<sockaddr *>(&addr), &addrLen, 0, 0) )
+			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &flag, reinterpret_cast<sockaddr *>(addr), addr == 0 ? 0 : &addrLen, 0, 0) )
 				throw Win32Exception("WSARecvFrom");
 
 			return dwSize;
@@ -267,7 +267,7 @@ namespace async
 			remoteAddr.sin_port			= ::htons(uPort);
 			remoteAddr.sin_addr.s_addr	= ::htonl(addr.Address());
 
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
 
 			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, asynResult.Get()) 
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
@@ -279,7 +279,7 @@ namespace async
 		// 异步关闭连接
 		void Socket::AsyncDisconnect(const iocp::CallbackType &callback, bool bReuseSocket/* = true*/)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
 
 			DWORD dwFlags = bReuseSocket ? TF_REUSE_SOCKET : 0;
 
@@ -293,7 +293,7 @@ namespace async
 		// 异步接接收数据
 		void Socket::AsyncRead(char *buf, size_t size, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = buf;
@@ -312,7 +312,7 @@ namespace async
 		// 异步发送数据
 		void Socket::AsyncWrite(const char *buf, size_t size, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = const_cast<char *>(buf);
@@ -329,9 +329,9 @@ namespace async
 		}
 
 		// 异步UDP写出
-		void Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN &addr, const iocp::CallbackType &callback)
+		void Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN *addr, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = const_cast<char *>(buf);
@@ -340,7 +340,7 @@ namespace async
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
 
-			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, dwFlag, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr), asynResult.Get(), NULL)
+			if( 0 != ::WSASendTo(socket_, &wsabuf, 1, &dwSize, dwFlag, reinterpret_cast<const sockaddr *>(addr), addr == 0 ? 0 : sizeof(*addr), asynResult.Get(), NULL)
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
 				throw Win32Exception("WSASendTo");
 			
@@ -348,9 +348,9 @@ namespace async
 		}	
 
 		// 异步UDP读入
-		void Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN &addr, const iocp::CallbackType &callback)
+		void Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN *addr, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback));
+			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = buf;
@@ -358,9 +358,9 @@ namespace async
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
-			int addrLen = sizeof(addr);
+			int addrLen = (addr == 0 ? 0 : sizeof(addr));
 
-			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &dwFlag, reinterpret_cast<sockaddr *>(&addr), &addrLen, asynResult.Get(), NULL)
+			if( 0 != ::WSARecvFrom(socket_, &wsabuf, 1, &dwSize, &dwFlag, reinterpret_cast<sockaddr *>(addr), &addrLen, asynResult.Get(), NULL)
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
 				throw Win32Exception("WSARecvFrom");
 			

@@ -131,24 +131,14 @@ namespace async
 			
 			// 阻塞式发送数据直到数据发送成功或出错
 			template<typename ConstBufferT>
-			size_t SendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr)
-			{
-				return impl_->SendTo(buffer.data(), buffer.size(), addr, 0);
-			}
-			template<typename ConstBufferT>
-			size_t SendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, u_long flag)
+			size_t SendTo(const ConstBufferT &buffer, const SOCKADDR_IN *addr, u_long flag = 0)
 			{
 				return impl_->SendTo(buffer.data(), buffer.size(), addr, flag);
 			}
 
 			// 阻塞式接收数据直到成功或出错
 			template<typename MutableBufferT>
-			size_t RecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr)
-			{
-				return impl_->RecvFrom(buffer.data(), buffer.size(), addr, 0);
-			}
-			template<typename MutableBufferT>
-			size_t RecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, u_long flag)
+			size_t RecvFrom(MutableBufferT &buffer, SOCKADDR_IN *addr, u_long flag = 0)
 			{
 				return impl_->RecvFrom(buffer.data(), buffer.size(), addr, flag);
 			}
@@ -157,13 +147,13 @@ namespace async
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT>
-			void AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN &addr, const HandlerT &callback)
+			void AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN *addr, const HandlerT &callback)
 			{
 				return impl_->AsyncSendTo(buffer.data(), buffer.size(), addr, callback);
 			}
 
 			template<typename MutableBufferT, typename HandlerT>
-			void AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN &addr, const HandlerT &callback)
+			void AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN *addr, const HandlerT &callback)
 			{
 				return impl_->AsyncRecvFrom(buffer.data(), buffer.size(), addr, callback);
 			}
