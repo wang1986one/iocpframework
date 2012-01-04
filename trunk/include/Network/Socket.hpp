@@ -233,7 +233,7 @@ namespace async
 			iocp::AutoBufferPtr acceptBuffer(MakeBuffer((sizeof(sockaddr_in) + 16) * 2 + szOutSize));
 
 			typedef detail::AcceptorHandle<HandlerT> HookAcceptor;
-			AsyncCallbackBasePtr asyncResult(MakeAsyncCallback(HookAcceptor(*this, remoteSocket, acceptBuffer, callback), &callback));
+			iocp::AsyncCallbackBasePtr asyncResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(HookAcceptor(*this, remoteSocket, acceptBuffer, callback)));
 
 			// 根据szOutSide大小判断，是否需要接收远程客户机第一块数据才返回。
 			// 如果为0，则立即返回。若大于0，则接受数据后再返回

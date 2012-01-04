@@ -68,9 +68,7 @@ namespace async
 			std::for_each(threads_.begin(), threads_.end(), std::ptr_fun(::CancelIo));
 
 			// 先停止所有的线程
-			for(ThreadsIter iter = threads_.begin();
-				iter != threads_.end();
-				++iter)
+			for(ThreadsConstIter iter = threads_.begin(); iter != threads_.end(); ++iter)
 			{
 				iocp_.PostStatus(0, 0, NULL);
 			}
