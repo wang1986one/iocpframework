@@ -267,7 +267,7 @@ namespace async
 			remoteAddr.sin_port			= ::htons(uPort);
 			remoteAddr.sin_addr.s_addr	= ::htonl(addr.Address());
 
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			if( !SocketProvider::GetSingleton(io_).ConnectEx(socket_, reinterpret_cast<SOCKADDR *>(&remoteAddr), sizeof(SOCKADDR), 0, 0, 0, asynResult.Get()) 
 				&& ::WSAGetLastError() != WSA_IO_PENDING )
@@ -279,7 +279,7 @@ namespace async
 		// 异步关闭连接
 		void Socket::AsyncDisconnect(const iocp::CallbackType &callback, bool bReuseSocket/* = true*/)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
+			iocp::AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			DWORD dwFlags = bReuseSocket ? TF_REUSE_SOCKET : 0;
 
@@ -293,7 +293,7 @@ namespace async
 		// 异步接接收数据
 		void Socket::AsyncRead(char *buf, size_t size, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = buf;
@@ -312,7 +312,7 @@ namespace async
 		// 异步发送数据
 		void Socket::AsyncWrite(const char *buf, size_t size, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = const_cast<char *>(buf);
@@ -331,7 +331,7 @@ namespace async
 		// 异步UDP写出
 		void Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN *addr, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = const_cast<char *>(buf);
@@ -350,7 +350,7 @@ namespace async
 		// 异步UDP读入
 		void Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN *addr, const iocp::CallbackType &callback)
 		{
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(callback, &callback));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
 			wsabuf.buf = buf;

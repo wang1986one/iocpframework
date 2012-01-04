@@ -118,7 +118,7 @@ namespace  async
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler, &handler));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(handler));
 
 			asynResult->Offset		= offset.LowPart;
 			asynResult->OffsetHigh	= offset.HighPart;
@@ -136,7 +136,7 @@ namespace  async
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			AsyncCallbackBasePtr asynResult(MakeAsyncCallback(handler, &handler));
+			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(handler));
 
 			asynResult->Offset		= offset.LowPart;
 			asynResult->OffsetHigh	= offset.HighPart;

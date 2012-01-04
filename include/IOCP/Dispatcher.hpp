@@ -38,7 +38,7 @@ namespace async
 		public:
 			// 线程容器类型
 			typedef std::vector<HANDLE>			Threads;
-			typedef Threads::const_iterator		ThreadsIter;
+			typedef Threads::const_iterator		ThreadsConstIter;
 			typedef std::tr1::function<void()>	InitCallback;
 			typedef std::tr1::function<void()>	UninitCallback;
 
@@ -80,7 +80,7 @@ namespace async
 		template < typename HandlerT >
 		void IODispatcher::Post(const HandlerT &handler)
 		{
-			AsyncCallbackBasePtr async(MakeAsyncCallback(handler, &handler));
+			AsyncCallbackBasePtr async(MakeAsyncCallback<AsyncCallback>(handler));
 
 			if( !iocp_.PostStatus(0, 0, static_cast<OVERLAPPED *>(async.Get())) )
 				throw Win32Exception("iocp_.PostStatus");
@@ -93,7 +93,7 @@ namespace async
 		{
 			if( async::thread::CallStack<IODispatcher>::Contains(this) )
 			{
-				AsyncCallbackBasePtr async(MakeAsyncCallback(handler, &handler));
+				AsyncCallbackBasePtr async(<AsyncCallback>(handler));
 				AsyncCallbackBase::Call(async);
 
 				async.Release();
