@@ -120,7 +120,7 @@ namespace async
 
 					if( transfers_ < total_ && size != 0 && error == 0 )
 					{
-						if( transfers_ <= condition_() )
+						if( transfers_ < condition_() )
 						{
 							stream_.AsyncRead(buffer_ + size, 
 								ThisType(stream_, buffer_ + size, condition_, transfers_, handler_));
