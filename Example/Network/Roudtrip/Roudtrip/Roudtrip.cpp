@@ -10,6 +10,10 @@
 #include <atlconv.h>
 #include <ctime>
 
+const size_t frameLen = sizeof(time_t);
+
+
+
 class Server
 {
 	async::iocp::IODispatcher &io_;
@@ -41,7 +45,10 @@ public:
 		try
 		{
 			newSock->SetOption(async::network::NoDelay(true));
-			newSock->AsyncRead(buf_, 1024, std::tr1::bind(&Server::OnRead, this, newSock, async::iocp::_Error,  async::iocp::_Size));
+
+			std::tr1::shared_ptr<async::network::Tcp::Socket> remoteSock(new async::network::Tcp::Socket(newSock)); 
+			async::iocp::AsyncRead(*remoteSock, async::iocp::Buffer(buf_), async::iocp::TransferAtLeast(frameLen),
+				std::tr1::bind(&Server::OnRead, this, remoteSock, async::iocp::_Error,  async::iocp::_Size));
 		}
 		catch(std::exception &e)
 		{
@@ -49,7 +56,7 @@ public:
 		}
 	}
 
-	void OnRead(async::network::SocketPtr newSock, u_long err, u_long size)
+	void OnRead(std::tr1::shared_ptr<async::network::Tcp::Socket> &newSock, u_long err, u_long size)
 	{
 		if( err != 0 )
 			return;
@@ -61,8 +68,10 @@ public:
 
 		try
 		{
-			newSock->AsyncWrite(buf_, size + sizeof(curTime), 0);
-			newSock->AsyncRead(buf_, 1024, std::tr1::bind(&Server::OnRead, this, newSock, async::iocp::_Error,  async::iocp::_Size));
+			async::iocp::Write(*newSock, async::iocp::Buffer(buf_, size + sizeof(curTime)), async::iocp::TransferAll());
+			
+			async::iocp::AsyncRead(*newSock, async::iocp::Buffer(buf_), async::iocp::TransferAtLeast(sizeof(curTime)),
+				std::tr1::bind(&Server::OnRead, this, newSock, async::iocp::_Error,  async::iocp::_Size));
 		}
 		catch(std::exception &e)
 		{
@@ -110,26 +119,34 @@ public:
 		if( err != 0 )
 			return;
 
-		time_t start = 00, stop = 0;
-		memcpy(&start, buf_, sizeof(start));
-		memcpy(&stop, buf_ + sizeof(start), sizeof(stop));
+		time_t send = 0, their = 0;
+		memcpy(&send, buf_, sizeof(send));
+		memcpy(&their, buf_ + sizeof(send), sizeof(their));
 
-		std::cout << "RTT: " << stop - start << std::endl;
+		time_t back = ::time(0);
+		time_t mine = (back + send) / 2;
 
+
+		std::cout << "round trip " << back - send
+			<< " clock error " << their - mine << std::endl << std::endl;
+
+		::Sleep(1000);
 		_Send();
 	}
 
 	void _Send()
 	{
-		time_t curTime = 0;
-		::time(&curTime);
+		time_t curTime = ::time(0);
 
 		memcpy(buf_, &curTime, sizeof(curTime));
 
 		try
 		{
-			sock_.AsyncWrite(async::network::Buffer(buf_, sizeof(curTime)), 0);
-			sock_.AsyncRead(async::network::Buffer(buf_), std::tr1::bind(&Client::OnRead, this, async::iocp::_Error, async::iocp::_Size));
+			async::iocp::Write(sock_, async::iocp::Buffer(buf_, sizeof(curTime)), async::iocp::TransferAll());
+
+			async::iocp::AsyncRead(sock_, async::iocp::Buffer(buf_), async::iocp::TransferAtLeast(frameLen),
+				std::tr1::bind(&Client::OnRead, this, async::iocp::_Error, async::iocp::_Size));
+
 		}
 		catch(std::exception &e)
 		{
@@ -163,6 +180,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 
+	
 	return 0;
 }
 
