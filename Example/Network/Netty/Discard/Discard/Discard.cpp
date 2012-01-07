@@ -18,32 +18,149 @@ using namespace timer;
 
 typedef unsigned long long ulonglong;
 
+
+
+ulonglong transffered_;
+ulonglong recevied_;
+
+ulonglong oldCounter_;
+CTime startTime_;
+volatile long connectedCnt_;
+
+
+class Session
+	: public std::tr1::enable_shared_from_this<Session>
+{
+private:
+	Tcp::Socket socket_;
+	std::vector<char> buf_;
+
+	async::iocp::CallbackType readCallback_;
+	async::iocp::CallbackType writeCallback_;
+
+public:
+	explicit Session(const SocketPtr &sock, size_t bufLen)
+		: socket_(sock)
+	{
+		buf_.resize(bufLen);
+		::InterlockedIncrement(&connectedCnt_);
+	}
+	~Session()
+	{
+		::InterlockedDecrement(&connectedCnt_);
+	}
+
+
+public:
+	Tcp::Socket& GetSocket()
+	{
+		return socket_;
+	}
+
+	void Start()
+	{
+		try
+		{		
+			readCallback_	= std::tr1::bind(&Session::_HandleRead, shared_from_this(), _Size, _Error);
+			writeCallback_	= std::tr1::bind(&Session::_HandleWrite, shared_from_this(), _Size, _Error);
+
+			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1), readCallback_);
+
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+	}
+
+	void Stop()
+	{
+		socket_.Close();
+
+		readCallback_	= 0;
+		writeCallback_	= 0;
+	}
+
+private:
+	void _HandleRead(u_long bytes, u_long error)
+	{
+		try
+		{
+			if( bytes == 0 )
+			{
+				socket_.AsyncDisconnect(std::tr1::bind(&Session::_DisConnect, shared_from_this()));
+				return;
+			}
+
+			recevied_ += bytes;
+			transffered_ += bytes;
+
+			AsyncWrite(socket_, Buffer(&buf_[0], bytes), TransferAll(), writeCallback_);
+		}
+		catch(const std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+	}
+
+	void _HandleWrite(u_long bytes, u_long error)
+	{
+		try
+		{		
+			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1), readCallback_);
+		}
+		catch(std::exception &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+	}
+
+	void _DisConnect()
+	{
+		Stop();
+	}
+};
+
+typedef std::tr1::shared_ptr<Session> SessionPtr;
+
+
+
+
+// 定制自己的工厂
+namespace async
+{
+	namespace iocp
+	{
+		template<>
+		struct ObjectFactory< Session >
+		{
+			typedef async::memory::FixedMemoryPool<true, sizeof(Session)>	PoolType;
+			typedef ObjectPool< PoolType >									ObjectPoolType;
+		};
+	}
+}
+
+
+inline SessionPtr CreateSession(const SocketPtr &socket, size_t bufLen)
+{
+	return SessionPtr(ObjectAllocate<Session>(socket, bufLen), &ObjectDeallocate<Session>);
+}
+
+
 class DiscadSvr
 {
 	IODispatcher &io_;
 	Tcp::Accpetor acceptor_;
 	Timer timer_;
-
-
-	ulonglong transffered_;
-	ulonglong recevied_;
-
-	ulonglong oldCounter_;
-	CTime startTime_;
-
-	std::vector<char> buffer_;
-
+	size_t bufLen_;
+	
 public:
 	DiscadSvr(IODispatcher &io, u_short port, size_t size)
 		: io_(io)
 		, acceptor_(io, Tcp::V4(), port)
 		, timer_(io)
-		, transffered_(0)
-		, recevied_(0)
-		, oldCounter_(0)
-	{
-		buffer_.resize(size);
-	}
+		, bufLen_(size)
+	{}
 
 	void Start()
 	{
@@ -69,10 +186,11 @@ private:
 		recevied_ = 0;
 
 		CTimeSpan span = endTime - startTime_;
-		printf("%4.3f MiB/s %4.3f Ki Msgs/s %6.2f bytes per msg\n",
+		printf("%4.3f MiB/s %4.3f Ki Msgs/s %6.2f bytes per msg\t connected count: %ld\n",
 			static_cast<double>(bytes)/span.GetTimeSpan()/1024/1024,
 			static_cast<double>(msgs)/span.GetTimeSpan()/1024,
-			static_cast<double>(bytes)/static_cast<double>(msgs));
+			static_cast<double>(bytes)/static_cast<double>(msgs),
+			connectedCnt_);
 
 		oldCounter_ = transffered_;
 		startTime_ = endTime;
@@ -86,50 +204,12 @@ private:
 		using namespace std::tr1::placeholders;
 		try
 		{
-			std::tr1::shared_ptr<Tcp::Socket> sock(new Tcp::Socket(acceptSocket));
-			//sock->SetOption(RecvBufSize(512));
-			//sock->SetOption(SendBufSize(512));
-			sock->AsyncRead(Buffer(buffer_), std::tr1::bind(&DiscadSvr::_OnRead, this, _Size, _Error, sock));
+			SessionPtr session(CreateSession(acceptSocket, bufLen_));
+			session->Start();
 
 			acceptor_.AsyncAccept(0, std::tr1::bind(&DiscadSvr::_OnAccept, this, _1, _2));
 		}
 		catch(const std::exception &e)
-		{
-			std::cerr << e.what() << std::endl;
-		}
-	}
-
-	void _OnRead(u_long size, u_long error, const std::tr1::shared_ptr<Tcp::Socket> &sock)
-	{
-		if( error != 0 )
-			return;
-
-		recevied_ += size;
-		transffered_ += size;
-
-		try
-		{
-			AsyncWrite(*sock, Buffer(buffer_, size), TransferAll(),
-				std::tr1::bind(&DiscadSvr::_OnWrite, this, _Error, sock));
-		}
-		catch(std::exception &e)
-		{
-			std::cerr << e.what() << std::endl;
-		}
-
-	}
-
-	void _OnWrite(u_long err, const std::tr1::shared_ptr<Tcp::Socket> &sock)
-	{
-		if( err != 0 )
-			return;
-
-		try
-		{
-			AsyncRead(*sock, Buffer(buffer_), TransferAtLeast(1),
-				std::tr1::bind(&DiscadSvr::_OnRead, this, _Size, _Error, sock));
-		}
-		catch(std::exception &e)
 		{
 			std::cerr << e.what() << std::endl;
 		}
