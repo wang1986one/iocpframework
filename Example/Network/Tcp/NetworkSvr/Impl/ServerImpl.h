@@ -4,10 +4,10 @@
 
 
 #include "../../../../../include/Network/TCP.hpp"
-
+#include "../../../../../include/Timer/Timer.hpp"
 
 using namespace async::network;
-
+using namespace async::timer;
 
 volatile long g_ClientNum = 0;
 
@@ -77,7 +77,7 @@ private:
 				return;
 			}
 
-			std::cout.write(buf_.data(), bytes) << std::endl;
+			//std::cout.write(buf_.data(), bytes) << std::endl;
 
 			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), writeCallback_);
 		}
@@ -146,6 +146,7 @@ class Server
 private:
 	IODispatcher &io_;
 	Tcp::Accpetor acceptor_;
+	std::auto_ptr<Timer> timer_;
 
 public:
 	Server(IODispatcher &io, short port)
@@ -161,6 +162,9 @@ public:
 public:
 	void Start()
 	{
+		timer_.reset(new Timer(io_, 2000, 0, std::tr1::bind(&Server::_OnTimer, this)));
+		timer_->AsyncWait();
+
 		_StartAccept();
 	}
 
@@ -186,6 +190,11 @@ private:
 	void _StopServer()
 	{
 		acceptor_.Close();
+	}
+
+	void _OnTimer()
+	{
+		std::cout << "Clients: " << g_ClientNum << std::endl;
 	}
 
 private:
