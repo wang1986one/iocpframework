@@ -5,11 +5,16 @@
 
 namespace async
 {
+	namespace iocp
+	{
+		static std::tr1::_Ph<2> _Socket;
+	}
+	
 	namespace network
 	{
 		namespace detail
 		{
-
+		
 			// Hook User Accept Callback
 			template<typename HandlerT>
 			struct AcceptorHandle
