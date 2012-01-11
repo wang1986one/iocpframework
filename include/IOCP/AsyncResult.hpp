@@ -16,8 +16,9 @@ namespace async
 
 		// 回调接口
 		typedef std::tr1::function<void(u_long size, u_long error)> CallbackType;
-		static std::tr1::_Ph<1> _Size;
-		static std::tr1::_Ph<2>	_Error;
+		static std::tr1::_Ph<1>	_Error;
+		static std::tr1::_Ph<2> _Size;
+		
 
 
 		// Allocate IO Callback
