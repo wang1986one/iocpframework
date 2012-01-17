@@ -5,6 +5,8 @@
 
 #include "../IOCP/Dispatcher.hpp"
 #include "../IOCP/Buffer.hpp"
+#include "../IOCP/ReadWriteBuffer.hpp"
+
 
 #include "IPAddress.hpp"
 #include "SocketProvider.hpp"
@@ -60,8 +62,8 @@ namespace async
 
 		public:
 			// WSAIoctl
-			template<typename InT, typename OutT>
-			DWORD IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize);
+			//template<typename InT, typename OutT>
+			//DWORD IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize);
 
 			// ioctrlsocket
 			template< typename IOCtrlT >
@@ -116,16 +118,16 @@ namespace async
 			void AsyncDisconnect(const iocp::CallbackType &callback, bool bReuseSocket);
 
 			// 异步TCP读取
-			void AsyncRead(char *buf, size_t size, const iocp::CallbackType &callback);
+			void AsyncRead(iocp::MutableBuffer &buf, const iocp::CallbackType &callback);
 
 			// 异步TCP写入
-			void AsyncWrite(const char *buf, size_t size, const iocp::CallbackType &callback);
+			void AsyncWrite(const iocp::ConstBuffer &buf, const iocp::CallbackType &callback);
 
 			// 异步UDP读取
-			void AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN *addr, const iocp::CallbackType &callback);
+			void AsyncSendTo(const iocp::ConstBuffer &buf, const SOCKADDR_IN *addr, const iocp::CallbackType &callback);
 
 			// 异步UDP读入
-			void AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN *addr, const iocp::CallbackType &callback);
+			void AsyncRecvFrom(iocp::MutableBuffer &buf, SOCKADDR_IN *addr, const iocp::CallbackType &callback);
 		};
 	}
 }
@@ -176,24 +178,27 @@ namespace async
 			return socket_ != INVALID_SOCKET;
 		}
 
-		template< typename IOCtrlT >
+		/*template< typename IOCtrlT >
 		inline bool Socket::IOControl(IOCtrlT &ioCtrl)
 		{
 			if( !IsOpen() )
 				return false;
 
 			return SOCKET_ERROR == ::ioctlsocket(socket_, ioCtrl.name(), ioCtrl.data());
-		}
+		}*/
 
-		template<typename InT, typename OutT>
-		inline DWORD Socket::IOControl(DWORD dwIOControl, InT *inData, DWORD inSize, OutT *outData, DWORD outSize)
+		template< typename IOCtrlT >
+		inline bool Socket::IOControl(IOCtrlT &ioCtrl)
 		{
-			DWORD dwRet = 0;
+			if( !IsOpen() )
+				return false;
 
-			if( 0 != ::WSAIoctl(socket_, dwIOControl, inData, inSize, outData, outSize, &dwRet, 0, 0) )
+			DWORD dwRet = 0;
+			if( 0 != ::WSAIoctl(socket_, ioCtrl.Cmd(), ioCtrl.InBuffer(), ioCtrl.InSize(), 
+				ioCtrl.OutBuffer(), ioCtrl.OutSize(), &dwRet, 0, 0) )
 				throw Win32Exception("WSAIoCtl");
 
-			return dwRet;
+			return true;
 		}
 
 		template<typename SocketOptionT>

@@ -133,14 +133,14 @@ namespace async
 			template<typename ConstBufferT>
 			size_t SendTo(const ConstBufferT &buffer, const SOCKADDR_IN *addr, u_long flag = 0)
 			{
-				return impl_->SendTo(buffer.data(), buffer.size(), addr, flag);
+				return impl_->SendTo(buffer, addr, flag);
 			}
 
 			// 阻塞式接收数据直到成功或出错
 			template<typename MutableBufferT>
 			size_t RecvFrom(MutableBufferT &buffer, SOCKADDR_IN *addr, u_long flag = 0)
 			{
-				return impl_->RecvFrom(buffer.data(), buffer.size(), addr, flag);
+				return impl_->RecvFrom(buffer, addr, flag);
 			}
 
 
@@ -149,13 +149,13 @@ namespace async
 			template<typename ConstBufferT, typename HandlerT>
 			void AsyncSendTo(const ConstBufferT &buffer, const SOCKADDR_IN *addr, const HandlerT &callback)
 			{
-				return impl_->AsyncSendTo(buffer.data(), buffer.size(), addr, callback);
+				return impl_->AsyncSendTo(buffer, addr, callback);
 			}
 
 			template<typename MutableBufferT, typename HandlerT>
 			void AsyncRecvFrom(MutableBufferT &buffer, SOCKADDR_IN *addr, const HandlerT &callback)
 			{
-				return impl_->AsyncRecvFrom(buffer.data(), buffer.size(), addr, callback);
+				return impl_->AsyncRecvFrom(buffer, addr, callback);
 			}
 
 		};

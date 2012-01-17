@@ -160,6 +160,15 @@ namespace async
 				return buffer_ + offset;
 			}
 
+			void append(pointer buf, size_t len)
+			{
+				if( len > capacity_ - bufferSize_ )
+					resize(2 * len);
+
+				std::copy(buf, buf + len, buffer_);
+				bufferSize_ += len;
+			}
+
 		private:
 			pointer _Allocate(size_t nSize)
 			{

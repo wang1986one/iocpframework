@@ -291,13 +291,13 @@ namespace async
 		}
 
 		// 异步接接收数据
-		void Socket::AsyncRead(char *buf, size_t size, const iocp::CallbackType &callback)
+		void Socket::AsyncRead(iocp::MutableBuffer &buf, const iocp::CallbackType &callback)
 		{
 			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = buf;
-			wsabuf.len = size;
+			wsabuf.buf = buf.data();
+			wsabuf.len = buf.size();
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
@@ -310,13 +310,13 @@ namespace async
 		}
 
 		// 异步发送数据
-		void Socket::AsyncWrite(const char *buf, size_t size, const iocp::CallbackType &callback)
+		void Socket::AsyncWrite(const iocp::ConstBuffer &buf, const iocp::CallbackType &callback)
 		{
 			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = const_cast<char *>(buf);
-			wsabuf.len = size;
+			wsabuf.buf = const_cast<char *>(buf.data());
+			wsabuf.len = buf.size();
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
@@ -329,13 +329,13 @@ namespace async
 		}
 
 		// 异步UDP写出
-		void Socket::AsyncSendTo(const char *buf, size_t size, const SOCKADDR_IN *addr, const iocp::CallbackType &callback)
+		void Socket::AsyncSendTo(const iocp::ConstBuffer &buf, const SOCKADDR_IN *addr, const iocp::CallbackType &callback)
 		{
 			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = const_cast<char *>(buf);
-			wsabuf.len = size;
+			wsabuf.buf = const_cast<char *>(buf.data());
+			wsabuf.len = buf.size();
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;
@@ -348,13 +348,13 @@ namespace async
 		}	
 
 		// 异步UDP读入
-		void Socket::AsyncRecvFrom(char *buf, size_t size, SOCKADDR_IN *addr, const iocp::CallbackType &callback)
+		void Socket::AsyncRecvFrom(iocp::MutableBuffer &buf, SOCKADDR_IN *addr, const iocp::CallbackType &callback)
 		{
 			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(callback));
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = buf;
-			wsabuf.len = size;
+			wsabuf.buf = buf.data();
+			wsabuf.len = buf.size();
 
 			DWORD dwFlag = 0;
 			DWORD dwSize = 0;

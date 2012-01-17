@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SocketProvider.hpp"
 #include "../IOCP/WinException.hpp"
+#include "SocketOption.hpp"
 #include "Socket.hpp"
 
 
@@ -22,13 +23,13 @@ namespace async
 			static GUID guidWSARecvMsg			= WSAID_WSARECVMSG;
 
 			SocketPtr socket(MakeSocket(io, AF_INET, SOCK_STREAM, IPPROTO_TCP));
-			GetExtensionFuncPtr(socket, &guidTransmitFile,			&TransmitFile);
-			GetExtensionFuncPtr(socket, &guidAcceptEx,				&AcceptEx);
-			GetExtensionFuncPtr(socket, &guidGetAcceptExSockaddrs,	&GetAcceptExSockaddrs);
-			GetExtensionFuncPtr(socket, &guidTransmitPackets,		&TransmitPackets);
-			GetExtensionFuncPtr(socket, &guidConnectEx,				&ConnectEx);
-			GetExtensionFuncPtr(socket, &guidDisconnectEx,			&DisconnectEx);
-			GetExtensionFuncPtr(socket, &guidWSARecvMsg,			&WSARecvMsg);
+			GetExtensionFuncPtr(socket, guidTransmitFile,			&TransmitFile);
+			GetExtensionFuncPtr(socket, guidAcceptEx,				&AcceptEx);
+			GetExtensionFuncPtr(socket, guidGetAcceptExSockaddrs,	&GetAcceptExSockaddrs);
+			GetExtensionFuncPtr(socket, guidTransmitPackets,		&TransmitPackets);
+			GetExtensionFuncPtr(socket, guidConnectEx,				&ConnectEx);
+			GetExtensionFuncPtr(socket, guidDisconnectEx,			&DisconnectEx);
+			GetExtensionFuncPtr(socket, guidWSARecvMsg,				&WSARecvMsg);
 		}
 
 		SocketProvider::~SocketProvider()
@@ -36,9 +37,9 @@ namespace async
 		}
 
 
-		void SocketProvider::GetExtensionFuncPtr(const SocketPtr &sock, GUID *guid, LPVOID pFunc)
+		void SocketProvider::GetExtensionFuncPtr(const SocketPtr &sock, const GUID &guid, LPVOID pFunc)
 		{
-			sock->IOControl(SIO_GET_EXTENSION_FUNCTION_POINTER, guid, sizeof(GUID), pFunc, sizeof(LPVOID));
+			sock->IOControl(GetExtensionFunction(guid, pFunc));
 		}
 
 		void SocketProvider::CancelIO(SOCKET socket)
