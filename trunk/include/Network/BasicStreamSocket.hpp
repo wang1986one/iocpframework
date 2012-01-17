@@ -138,14 +138,14 @@ namespace async
 			template<typename ConstBufferT>
 			size_t Write(const ConstBufferT &buffer, DWORD flag)
 			{
-				return impl_->Write(buffer.data(), buffer.size(), flag);
+				return impl_->Write(buffer, flag);
 			}
 
 			// 异步发送数据
 			template<typename ConstBufferT, typename HandlerT >
 			void AsyncWrite(const ConstBufferT &buffer, const HandlerT &callback)
 			{
-				return impl_->AsyncWrite(buffer.data(), buffer.size(), callback);
+				return impl_->AsyncWrite(buffer, callback);
 			}
 
 			
@@ -159,7 +159,7 @@ namespace async
 			template<typename MutableBufferT>
 			size_t Read(MutableBufferT &buffer, u_long flag)
 			{
-				return impl_->Read(buffer.data(), buffer.size(), flag);
+				return impl_->Read(buffer, flag);
 			}
 	
 
@@ -167,7 +167,7 @@ namespace async
 			template<typename MutableBufferT, typename HandlerT >
 			void AsyncRead(MutableBufferT &buffer, const HandlerT &callback)
 			{
-				return impl_->AsyncRead(buffer.data(), buffer.size(), callback);
+				return impl_->AsyncRead(buffer, callback);
 			}
 
 		};

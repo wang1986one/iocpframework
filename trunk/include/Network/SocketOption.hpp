@@ -1,7 +1,7 @@
 #ifndef __SOCKET_SOCKET_OPTION_HPP
 #define __SOCKET_SOCKET_OPTION_HPP
 
-
+#include <MSTcpIP.h>
 
 namespace async
 {
@@ -261,7 +261,7 @@ namespace async
 
 		typedef u_long IoctlArgType;
 
-		template < size_t _CMD >
+		/*template < size_t _CMD >
 		class IOCtrl
 		{
 		private:
@@ -299,6 +299,131 @@ namespace async
 			{
 				return &value_;
 			}
+		};*/
+
+		template < size_t _CMD >
+		class IOCtrl;
+
+		template <>
+		class IOCtrl<FIONBIO>
+		{
+			u_long enable_;
+
+		public:
+			IOCtrl(bool enable)
+				: enable_(enable ? 1 : 0)
+			{}
+
+			u_long Cmd() const
+			{
+				return FIONBIO;
+			}
+
+			void *InBuffer()
+			{
+				return &enable_;
+			}
+
+			size_t InSize() const
+			{
+				return sizeof(enable_);
+			}
+
+			void *OutBuffer()
+			{
+				return 0;
+			}
+
+			size_t OutSize() const
+			{
+				return 0;
+			}
+		};
+
+		template <>
+		class IOCtrl<SIO_KEEPALIVE_VALS>
+		{
+			tcp_keepalive inAlive_;
+			tcp_keepalive outAlive_;
+
+		public:
+			IOCtrl(u_long inTime)
+			{
+				if( inTime != 0 )
+					inAlive_.onoff = 1;
+				else
+					inAlive_.onoff = 0;
+
+				inAlive_.keepalivetime = inTime * 1000;
+				inAlive_.keepaliveinterval = 2 * 1000;
+
+				inAlive_.onoff = 0;
+				outAlive_.keepalivetime = 0;
+				outAlive_.keepaliveinterval = 0;
+			}
+
+			u_long Cmd() const
+			{
+				return SIO_KEEPALIVE_VALS;
+			}
+
+			void *InBuffer()
+			{
+				return &inAlive_;
+			}
+
+			size_t InSize() const
+			{
+				return sizeof(inAlive_);
+			}
+
+			void *OutBuffer()
+			{
+				return &outAlive_;
+			}
+
+			size_t OutSize() const
+			{
+				return sizeof(outAlive_);
+			}
+		};
+
+		template <>
+		class IOCtrl<SIO_GET_EXTENSION_FUNCTION_POINTER>
+		{
+			GUID guid_;
+			LPVOID func_;
+
+		public:
+			IOCtrl(const GUID &guid, LPVOID func)
+				: guid_(guid)
+				, func_(func)
+			{}
+
+			u_long Cmd() const
+			{
+				return SIO_GET_EXTENSION_FUNCTION_POINTER;
+			}
+
+			void *InBuffer()
+			{
+				return &guid_;
+			}
+
+			size_t InSize() const
+			{
+				return sizeof(guid_);
+			}
+
+			LPVOID OutBuffer()
+			{
+				return func_;
+			}
+
+			size_t OutSize() const
+			{
+				return sizeof(func_);
+			}
 		};
 
 
@@ -332,7 +457,9 @@ namespace async
 
 
 		typedef IOCtrl<FIONBIO>						NonBlockingIO;
-		typedef IOCtrl<FIONREAD>					BytesReadable;
+		//typedef IOCtrl<FIONREAD>					BytesReadable;
+		typedef IOCtrl<SIO_KEEPALIVE_VALS>			IOKeepAlive;
+		typedef IOCtrl<SIO_GET_EXTENSION_FUNCTION_POINTER> GetExtensionFunction;
 	}
 }
 

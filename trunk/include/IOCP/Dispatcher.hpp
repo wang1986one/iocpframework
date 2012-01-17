@@ -93,8 +93,8 @@ namespace async
 		{
 			if( async::thread::CallStack<IODispatcher>::Contains(this) )
 			{
-				AsyncCallbackBasePtr async(<AsyncCallback>(handler));
-				AsyncCallbackBase::Call(async);
+				AsyncCallbackBasePtr async(MakeAsyncCallback<AsyncCallback>(handler));
+				//AsyncCallbackBase::Call(0, async.Get(),);
 
 				async.Release();
 			}

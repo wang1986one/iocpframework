@@ -55,7 +55,7 @@ namespace async
 			}
 
 			// ªÒ»°¿©’πAPI
-			static void GetExtensionFuncPtr(const SocketPtr &sock, GUID *guid, LPVOID pFunc);
+			static void GetExtensionFuncPtr(const SocketPtr &sock, const GUID &guid, LPVOID pFunc);
 
 			static void CancelIO(SOCKET sock);
 		};
