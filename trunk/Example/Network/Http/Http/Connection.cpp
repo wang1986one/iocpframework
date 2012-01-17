@@ -11,8 +11,8 @@
 namespace http
 {
 	
-	Connection::Connection(async::iocp::IODispatcher &io, ConnectionMgr &mgr, RequestHandler &handler)
-		: socket_(io, async::network::Tcp::V4())
+	Connection::Connection(const async::network::SocketPtr &sock, ConnectionMgr &mgr, RequestHandler &handler)
+		: socket_(sock)
 		, connectionMgr_(mgr)
 		, requestHandler_(handler)
 		, socketBuffer_()
@@ -55,7 +55,7 @@ namespace http
 		}
 	}
 
-	void Connection::_HandleRead(size_t bytes, u_long error)
+	void Connection::_HandleRead(u_long error, u_long bytes)
 	{
 		if( error == ERROR_OPERATION_ABORTED || bytes == 0 )
 		{
@@ -103,7 +103,7 @@ namespace http
 	}
 
 
-	void Connection::_HandleWrite(size_t bytes, u_long error)
+	void Connection::_HandleWrite(u_long error, u_long bytes)
 	{
 		// нч╢М
 		if( error == 0 )

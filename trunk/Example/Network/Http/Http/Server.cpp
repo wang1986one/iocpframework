@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Server.h"
 
+#include "Connection.h"
+#include "../../../../include/IOCP/AsyncResult.hpp"
 
 
 namespace http
@@ -10,7 +12,6 @@ namespace http
 		: io_()
 		, acceptor_(io_, async::network::Tcp::V4(), ::atoi(port.c_str()))
 		, connectionMgr_()
-		, newConnection_(new Connection(io_, connectionMgr_, requestHandler_))
 		, requestHandler_(dir)
 	{
 		
@@ -18,20 +19,18 @@ namespace http
 
 	void Server::Start()
 	{
-		using namespace std::tr1::placeholders;
-
-		acceptor_.AsyncAccept(newConnection_->Socket().Get(), 0, 
-			std::tr1::bind(&Server::_HandleAccept, this, _1, _2));
+		acceptor_.AsyncAccept(0, 
+			std::tr1::bind(&Server::_HandleAccept, this, async::iocp::_Error, async::iocp::_Socket));
 	}
 
 	void Server::Stop()
 	{
-		io_.Dispatch(async::iocp::MakeAsyncCallback(std::tr1::bind(&Server::_HandleStop, this)).Get());
+		io_.Post(std::tr1::bind(&Server::_HandleStop, this));
 	}
 
 	void Server::_HandleAccept(u_long error, const async::network::SocketPtr &remoteSocket)
 	{
-		if( error == ERROR_OPERATION_ABORTED )
+		if( error != 0 )
 		{
 			// ... ´íÎó
 			return;
@@ -39,13 +38,11 @@ namespace http
 
 		try
 		{
-			connectionMgr_.Start(newConnection_);
+			ConnectionPtr connection(new Connection(remoteSocket, connectionMgr_, requestHandler_));
+			connectionMgr_.Start(connection);
 
-			newConnection_.reset(new Connection(io_, connectionMgr_, requestHandler_));
-			
-			using namespace std::tr1::placeholders;
-			acceptor_.AsyncAccept(newConnection_->Socket().Get(), 0, 
-				std::tr1::bind(&Server::_HandleAccept, this, _1, _2));
+			acceptor_.AsyncAccept(0, 
+				std::tr1::bind(&Server::_HandleAccept, this, async::iocp::_Error, async::iocp::_Socket));
 		}
 		catch(std::exception &e)
 		{

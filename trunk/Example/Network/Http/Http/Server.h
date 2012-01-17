@@ -2,9 +2,9 @@
 #define __HTTP_SERVER_HPP
 
 #include <string>
-#include "../../include/Network/TCP.hpp"
+#include "../../../../include/Network/TCP.hpp"
 
-#include "Connection.h"
+
 #include "ConnectionMgr.h"
 #include "RequestHandler.h"
 
@@ -20,7 +20,6 @@ namespace http
 		async::network::Tcp::Accpetor acceptor_;
 	
 		ConnectionMgr connectionMgr_;
-		ConnectionPtr newConnection_;
 		RequestHandler requestHandler_;
 
 	public:
