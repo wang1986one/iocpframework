@@ -31,7 +31,7 @@ namespace http
 		Reply reply_;
 
 	public:
-		Connection(async::iocp::IODispatcher &io, ConnectionMgr &mgr, RequestHandler &handler);
+		Connection(const async::network::SocketPtr &sock, ConnectionMgr &mgr, RequestHandler &handler);
 
 	private:
 		Connection(const Connection &);
@@ -45,8 +45,8 @@ namespace http
 
 	private:
 		void _CopyBuffer(const std::vector<async::iocp::ConstBuffer> &buf);
-		void _HandleRead(size_t bytes, u_long error);
-		void _HandleWrite(size_t bytes, u_long error);
+		void _HandleRead(u_long, u_long);
+		void _HandleWrite(u_long, u_long);
 	};
 
 

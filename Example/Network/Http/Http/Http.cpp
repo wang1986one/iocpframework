@@ -45,16 +45,10 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	// ≤‚ ‘ƒ⁄¥Ê…Í«Î Õ∑≈
-	async::iocp::DefaultDebug::RegisterCallback(
-		std::tr1::bind(&DebugAllocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2),
-		std::tr1::bind(&DebugDeallocSize, std::tr1::placeholders::_1, std::tr1::placeholders::_2));
-
-
 	try
 	{
 		http::Server server("127.0.0.1", "5050",
-			"F:\\Program\\boost\\libs\\");
+			"F:\\Program\\Adobe\\documentation\\html\\");
 
 		console_ctrl_function = std::tr1::bind(&http::Server::Stop, &server);
 		::SetConsoleCtrlHandler(&console_ctrl_handler, TRUE);
