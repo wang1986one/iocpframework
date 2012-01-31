@@ -17,7 +17,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	try
 	{
-		FileImpl file(io, _T("E:/Photo/æ≈’Øπµ/M4H01339.MP4"), _T("C:/1.mp4"));
+		FileImpl file(io, _T("D:\\VM7\\VMware_7.0_CN.rar"), _T("C:\\VMware_7.0_CN.rar"));
 		file.Start();
 
 		system("pause");

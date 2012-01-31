@@ -3,7 +3,7 @@
 
 
 
-#include "../../include/FileSystem/BasicFile.hpp"
+#include "../../../include/FileSystem/BasicFile.hpp"
 
 
 #include <algorithm>
@@ -35,7 +35,7 @@ private:
 	BasicFile readFile_;
 	BasicFile writeFile_;
 
-	DWORD fileSize_;
+	u_int64 fileSize_;
 
 public:
 	FileImpl(IODispatcher &io, LPCTSTR lpszReadFile, LPCTSTR lpszWriteFile)
@@ -48,7 +48,12 @@ public:
 	{
 		//std::uninitialized_fill(buf_.begin(), buf_.end(), 0);
 		HANDLE file = ::CreateFile(lpszReadFile, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		fileSize_ = ::GetFileSize(file, &fileSize_);
+		
+		LARGE_INTEGER size = {0};
+		if( !::GetFileSizeEx(file, &size) )
+			throw std::runtime_error("GetFileSizeEx");
+		fileSize_ = size.QuadPart;
+
 		::CloseHandle(file);
 	}
 
@@ -57,14 +62,14 @@ public:
 	{
 		try
 		{
-			DWORD left = min(fileSize_ - (DWORD)offset_, 8192);
+			size_t left = (size_t)min(fileSize_ - offset_, 8192);
 			if( left == 0 )
 			{
 				Stop();
 			}
 
 			AsyncRead(readFile_, Buffer(buf_->data(), Round(left)), offset_, TransferAtLeast(left), 
-				std::tr1::bind(&FileImpl::_OnRead, this, _1, _2));
+				std::tr1::bind(&FileImpl::_OnRead, this, _Size, _Error));
 		}
 		catch(std::exception &e)
 		{
@@ -91,7 +96,7 @@ private:
 		try
 		{
 			AsyncWrite(writeFile_, Buffer(buf_->data(), size), offset_, TransferAtLeast(size), 
-				std::tr1::bind(&FileImpl::_OnWrite, this, _1, _2));
+				std::tr1::bind(&FileImpl::_OnWrite, this, _Size, _Error));
 		}
 		catch(std::exception &e)
 		{
