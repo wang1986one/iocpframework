@@ -81,12 +81,14 @@ namespace  async
 		}
 
 
-		size_t File::Read(void *buf, size_t len, const LARGE_INTEGER &offset)
+		size_t File::Read(void *buf, size_t len, const u_int64 &offset)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			if( !::SetFilePointerEx(file_, offset, 0, FILE_BEGIN) )
+			LARGE_INTEGER off = {0};
+			off.QuadPart = offset;
+			if( !::SetFilePointerEx(file_, off, 0, FILE_BEGIN) )
 				throw iocp::Win32Exception("SetFilePointerEx");
 
 			DWORD read = 0;
@@ -96,12 +98,14 @@ namespace  async
 			return read;
 		}
 
-		size_t File::Write(const void *buf, size_t len, const LARGE_INTEGER &offset)
+		size_t File::Write(const void *buf, size_t len, const u_int64 &offset)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
-			if( !::SetFilePointerEx(file_, offset, 0, FILE_BEGIN) )
+			LARGE_INTEGER off = {0};
+			off.QuadPart = offset;
+			if( !::SetFilePointerEx(file_, off, 0, FILE_BEGIN) )
 				throw iocp::Win32Exception("SetFilePointerEx");
 
 			DWORD read = 0;
@@ -113,15 +117,14 @@ namespace  async
 			return 0;
 		}
 
-		void File::AsyncRead(void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler)
+		void File::AsyncRead(void *buf, size_t len, const u_int64 &offset, const CallbackType &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
 			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(handler));
-
-			asynResult->Offset		= offset.LowPart;
-			asynResult->OffsetHigh	= offset.HighPart;
+			asynResult->Offset		= offset & 0xFFFFFFFF;
+			asynResult->OffsetHigh	= (offset >> 32) & 0xFFFFFFFF;
 
 			DWORD bytesRead = 0;
 			BOOL bSuc = ::ReadFile(file_, buf, len, &bytesRead, asynResult.Get());
@@ -131,15 +134,15 @@ namespace  async
 			asynResult.Release();
 		}
 
-		void File::AsyncWrite(const void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler)
+		void File::AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const CallbackType &handler)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("File not open");
 
 			AsyncCallbackBasePtr asynResult(iocp::MakeAsyncCallback<iocp::AsyncCallback>(handler));
 
-			asynResult->Offset		= offset.LowPart;
-			asynResult->OffsetHigh	= offset.HighPart;
+			asynResult->Offset		= offset & 0xFFFFFFFF;
+			asynResult->OffsetHigh	= (offset >> 32) & 0xFFFFFFFF;
 
 			DWORD bytesRead = 0;
 			BOOL bSuc = ::WriteFile(file_, buf, len, &bytesRead, asynResult.Get());

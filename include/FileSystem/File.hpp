@@ -75,13 +75,13 @@ namespace async
 
 			// 不需设置回调接口,同步函数
 		public:
-			size_t Read(void *buf, size_t len, const LARGE_INTEGER &offset);
-			size_t Write(const void *buf, size_t len, const LARGE_INTEGER &offset);
+			size_t Read(void *buf, size_t len, const u_int64 &offset);
+			size_t Write(const void *buf, size_t len, const u_int64 &offset);
 
 			// 异步调用接口
 		public:
-			void AsyncRead(void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler);
-			void AsyncWrite(const void *buf, size_t len, const LARGE_INTEGER &offset, const CallbackType &handler);
+			void AsyncRead(void *buf, size_t len, const u_int64 &offset, const CallbackType &handler);
+			void AsyncWrite(const void *buf, size_t len, const u_int64 &offset, const CallbackType &handler);
 		};
 	}
 

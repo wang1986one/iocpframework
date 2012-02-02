@@ -82,9 +82,9 @@ namespace async
 				return impl_->Cancel();
 			}
 
-			void SetFileSize()
+			void SetFileSize(unsigned long long size)
 			{
-				return impl_->SetFileSize();
+				return impl_->SetFileSize(size);
 			}
 
 		public:
@@ -96,7 +96,7 @@ namespace async
 			}
 
 			template<typename ConstBufferT>
-			size_t Write(const ConstBufferT &buffer, const LARGE_INTEGER &offset)
+			size_t Write(const ConstBufferT &buffer, const u_int64 &offset)
 			{
 				return impl_->Write(buffer.data(), buffer.size(), offset);
 			}
@@ -109,7 +109,7 @@ namespace async
 			}
 
 			template<typename ConstBufferT, typename HandlerT>
-			void AsyncWrite(const ConstBufferT &buffer, const LARGE_INTEGER &offset, const HandlerT &callback)
+			void AsyncWrite(const ConstBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
 			{
 				return impl_->AsyncWrite(buffer.data(), buffer.size(), offset, callback);
 			}
@@ -123,7 +123,7 @@ namespace async
 			}
 
 			template<typename MutableBufferT>
-			size_t Read(MutableBufferT &buffer, const LARGE_INTEGER &offset)
+			size_t Read(MutableBufferT &buffer, const u_int64 &offset)
 			{
 				return impl_->Read(buffer.data(), buffer.size(), offset);
 			}
@@ -137,7 +137,7 @@ namespace async
 
 			// 异步接收数据
 			template<typename MutableBufferT, typename HandlerT>
-			void AsyncRead(MutableBufferT &buffer, const LARGE_INTEGER &offset, const HandlerT &callback)
+			void AsyncRead(MutableBufferT &buffer, const u_int64 &offset, const HandlerT &callback)
 			{
 				return impl_->AsyncRead(buffer.data(), buffer.size(), offset, callback);
 			}
