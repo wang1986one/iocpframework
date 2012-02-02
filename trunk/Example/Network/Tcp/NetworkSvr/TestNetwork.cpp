@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		Server server(ioService, 5051);
+		Server server(ioService, 5050);
 		server.Start();
 
 		//async::timer::Timer time(ioService, 2000, 0);

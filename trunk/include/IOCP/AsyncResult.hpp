@@ -30,29 +30,7 @@ namespace async
 		struct AsyncCallback;
 		typedef Pointer< AsyncCallbackBase, IOAsyncCallback<AsyncCallback> > AsyncCallbackBasePtr;
 
-
-		// Pointer Realase
-		template < >
-		struct IOAsyncCallback<AsyncCallback>
-		{
-			template < typename HandlerT >
-			AsyncCallbackBase *operator()(const HandlerT &handler)
-			{
-				return reinterpret_cast<AsyncCallbackBase *>(ObjectAllocate<AsyncCallback>(handler));
-			}
-
-			void operator()(AsyncCallbackBase *p)
-			{
-				ObjectDeallocate<AsyncCallback>(reinterpret_cast<AsyncCallback *>(p));
-			}
-		};
-
-
-		template < typename T, typename HandlerT >
-		inline AsyncCallbackBase *MakeAsyncCallback(const HandlerT &handler)
-		{
-			return IOAsyncCallback<T>()(handler);
-		}
+		
 
 		//---------------------------------------------------------------------------
 		// class AsyncCallbackBase
@@ -66,9 +44,7 @@ namespace async
 			}
 
 			virtual ~AsyncCallbackBase()
-			{
-
-			}
+			{}
 
 			virtual void Invoke(AsyncCallbackBase *p, u_long size, u_long error) = 0;
 
@@ -93,19 +69,9 @@ namespace async
 			explicit AsyncCallback(const CallbackType &callback)
 				: handler_(callback)
 			{}
-			virtual ~AsyncCallback()
-			{
-
-			}
-
+			virtual ~AsyncCallback();
 		public:
-			virtual void Invoke(AsyncCallbackBase *p, u_long size, u_long error)
-			{
-				if( handler_ != 0 )
-					handler_(size, error);
-
-				AsyncCallbackBasePtr ptr(p);
-			}
+			virtual void Invoke(AsyncCallbackBase *p, u_long size, u_long error);
 
 		private:
 			AsyncCallback();
@@ -122,30 +88,61 @@ namespace async
 		};
 
 
-
-		struct TlsMemoryPool
+		template < typename T, typename HandlerT >
+		inline AsyncCallbackBase *MakeAsyncCallback(const HandlerT &handler)
 		{
-			typedef std::tr1::aligned_storage<
-				sizeof(AsyncCallback),
-				std::tr1::alignment_of<AsyncCallback>::value 
-			>::type StorageBuffer;
+			return IOAsyncCallback<T>()(handler);
+		}
 
-			StorageBuffer buf_;
-
-			static void *Allocate(size_t n)
+		namespace detail
+		{
+			template < typename CallbackT >
+			struct TlsMemoryPool
 			{
-	
-				return 0;//reinterpret_cast<AsyncCallback *>(&Pool.buf_);//::operator new(n);
+				typedef typename std::tr1::aligned_storage<
+					sizeof(CallbackT),
+					std::tr1::alignment_of<CallbackT>::value 
+				>::type StorageBuffer;
+
+				static __declspec(thread) StorageBuffer buf_;
+
+				template < typename HandlerT >
+				static CallbackT *ObjectAllocate(const HandlerT &handler)
+				{
+					return ::new (&buf_) CallbackT(handler);
+				}
+
+				static void ObjectDeallocate(CallbackT *p)
+				{
+					p->~CallbackT();
+				}
+			};
+
+			template< typename CallbackT >
+			__declspec(thread) typename TlsMemoryPool<CallbackT>::StorageBuffer TlsMemoryPool<CallbackT>::buf_;
+
+			typedef TlsMemoryPool<AsyncCallback> TlsAsyncMemoryPool;
+		}
+
+
+		// Pointer Realase
+		template < >
+		struct IOAsyncCallback<AsyncCallback>
+		{
+			template < typename HandlerT >
+			AsyncCallbackBase *operator()(const HandlerT &handler)
+			{
+				//return detail::TlsAsyncMemoryPool::ObjectAllocate(handler);
+				return reinterpret_cast<AsyncCallbackBase *>(ObjectAllocate<AsyncCallback>(handler));
 			}
 
-			static void Deallocate(void *p, size_t n)
+			void operator()(AsyncCallbackBase *p)
 			{
-				//::operator delete(p);
+				//detail::TlsAsyncMemoryPool::ObjectDeallocate(reinterpret_cast<AsyncCallback *>(p));
+				ObjectDeallocate<AsyncCallback>(reinterpret_cast<AsyncCallback *>(p));
 			}
 		};
 
-
-		
 	}
 }
 

@@ -17,20 +17,25 @@ namespace async
 		{
 			typedef MemoryPoolT	MemoryPool;
 
+			static __declspec(thread) MemoryPool *pool;
 			static MemoryPool &GetMemoryPool()
 			{
-				static MemoryPool pool;
+				if( pool == 0 )
+					pool = new MemoryPool;
 
-				return pool;
+				return *pool;
 			}
 		};
+
+		template< typename MemoryPoolT >
+		__declspec(thread) MemoryPoolT *ObjectPool<MemoryPoolT>::pool;
 
 
 		// 每个类型的内存的声请释放
 		template< typename T >
 		struct ObjectFactory
 		{
-			typedef async::memory::SGIMTMemoryPool	PoolType;
+			typedef async::memory::SGISTMemoryPool	PoolType;
 			typedef ObjectPool<PoolType>			ObjectPoolType;
 		};
 
