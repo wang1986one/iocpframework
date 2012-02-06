@@ -169,11 +169,12 @@ namespace async
 		{
 			typedef google::protobuf::int32 int32;
 
-			buf.resize(kHeaderLen);
-
 			const std::string& typeName = message.GetTypeName();
 			int32 nameLen = static_cast<int32>(typeName.size()+1);
 			int32 be32 = nameLen;
+
+			buf.resize(sizeof(int32) * 2 + nameLen);
+
 			buf.append(reinterpret_cast<char*>(&be32), sizeof be32);
 			buf.append(typeName.c_str(), nameLen);
 			bool succeed = message.AppendToString(&buf);
