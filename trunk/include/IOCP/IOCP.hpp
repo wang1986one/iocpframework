@@ -1,7 +1,7 @@
 #ifndef __IOCP_IOCP_HPP
 #define __IOCP_IOCP_HPP
 
-
+#include "../Basic.hpp"
 #include <cassert>
 
 
@@ -12,7 +12,7 @@ namespace async
 	namespace iocp
 	{
 		//--------------------------------------------------------------
-		// class CIOCP
+		// class IOCP
 
 		class Iocp
 		{

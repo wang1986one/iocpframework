@@ -103,8 +103,8 @@ namespace async
 			size_t Read(char *buf, size_t size, DWORD flag);
 			size_t Write(const char *buffer, size_t size, DWORD flag);
 
-			size_t SendTo(const char *buffer, size_t sz, const SOCKADDR_IN *addr, DWORD flag);
-			size_t RecvFrom(char *buffer, size_t sz, SOCKADDR_IN *addr, DWORD flag);
+			size_t SendTo(const iocp::ConstBuffer &buf, const SOCKADDR_IN *addr, DWORD flag);
+			size_t RecvFrom(iocp::MutableBuffer &buf, SOCKADDR_IN *addr, DWORD flag);
 
 			// 异步调用接口
 		public:

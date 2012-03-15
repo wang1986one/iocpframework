@@ -64,7 +64,7 @@ namespace async
 
 		public:
 			template < typename HandlerT >
-			void Monitor(const HandlerT &handler)
+			void Monitor(const HandlerT &handler, bool sub_dir = true)
 			{
 				if( !IsValid() )
 					throw std::logic_error("File Path Not Valid");
@@ -73,7 +73,7 @@ namespace async
 				iocp::FileChangeCallbackPtr asynResult(iocp::MakeAsyncCallback(FileChangeHandleHook(*this, handler)));
 				
 				DWORD ret = 0;
-				BOOL suc = ::ReadDirectoryChangesW(file_, &asynResult->buffer_, iocp::FileChangeCallback::BUFFER_LEN, TRUE, 
+				BOOL suc = ::ReadDirectoryChangesW(file_, &asynResult->buffer_, iocp::FileChangeCallback::BUFFER_LEN, sub_dir ? TRUE : FALSE, 
 					filter_, &ret, asynResult.Get(), 0);
 				
 				if( !suc )

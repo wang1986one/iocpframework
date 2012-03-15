@@ -105,12 +105,12 @@ namespace async
 				ReadHandlerT handler_;
 
 			public:
-				ReadHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
+				ReadHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, size_t total, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer)
 					, condition_(condition)
 					, transfers_(transfer)
-					, total_(buffer.size())
+					, total_(total)
 					, handler_(handler)
 				{}
 
@@ -123,14 +123,14 @@ namespace async
 						if( transfers_ < condition_() )
 						{
 							stream_.AsyncRead(buffer_ + size, 
-								ThisType(stream_, buffer_ + size, condition_, transfers_, handler_));
+								ThisType(stream_, buffer_ + size, total_, condition_, transfers_, handler_));
 
 							return;
 						}
 					}
 					
 					// 回调	
-					handler_(transfers_, error);
+					handler_(error, transfers_);
 				}
 			};
 
@@ -149,13 +149,13 @@ namespace async
 				ReadHandlerT handler_;
 
 			public:
-				ReadOffsetHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, const OffsetT &offset, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
+				ReadOffsetHandler(AsyncWriteStreamT &stream, MutableBufferT &buffer, size_t total, const OffsetT &offset, const CompletionConditionT &condition, size_t transfer, const ReadHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer)
 					, condition_(condition)
 					, offset_(offset)
 					, transfers_(transfer)
-					, total_(buffer.size())
+					, total_(total)
 					, handler_(handler)
 				{}
 
@@ -168,14 +168,14 @@ namespace async
 						if( transfers_ < condition_() )
 						{
 							stream_.AsyncRead(buffer_ + size, offset_,
-								ThisType(stream_, buffer_ + size, offset_, condition_, transfers_, handler_));
+								ThisType(stream_, buffer_ + size, total_, offset_, condition_, transfers_, handler_));
 
 							return;
 						}
 					}
 
 					// 回调
-					handler_(transfers_, error);
+					handler_(error, transfers_);
 				}
 			};
 		}
@@ -201,7 +201,7 @@ namespace async
 		{
 			typedef detail::ReadHandler<SyncWriteStreamT, MutableBufferT, ComplateConditionT, HandlerT> HookReadHandler;
 
-			s.AsyncRead(buffer, HookReadHandler(s, buffer, condition, 0, handler));
+			s.AsyncRead(buffer, HookReadHandler(s, buffer, buffer.size(), condition, 0, handler));
 		}
 	
 		template<typename SyncWriteStreamT, typename MutableBufferT, typename OffsetT, typename ComplateConditionT, typename HandlerT>
@@ -209,7 +209,7 @@ namespace async
 		{
 			typedef detail::ReadOffsetHandler<SyncWriteStreamT, MutableBufferT, OffsetT, ComplateConditionT, HandlerT> HookReadHandler;
 
-			s.AsyncRead(buffer, offset, HookReadHandler(s, buffer, offset, condition, 0, handler));
+			s.AsyncRead(buffer, offset, HookReadHandler(s, buffer, buffer.size(), offset, condition, 0, handler));
 		}
 
 	}

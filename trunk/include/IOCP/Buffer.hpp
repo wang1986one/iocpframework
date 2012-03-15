@@ -8,6 +8,7 @@
 #include <string>
 
 #include "ObjectFactory.hpp"
+#include "ReadWriteBuffer.hpp"
 
 #pragma warning(disable: 4996) // 去掉
 
@@ -125,7 +126,8 @@ namespace async
 					pointer pNewBuf = _Allocate(nNewSize);
 
 					// 复制缓冲区
-					std::copy(buffer_, buffer_ + capacity_, pNewBuf);
+					std::copy(buffer_, buffer_ + capacity_, 
+						stdext::make_checked_array_iterator(pNewBuf, nNewSize));
 
 					// 释放旧缓冲区
 					alloc_.deallocate(buffer_, capacity_);
@@ -255,6 +257,17 @@ namespace async
 			return MakeBuffer(const_cast<std::string &>(arr));
 		}
 
+
+		// -----------------------------
+		inline ConstBuffer Buffer(const AutoBuffer &buf)
+		{
+			return ConstBuffer(buf.data(), buf.size());
+		}
+
+		inline MutableBuffer Buffer(AutoBuffer &buf)
+		{
+			return MutableBuffer(buf.data(), buf.size());
+		}
 
 	} // end of iocp
 

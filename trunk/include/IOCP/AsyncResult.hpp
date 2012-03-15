@@ -15,7 +15,7 @@ namespace async
 	{
 
 		// 回调接口
-		typedef std::tr1::function<void(u_long size, u_long error)> CallbackType;
+		typedef std::tr1::function<void(u_long , u_long )> CallbackType;
 		static std::tr1::_Ph<1>	_Error;
 		static std::tr1::_Ph<2> _Size;
 		
@@ -53,7 +53,7 @@ namespace async
 			{
 				AsyncCallbackBase *p(static_cast<AsyncCallback *>(overlapped));
 				
-				p->Invoke(p, error, size);
+				p->Invoke(p, size, error);
 			}
 		};
 
