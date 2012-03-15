@@ -159,7 +159,7 @@ namespace async
 			template<typename MutableBufferT>
 			size_t Read(MutableBufferT &buffer, u_long flag)
 			{
-				return impl_->Read(buffer, flag);
+				return impl_->Read(buffer.data(), buffer.size(), flag);
 			}
 	
 

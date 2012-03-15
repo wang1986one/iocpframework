@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "Socket.hpp"
 #include "SocketOption.hpp"
 
@@ -185,14 +184,14 @@ namespace async
 		}
 
 
-		size_t Socket::SendTo(const char *buffer, size_t sz, const SOCKADDR_IN *addr, DWORD flag)
+		size_t Socket::SendTo(const iocp::ConstBuffer &buf, const SOCKADDR_IN *addr, DWORD flag)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = const_cast<char *>(buffer);
-			wsabuf.len = sz;
+			wsabuf.buf = const_cast<char *>(buf.data());
+			wsabuf.len = buf.size();
 
 			if( wsabuf.len == 0 )
 				throw std::logic_error("Buffer size is zero");
@@ -204,14 +203,14 @@ namespace async
 			return dwSize;
 		}
 
-		size_t Socket::RecvFrom(char *buffer, size_t size, SOCKADDR_IN *addr, DWORD flag)
+		size_t Socket::RecvFrom(iocp::MutableBuffer &buf, SOCKADDR_IN *addr, DWORD flag)
 		{
 			if( !IsOpen() )
 				throw std::logic_error("Socket not open");
 
 			WSABUF wsabuf = {0};
-			wsabuf.buf = buffer;
-			wsabuf.len = size;
+			wsabuf.buf = buf.data();
+			wsabuf.len = buf.size();
 
 			if( wsabuf.len == 0 )
 				throw std::logic_error("Buffer allocate size is zero");

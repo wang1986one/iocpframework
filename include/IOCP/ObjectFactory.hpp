@@ -20,10 +20,13 @@ namespace async
 			static __declspec(thread) MemoryPool *pool;
 			static MemoryPool &GetMemoryPool()
 			{
-				if( pool == 0 )
-					pool = new MemoryPool;
+				//if( pool == 0 )
+				//	pool = new MemoryPool;
 
-				return *pool;
+				//return *pool;
+
+				static MemoryPool pool;
+				return pool;
 			}
 		};
 

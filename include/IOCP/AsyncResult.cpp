@@ -17,7 +17,7 @@ namespace async
 			if( handler_ != 0 )
 				handler_(size, error);
 
-			AsyncCallbackBasePtr ptr(p);
+ 			AsyncCallbackBasePtr ptr(p);
 		}
 	}
 }

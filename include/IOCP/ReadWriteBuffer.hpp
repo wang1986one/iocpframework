@@ -307,11 +307,11 @@ namespace async
 
 		inline ConstBuffer Buffer(const std::string &data)
 		{
-			return ConstBuffer(data.data(), data.size());
+			return ConstBuffer(data.data(), data.length());
 		}	
 		inline ConstBuffer Buffer(const std::string &data, size_t maxSize)
 		{
-			return ConstBuffer(data.data(), data.size() < maxSize ? data.size() : maxSize);
+			return ConstBuffer(data.data(), data.length() < maxSize ? data.length() : maxSize);
 		}
 	}
 }

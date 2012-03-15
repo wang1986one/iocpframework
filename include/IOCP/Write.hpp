@@ -106,12 +106,12 @@ namespace async
 				WriteHandlerT handler_;
 
 			public:
-				WriteHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, const CompletionConditionT &condition, size_t transfer, const WriteHandlerT &handler)
+				WriteHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, size_t total, const CompletionConditionT &condition, size_t transfer, const WriteHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer_)
 					, condition_(condition)
 					, transfers_(transfer)
-					, total_(buffer.size())
+					, total_(total)
 					, handler_(handler)
 				{}
 
@@ -124,14 +124,14 @@ namespace async
 						if( transfers_ <= condition_() )
 						{
 							stream_.AsyncWrite(buffer_ + size, 
-								ThisType(stream_, buffer_ + size, condition_, transfers_, handler_));
+								ThisType(stream_, buffer_ + size, total_, condition_, transfers_, handler_));
 
 							return;
 						}
 					}
 					
 					// 回调
-					handler_(transfers_, error);
+					handler_(error, transfers_);
 				}
 			};
 
@@ -150,13 +150,13 @@ namespace async
 				WriteHandlerT handler_;
 
 			public:
-				WriteOffsetHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, const u_int64 &offset, const CompletionConditionT &condition, size_t transfer, const WriteHandlerT &handler)
+				WriteOffsetHandler(AsyncWriteStreamT &stream, const ConstBufferT &buffer, size_t total, const u_int64 &offset, const CompletionConditionT &condition, size_t transfer, const WriteHandlerT &handler)
 					: stream_(stream)
 					, buffer_(buffer_)
 					, offset_(offset)
 					, condition_(condition)
 					, transfers_(transfer)
-					, total_(buffer.size())
+					, total_(total)
 					, handler_(handler)
 				{}
 
@@ -169,14 +169,14 @@ namespace async
 						if( transfers_ < condition_() )
 						{
 							stream_.AsyncWrite(buffer_ + size, offset_,
-								ThisType(stream_, buffer_ + size, offset_, condition_, transfers_, handler_));
+								ThisType(stream_, buffer_ + size, total_, offset_, condition_, transfers_, handler_));
 
 							return;
 						}
 					}
 
 					// 回调
-					handler_(transfers_, error);
+					handler_(error, transfers_);
 				}
 			};
 		}
@@ -202,7 +202,7 @@ namespace async
 		{
 			typedef detail::WriteHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
 
-			s.AsyncWrite(buffer, HookWriteHandler(s, buffer, condition, 0, handler));
+			s.AsyncWrite(buffer, HookWriteHandler(s, buffer, buffer.size(), condition, 0, handler));
 		}
 
 		template<typename SyncWriteStreamT, typename ConstBufferT, typename ComplateConditionT, typename HandlerT>
@@ -210,7 +210,7 @@ namespace async
 		{
 			typedef detail::WriteOffsetHandler<SyncWriteStreamT, ConstBufferT, ComplateConditionT, HandlerT> HookWriteHandler;
 
-			s.AsyncWrite(buffer, offset, HookWriteHandler(s, buffer, offset, condition, 0, handler));
+			s.AsyncWrite(buffer, offset, HookWriteHandler(s, buffer, buffer.size(), offset, condition, 0, handler));
 		}
 
 	}
