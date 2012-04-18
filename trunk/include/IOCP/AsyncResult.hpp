@@ -53,7 +53,7 @@ namespace async
 			{
 				AsyncCallbackBase *p(static_cast<AsyncCallback *>(overlapped));
 				
-				p->Invoke(p, size, error);
+				p->Invoke(p, error, size);
 			}
 		};
 

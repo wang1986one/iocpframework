@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "SocketProvider.hpp"
 #include "../IOCP/WinException.hpp"
 #include "SocketOption.hpp"

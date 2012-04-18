@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "AsyncResult.hpp"
 
 
@@ -12,12 +11,12 @@ namespace async
 
 		}
 
-		void AsyncCallback::Invoke(AsyncCallbackBase *p, u_long size, u_long error)
+		void AsyncCallback::Invoke(AsyncCallbackBase *p, u_long error, u_long size)
 		{
 			if( handler_ != 0 )
 				handler_(size, error);
 
- 			AsyncCallbackBasePtr ptr(p);
+			AsyncCallbackBasePtr ptr(p);
 		}
 	}
 }

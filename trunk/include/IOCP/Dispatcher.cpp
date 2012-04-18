@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "Dispatcher.hpp"
 #include "WinException.hpp"
 #include "../../MultiThread/Tls.hpp"

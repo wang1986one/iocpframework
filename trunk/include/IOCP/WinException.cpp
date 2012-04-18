@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "WinException.hpp"
 
 #include <sstream>
