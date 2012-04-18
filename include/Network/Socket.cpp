@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Socket.hpp"
 #include "SocketOption.hpp"
 

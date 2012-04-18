@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Option.hpp"
 
 #include <exception>

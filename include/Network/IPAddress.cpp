@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "IPAddress.hpp"
 
 
@@ -26,7 +25,7 @@ namespace async
 			in_addr tmp = {0};
 			tmp.s_addr = addr;
 
-			char *p = ::inet_ntoa(tmp);
+            char *p = ::inet_ntoa(tmp);
 			return p;
 		}
 	}
