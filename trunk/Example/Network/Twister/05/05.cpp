@@ -35,7 +35,7 @@ public:
 
 		char msg[] = "No User";
 		network::ConstBuffer buf(msg, _countof(msg));
-		newSock->AsyncWrite(buf.data(), buf.size(), std::tr1::bind(
+		newSock->AsyncWrite(buf, std::tr1::bind(
 			&Server::_OnWrite, this, iocp::_Error));
 	}
 
