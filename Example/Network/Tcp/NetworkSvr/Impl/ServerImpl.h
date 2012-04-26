@@ -6,6 +6,9 @@
 #include "../../../../../include/Network/TCP.hpp"
 #include "../../../../../include/Timer/Timer.hpp"
 
+
+#include "../CRC32.hpp"
+
 using namespace async::network;
 using namespace async::timer;
 
@@ -17,7 +20,7 @@ class Session
 {
 private:
 	Tcp::Socket socket_;
-	std::tr1::array<char, 32> buf_;
+	std::vector<char> buf_;
 
 	async::iocp::CallbackType readCallback_;
 	async::iocp::CallbackType writeCallback_;
@@ -26,6 +29,7 @@ public:
 	explicit Session(const SocketPtr &sock)
 		: socket_(sock)
 	{
+		buf_.resize(1024 * 1024 + sizeof(size_t));
 		socket_.IOControl(NonBlockingIO(true));
 		::InterlockedIncrement(&g_ClientNum);
 	}
@@ -49,7 +53,7 @@ public:
 			readCallback_	= std::tr1::bind(&Session::_HandleRead, shared_from_this(), _Size, _Error);
 			writeCallback_	= std::tr1::bind(&Session::_HandleWrite, shared_from_this(), _Size, _Error);
 
-			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1), readCallback_);
+			AsyncRead(socket_, Buffer(buf_), TransferAll(), readCallback_);
 
 		}
 		catch(std::exception &e)
@@ -77,9 +81,11 @@ private:
 				return;
 			}
 
-			//std::cout.write(buf_.data(), bytes) << std::endl;
+			size_t crc = algorithm::crc::cac_crc32(&buf_[sizeof(size_t)], bytes - sizeof(size_t));
+			size_t dst = *(size_t *)(&buf_[0]);
+			assert(crc == dst);
 
-			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), writeCallback_);
+			AsyncWrite(socket_, Buffer(buf_), TransferAll(), writeCallback_);
 		}
 		catch(const std::exception &e)
 		{

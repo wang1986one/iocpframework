@@ -201,6 +201,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\CRC32.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
@@ -232,6 +236,14 @@
 				<File
 					RelativePath="..\..\..\..\include\IOCP\AsyncResult.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\IOCP\AsyncResult.hpp"
@@ -244,6 +256,14 @@
 				<File
 					RelativePath="..\..\..\..\include\IOCP\Dispatcher.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\IOCP\Dispatcher.hpp"
@@ -266,16 +286,20 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\include\IOCP\ReadWriteBuffer.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\include\IOCP\ReadWriteBuffer.hpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\IOCP\WinException.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\IOCP\WinException.hpp"
@@ -306,12 +330,16 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\include\Network\BufferHelper.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\..\include\Network\IPAddress.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\Network\IPAddress.hpp"
@@ -320,6 +348,14 @@
 				<File
 					RelativePath="..\..\..\..\include\Network\Socket.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\Network\Socket.hpp"
@@ -332,6 +368,14 @@
 				<File
 					RelativePath="..\..\..\..\include\Network\SocketProvider.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\Network\SocketProvider.hpp"
