@@ -45,7 +45,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -222,47 +222,59 @@
 				Name="IOCP"
 				>
 				<File
-					RelativePath="..\..\include\IOCP\AsyncResult.hpp"
+					RelativePath="..\..\..\..\include\IOCP\AsyncResult.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Buffer.hpp"
+					RelativePath="..\..\..\..\include\IOCP\AsyncResult.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Dispatcher.cpp"
+					RelativePath="..\..\..\..\include\IOCP\Buffer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Dispatcher.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\IOCP.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Dispatcher.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\MemoryMgr.hpp"
+					RelativePath="..\..\..\..\include\IOCP\IOCP.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Object.cpp"
+					RelativePath="..\..\..\..\include\IOCP\MemoryMgr.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Object.hpp"
+					RelativePath="..\..\..\..\include\IOCP\ObjectFactory.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Pointer.hpp"
+					RelativePath="..\..\..\..\include\IOCP\Pointer.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\WinException.cpp"
+					RelativePath="..\..\..\..\include\IOCP\Read.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\WinException.hpp"
+					RelativePath="..\..\..\..\include\IOCP\ReadWriteBuffer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\IOCP\WinException.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\IOCP\WinException.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\IOCP\Write.hpp"
 					>
 				</File>
 			</Filter>
@@ -270,22 +282,22 @@
 				Name="Logger"
 				>
 				<File
-					RelativePath="..\..\include\Logger\Logger.hpp"
+					RelativePath="..\..\..\..\include\Logger\Logger.hpp"
 					>
 				</File>
 				<Filter
 					Name="impl"
 					>
 					<File
-						RelativePath="..\..\include\Logger\Impl\BasicLogger.hpp"
+						RelativePath="..\..\..\..\include\Logger\Impl\BasicLogger.hpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\Logger\Impl\LoggerImpl.hpp"
+						RelativePath="..\..\..\..\include\Logger\Impl\LoggerImpl.hpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\Logger\Impl\LoggerService.hpp"
+						RelativePath="..\..\..\..\include\Logger\Impl\LoggerService.hpp"
 						>
 					</File>
 				</Filter>
