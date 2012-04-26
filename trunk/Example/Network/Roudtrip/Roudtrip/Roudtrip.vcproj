@@ -117,7 +117,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -259,10 +259,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\include\IOCP\Read.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\..\include\IOCP\ReadWriteBuffer.cpp"
 					>
 				</File>
 				<File
