@@ -45,7 +45,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -228,6 +228,14 @@
 				<File
 					RelativePath="..\..\include\IOCP\AsyncResult.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\include\IOCP\AsyncResult.hpp"
@@ -240,6 +248,14 @@
 				<File
 					RelativePath="..\..\include\IOCP\Dispatcher.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\include\IOCP\Dispatcher.hpp"
@@ -254,14 +270,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\IOCP\Object.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\IOCP\Object.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\include\IOCP\ObjectFactory.hpp"
 					>
 				</File>
@@ -271,10 +279,6 @@
 				</File>
 				<File
 					RelativePath="..\..\include\IOCP\Read.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\IOCP\ReadWriteBuffer.cpp"
 					>
 				</File>
 				<File

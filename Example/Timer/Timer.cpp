@@ -6,24 +6,11 @@
 
 
 
-void AsyncWait(async::timer::Timer &timer)
+void AsyncWait()
 {
 	std::cout << "AsyncWait" << std::endl;
 
 	static int count = 0;
-
-	try
-	{
-		if( count++ == 5 )
-			timer.SetTimer(200);
-		if( count >= 10 )
-			timer.Cancel();
-	}
-	catch(std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-	
 }
 
 
@@ -72,8 +59,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		try
 		{
 			{
-				//async::timer::Timer timer(io, 2000, 0);
-				//timer.AsyncWait(std::tr1::bind(&AsyncWait, std::tr1::ref(timer)));
+				std::auto_ptr<async::timer::Timer> timer;
+				timer.reset(new async::timer::Timer(io, 2000, 0, std::tr1::bind(&AsyncWait)));
+				timer->AsyncWait();
+ 
+				timer->Cancel();
+				timer->SetTimer(10000);
 
 				async::timer::Timer timer2(io, 4000, 0, std::tr1::bind(&AsyncWait2));
 				timer2.AsyncWait();
