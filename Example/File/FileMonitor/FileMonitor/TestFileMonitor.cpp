@@ -16,10 +16,10 @@ void Monitor(LPCTSTR fileName, size_t len)
 int _tmain(int argc, _TCHAR* argv[])
 {
 	async::iocp::IODispatcher io;
-	async::filesystem::FileSystemMonitor monitor(io, L"C:/");
+	async::filesystem::FileSystemMonitor monitor(io, L"C:/Log.txt");
 
 	using namespace std::tr1::placeholders;
-	monitor.Monitor(std::tr1::bind(&Monitor, _3, _4));
+	monitor.Monitor(std::tr1::bind(&Monitor, _3, _4), false);
 
 	system("pause");
 
