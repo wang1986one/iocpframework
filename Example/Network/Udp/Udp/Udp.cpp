@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "../../include/Network/UDP.hpp"
+#include "../../../../include/Network/UDP.hpp"
 
 
 using namespace async::iocp;
@@ -22,16 +22,22 @@ private:
 	char data_[max_length];
 
 public:
-	Server(async::iocp::IODispatcher& io, short port)
+	Server(async::iocp::IODispatcher& io, async::network::IPAddress &ip, u_short port)
 		: io_service_(io)
-		, socket_(io, Udp::V4(), port)
+		, socket_(io, Udp::V4())
 	{
+		std::uninitialized_fill_n(reinterpret_cast<char *>(&addr_), sizeof(addr_), 0);
+		
+		addr_.sin_family = Udp::V4().Family();
+		addr_.sin_addr.S_un.S_addr = ::htonl(ip);
+		addr_.sin_port = ::htons(port);
+
 		try
 		{
+			//socket_.SetOption(async::network::RecvTimeOut(3000));
 			socket_.AsyncRecvFrom(
-				async::network::Buffer(data_, max_length), addr_,
-				std::tr1::bind(&Server::handle_receive_from, this,
-				_1, _2));
+				async::network::Buffer(data_, max_length), &addr_,
+				std::tr1::bind(&Server::handle_receive_from, this, _1, _2));
 		}
 		catch(std::exception &e)
 		{
@@ -54,16 +60,14 @@ public:
 			if (!error && bytes_recvd > 0)
 			{
 				socket_.AsyncSendTo(
-					Buffer(data_, bytes_recvd), addr_,
-					std::tr1::bind(&Server::handle_send_to, this,
-					_1, _2));
+					Buffer(data_, bytes_recvd), &addr_,
+					std::tr1::bind(&Server::handle_send_to, this, _1, _2));
 			}
 			else
 			{
 				socket_.AsyncRecvFrom(
-					async::network::Buffer(data_, max_length), addr_,
-					std::tr1::bind(&Server::handle_receive_from, this,
-					_1, _2));
+					async::network::Buffer(data_, max_length), &addr_,
+					std::tr1::bind(&Server::handle_receive_from, this, _1, _2));
 			}
 		}
 		catch(std::exception &e)
@@ -77,9 +81,8 @@ public:
 		try
 		{
 			socket_.AsyncRecvFrom(
-				async::network::Buffer(data_, max_length), addr_,
-				std::tr1::bind(&Server::handle_receive_from, this,
-				_1, _2));
+				async::network::Buffer(data_, max_length), &addr_,
+				std::tr1::bind(&Server::handle_receive_from, this, _1, _2));
 		}
 		catch(std::exception &e)
 		{
@@ -102,7 +105,7 @@ int main(int argc, char* argv[])
 		async::iocp::IODispatcher io;
 
 		using namespace std; // For atoi.
-		Server s(io, 5050);
+		Server s(io, async::network::IPAddress::Parse("127.0.0.1"), 5050);
 
 		system("pause");
 	}
