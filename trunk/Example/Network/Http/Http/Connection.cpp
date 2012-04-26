@@ -50,7 +50,8 @@ namespace http
 		size_t index = 0;
 		for(size_t i =0; i != buf.size(); ++i)
 		{
-			std::copy(buf[i].begin(), buf[i].end(), socketBuffer_.data(index));
+			std::copy(buf[i].begin(), buf[i].end(), 
+				stdext::make_checked_array_iterator(socketBuffer_.data(index), socketBuffer_.size() - index));
 			index += buf[i].size();
 		}
 	}

@@ -4,7 +4,7 @@
 #include <set>
 #include "Connection.h"
 
-#include "../../../../include/MultiThread/Lock.hpp"
+#include "../../../../MultiThread/Lock.hpp"
 
 namespace http
 {
