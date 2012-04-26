@@ -4,9 +4,9 @@
 #include "stdafx.h"
 
 
-#include "../../include/Network/TCP.hpp"
+#include "../../../../include/Network/TCP.hpp"
 
-#include "../../include/MultiThread/Thread.hpp"
+#include "../../../../MultiThread/Thread.hpp"
 
 
 
