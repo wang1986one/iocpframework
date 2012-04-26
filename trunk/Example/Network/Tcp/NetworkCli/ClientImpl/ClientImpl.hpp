@@ -3,7 +3,7 @@
 
 
 #include "../../../../include/Network/TCP.hpp"
-
+#include "../CRC32.hpp"
 
 using namespace async::network;
 
@@ -14,13 +14,23 @@ class Client
 private:
 	IODispatcher &io_;
 	Tcp::Socket socket_;
-	std::tr1::array<char, 4096>	buf_;
+	std::vector<char> buf_;
 
 public:
 	Client(IODispatcher &io, const std::string &ip, u_short port)
 		: io_(io)
 		, socket_(io, Tcp::V4())
 	{
+		const size_t len = 1024 * 1024 + sizeof(size_t);
+		buf_.resize(len);
+		std::fill(buf_.begin(), buf_.end(), 100);
+
+		size_t crc = algorithm::crc::cac_crc32(&buf_[sizeof(size_t)], len - sizeof(size_t));
+		const char *beg = reinterpret_cast<char *>(&crc);
+		const char *end = beg + sizeof(size_t);
+		std::copy(beg, end, buf_.begin());
+		
+
 		try
 		{
 			socket_.AsyncConnect(IPAddress::Parse(ip), port, 
@@ -39,11 +49,11 @@ private:
 		if( error != 0 )
 			return;
 
-		static char msg[] = "I am a new client";
+		//static char msg[] = "I am a new client";
 
 		try
 		{
-			AsyncWrite(socket_, Buffer(msg), TransferAll(), 
+			AsyncWrite(socket_, Buffer(buf_), TransferAll(), 
 				std::tr1::bind(&Client::_HandleWrite, this, _Size, _Error));
 		}
 		catch(std::exception &e)
@@ -62,11 +72,11 @@ private:
 				return;
 			}
 
-			std::cout.write(buf_.data(), bytes) << std::endl;
+			//std::cout.write(buf_.data(), bytes) << std::endl;
 
 			::Sleep(2000);
 
-			AsyncWrite(socket_, Buffer(buf_.data(), bytes), TransferAll(), 
+			AsyncWrite(socket_, Buffer(buf_), TransferAll(), 
 				std::tr1::bind(&Client::_HandleWrite, this, _Size, _Error));
 		}
 		catch(const std::exception &e)
@@ -86,7 +96,7 @@ private:
 				return;
 			}
 
-			AsyncRead(socket_, Buffer(buf_), TransferAtLeast(1),
+			AsyncRead(socket_, Buffer(buf_), TransferAll(),
 				std::tr1::bind(&Client::_HandleRead, this, _Size, _Error));
 
 		}
