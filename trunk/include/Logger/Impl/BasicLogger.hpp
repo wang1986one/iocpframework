@@ -1,7 +1,6 @@
 #ifndef __LOGGER_BASIC_LOGGER_HPP
 #define __LOGGER_BASIC_LOGGER_HPP
 
-#include "../../iocp/Object.hpp"
 
 
 namespace async

@@ -76,9 +76,7 @@ namespace async
 				// 设置日志文件
 				void UseFile(LoggerImplType &/*impl*/, const std::string &file)
 				{
-					iocp::AsyncCallbackBasePtr callback(MakeAsyncCallback(std::tr1::bind(&LoggerService::_UseFileImpl, this, file)));
-
-					io_.Dispatch(callback.Get());
+					io_.Dispatch(std::tr1::bind(&LoggerService::_UseFileImpl, this, file));
 				}
 
 				// 记录信息
@@ -88,9 +86,7 @@ namespace async
 					std::ostringstream os;
 					os << impl->id_ << ": " << msg;
 
-					iocp::AsyncCallbackBasePtr callback(MakeAsyncCallback(std::tr1::bind(&LoggerService::_LogImpl, this, os.str())));
-
-					io_.Dispatch(callback.Get());
+					io_.Dispatch(std::tr1::bind(&LoggerService::_LogImpl, this, os.str()));
 				}
 
 			private:
