@@ -138,7 +138,7 @@ namespace async
 			template<typename ConstBufferT>
 			size_t Write(const ConstBufferT &buffer, DWORD flag)
 			{
-				return impl_->Write(buffer, flag);
+				return impl_->Write(buffer.data(), buffer.size(), flag);
 			}
 
 			// 异步发送数据
